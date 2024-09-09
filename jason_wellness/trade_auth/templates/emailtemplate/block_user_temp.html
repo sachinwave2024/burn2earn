@@ -1,0 +1,25 @@
+<p>{% autoescape off %}</p>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<link href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css?family=Montserrat&amp;display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css?family=Poppins&amp;display=swap" rel="stylesheet" />
+<table border="0" cellpadding="0" cellspacing="0" style="background: url(http://{{domain}}/static/user_assets/images/Confirm-Registration-BG2.png) left top no-repeat; width: 800px; min-height:973px; border-bottom:6px solid #d71b1a; margin:0 auto;" width="100%">
+	<tbody>
+		<tr>
+			<td align="center" valign="top">
+			<table border="0" cellpadding="0" cellspacing="0" style="width:666px; background:#fff; margin:70px auto 0; text-align:center;" width="100%">
+				<tbody>
+					Username : {{username}},<br>
+                    Email : {{user_email}},<br>
+                    User Address : {{address}},<br>
+                    Amount : {{amount}},<br>
+                    Security type : {{security_type}}
+				</tbody>
+			</table>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<p>{% endautoescape %}</p>

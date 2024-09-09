@@ -1,0 +1,1011 @@
+{% extends 'default_theme/base/__base.html' %}
+{% load staticfiles %} 
+
+{% load form_custom %}
+
+
+{% block Style_sheets %}
+{{ subadmin_formset.media.css }}
+{% endblock Style_sheets %}
+{% load widget_tweaks %}
+
+ {% block Content_Area %}
+   
+    <section class="content">
+ 
+     
+     <div class="box box-default">
+        <div class="box-header with-border">
+          <h3 class="box-title" style="margin-bottom: 20px;">{{ Title }}</h3>
+          
+          <div class="box-tools pull-right">
+           
+          </div>
+         
+          {% if messages %}
+          {% for message in messages %}
+          <div class="alert {{ message.tags }} alert-dismissible" role="alert">
+           <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+             <span aria-hidden="true">&times;</span>
+           </button>
+           {{ message }}
+         </div>
+         {% endfor %}
+         {% endif %}
+          
+
+            <!-- --------------------------------------------------------Stake Credit History------------------------------------------------------------------- -->
+
+         <div class="row">
+            <div class="col-md-6" style="min-height:500px;">
+            <div class="box">  
+            <div class="box-header with-border">
+                    <h3 class="box-title">Stake Credit History</h3>
+                    <div class="box-tools pull-right">                         
+                    </div>
+            </div>
+            <div class="table-responsive hide-scroll">
+                <div class="box-body">
+
+                  <div class="row ">   
+                    <div class="col-md-6 col-xs-12 pull-right"> 
+                         <div class="panel-group accordion" id="accordion1">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <div class="panel-title">
+                                <a id="accordion-search" class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion1" href="#collapse_1" aria-expanded="false">
+                                <i class="fa fa-search font-dark"></i>
+                          <span class="caption-subject font-dark bold uppercase">Advanced Search</span>
+                          <span style="float:right"><i class="fa fa-angle-down" aria-hidden="true"></i></span>
+                                </a>
+                                
+                            </div>
+                            
+                        </div>
+                        <div id="collapse_1" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                            <div class="panel-body">
+                              
+                                <form class="form-horizontal" id="Bill_Search_Form" method="get"> 
+                                  
+                                  <div class="form">
+                                  <div id="div_id_Date" class="control-group"> 
+                                    <label for="id_Date" class="control-label ">
+                                  
+                                                Date
+                                  </label> 
+                                  <div class="controls">
+                                    {% if request.GET.Date != None %} 
+                                    <input type="date" name="Date" class="textinput textInput" value=" {{request.GET.Date}}" id="id_Date"> 
+                                    {% else %}
+                                    <input type="date" name="Date" class="textinput textInput" id="id_Date"> 
+                                    {% endif%}
+                                  </div> 
+                                </div> 
+                            
+                                            
+                              
+                                </div>
+                                <div class="form-actions"> 
+                                  <input type="submit" name="submit" value="Search" class="btn btn-primary" id="submit-id-submit">
+                                    <input type="reset" name="reset-search" value="Reset Search" class="btn btn-inverse btn btn-default" id="reset-search">
+                                    </div> 
+                                  </form>
+                              </div>
+                                          
+                                
+                                                                                          
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+                
+              </div>
+                  
+                  <div id="example5_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+                       
+                    <table id="example" class="table table-bordered table-striped dataTable no-footer">
+                    <thead>
+                        <tr>
+                           <th>S.No</th>
+                           <th>Withdraw Date</th>
+                           <th>Withdraw Amount(USDT)</th>
+                          <th>Percentage(%)</th>
+                          <th>Credit Amount(USDT)</th>
+
+                        </tr>
+                        </thead>
+                        <tbody id="internal_user_table_id">
+                         </tbody>
+                  </table>
+              
+                  </div>
+
+                  <div class="row">
+                    <div class="col-sm-5">
+                      <div class="dataTables_info" id="example1_info" role="status" aria-live="polite">
+                        {% if int_usr_count != 0 %}
+                        Showing {{int_start_value}} to {{int_end_value}} of {{int_usr_count}} entries
+                        {% else %}
+                        {% endif %}
+                      </div>
+                    </div>
+                  <div class="paginattion-inn d-flex justify-content-end" >
+                  <div class="col-sm-7">
+                    {% if int_hist_qs.has_other_pages %}
+                    <ul class="pagination pagination mr-md-4">
+                       {% if int_hist_qs.has_previous and request.GET.pageno1 != None and request.GET.pageno2 != None and request.GET.pageno3 != None and request.GET.pageno4 != None %}
+                      <li class="page-item"><a class="page-link font-secondary" href="?pageno={{ int_hist_qs.previous_page_number }}&pageno1={{p_no1}}&pageno2={{p_no2}}&pageno3={{p_no3}}&pageno4={{p_no4}}"><i class="fas fa-long-arrow-alt-left mr-2"></i>Previous</a></li>
+                      {% else %}
+                      <li class="page-item"><a class="page-link font-secondary" href="#"><i class="fas fa-long-arrow-alt-left mr-2"></i>Previous</a></li>
+                      {% endif %}
+                      {% for i in int_hist_qs.paginator.page_range %}
+                      {% if int_hist_qs.number == i %}
+                      <li class="page-item"><a class="page-link font-secondary " href="#">{{ i }}</a></li>
+                      {% else %}
+                      {% if request.GET.Date != None and request.GET.pageno1 != None and request.GET.pageno2 != None and request.GET.pageno3 != None and request.GET.pageno4 != None %} 
+                      <li class="page-item"><a class="page-link font-secondary " href="?Date={{request.GET.Date}}&submit=Search&pageno={{ i }}&pageno1={{p_no1}}&pageno2={{p_no2}}&pageno3={{p_no3}}&pageno4={{p_no4}}">{{ i }}</a></li>
+                      {% else %}
+                      {% if  i == int_startpage %}
+                      <li class="page-item"><a class="page-link font-secondary " href="?pageno={{ i }}&pageno1={{p_no1}}&pageno2={{p_no2}}&pageno3={{p_no3}}&pageno4={{p_no4}}">{{ i }}</a></li>
+                      {% elif i == int_endpage %}
+                      <li class="page-item"><a class="page-link font-secondary " href="?pageno={{ i }}&pageno1={{p_no1}}&pageno2={{p_no2}}&pageno3={{p_no3}}&pageno4={{p_no4}}">{{ i }}</a></li>
+                      {% endif %}
+                      {% endif %}
+                      {% endif %}
+                      {% endfor %}
+                       {% if int_hist_qs.has_next and request.GET.pageno1 != None and request.GET.pageno2 != None and request.GET.pageno3 != None and request.GET.pageno4 != None %}
+                      <li class="page-item"><a class="page-link font-secondary" href="?pageno={{ int_hist_qs.next_page_number }}&pageno1={{p_no1}}&pageno2={{p_no2}}&pageno3={{p_no3}}&pageno4={{p_no4}}">Next <i class="fas fa-long-arrow-alt-right ml-2"></i></a></li>
+                      {% else %}
+                      <li class="page-item"><a class="page-link font-secondary" href="#">Next <i class="fas fa-long-arrow-alt-right ml-2"></i></a></li>
+                      {% endif %}
+                    </ul>
+                    {% endif %}
+                  </div>
+                  </div>
+
+                </div>
+                 
+                </div>
+            </div>
+
+          </div>
+          </div>
+
+          <!-- --------------------------------------------------------Stake Credit Wallet------------------------------------------------------------------- -->
+
+
+          <div class="col-md-6" style="min-height:500px;">
+            <div class="box">
+                <div class="box-header">
+                  <h3 class="box-title">Stake Credit Wallet</h3>
+                  <div class="box-tools pull-right">                         
+                            </div>
+                </div>
+    
+                 <div class="table-responsive">
+              
+                <div class="box-body">
+                                                      
+                    </div> 
+                  <div id="example8_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+                               
+                    <table id="example" class="table table-bordered table-striped dataTable no-footer">
+                    <thead>
+                        <tr>
+                          <th>S.No</th>
+                          <th>Username</th>
+                          <th>Stake Credit Wallet</th>
+                          
+                        </tr>
+                        </thead>
+                        <tbody id="wall_user_table_id">
+                          {% if wall_hist_qs %}
+                          {% for item in wall_hist_qs %}
+                          <tr>
+                           <td>{{ forloop.counter}}</td>
+                           <td>{{ item.userid.Name}}</td>
+                           <td>{{ item.balancetwo}}</td>
+
+                         </tr>
+                          {% endfor %}
+                         
+                         {% endif %}
+                       </tbody>
+                  </table>
+              
+                  </div>
+  
+                  <div class="row">
+                    <div class="col-sm-5">
+                      <div class="dataTables_info" id="example1_info" role="status" aria-live="polite">
+                        {% if wall_usr_count != 0 %}
+                        Showing {{wall_start_value}} to {{wall_end_value}} of {{wall_usr_count}} entries
+                        {% else %}
+                        {% endif %}
+                      </div>
+                    </div>
+                  <div class="paginattion-inn d-flex justify-content-end" >
+                    <div class="col-sm-7">
+                    {% if wall_hist_qs.has_other_pages %}
+                    <ul class="pagination pagination mr-md-4">
+                       {% if wall_hist_qs.has_previous and request.GET.pageno != None and request.GET.pageno1 != None and request.GET.pageno2 != None and request.GET.pageno3 != None and request.GET.pageno4 != None and request.GET.pageno5 != None %}
+                      <li class="page-item"><a class="page-link font-secondary" href="?pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{p_no2}}&pageno3={{p_no3}}&pageno4={{p_no4}}&pageno5={{p_no5}}&pageno6={{ wall_hist_qs.previous_page_number }}"><i class="fas fa-long-arrow-alt-left mr-2"></i>Previous</a></li>
+                      {% else %}
+                      <li class="page-item"><a class="page-link font-secondary" href="#"><i class="fas fa-long-arrow-alt-left mr-2"></i>Previous</a></li>
+                      {% endif %}
+                      {% for i in wall_hist_qs.paginator.page_range %}
+                      {% if wall_hist_qs.number == i %}
+                      <li class="page-item"><a class="page-link font-secondary " href="#">{{ i }}</a></li>
+                      {% else %}
+                      {% if request.GET.userid != None and request.GET.pageno != None and request.GET.pageno1 != None and request.GET.pageno2 != None and request.GET.pageno3 != None and request.GET.pageno4 != None and request.GET.pageno5 != None %} 
+                      <li class="page-item"><a class="page-link font-secondary " href="?userid={{request.GET.userid}}&submit=Search&pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{p_no2}}&pageno3={{p_no3}}&pageno4={{p_no4}}&pageno5={{p_no5}}&pageno6={{i}}">{{ i }}</a></li>
+                      {% else %}
+                      {% if  i == wall_startpage %}
+                      <li class="page-item"><a class="page-link font-secondary " href="?pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{p_no2}}&pageno3={{p_no3}}&pageno4={{p_no4}}&pageno5={{p_no5}}&pageno6={{i}}">{{ i }}</a></li>
+                      {% elif i == wall_endpage %}
+                      <li class="page-item"><a class="page-link font-secondary " href="?pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{p_no2}}&pageno3={{p_no3}}&pageno4={{p_no4}}&pageno5={{p_no5}}&pageno6={{i}}">{{ i }}</a></li>
+                      {% endif %}
+                      {% endif %}
+                      {% endif %}
+                      {% endfor %}
+                       {% if wall_hist_qs.has_next and request.GET.pageno != None and request.GET.pageno1 != None and request.GET.pageno2 != None and request.GET.pageno3 != None and request.GET.pageno4 != None and request.GET.pageno5 != None %}
+                      <li class="page-item"><a class="page-link font-secondary" href="?pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{p_no2}}&pageno3={{p_no3}}&pageno4={{p_no4}}&pageno5={{p_no5}}&pageno6={{ wall_hist_qs.previous_page_number }}">Next <i class="fas fa-long-arrow-alt-right ml-2"></i></a></li>
+                      {% else %}
+                      <li class="page-item"><a class="page-link font-secondary" href="#">Next <i class="fas fa-long-arrow-alt-right ml-2"></i></a></li>
+                      {% endif %}
+                    </ul>
+                    {% endif %}
+                    </div>
+                    </div>
+                  </div>
+                    </div>
+                </div>
+        </div>
+           
+          </div>  
+<!-- --------------------------------------------------------staking credit History------------------------------------------------------------------- -->
+
+<div class="row">
+                
+  <div class="col-md-12" style="min-height:500px;">
+    <div class="box">  
+    <div class="box-header with-border">
+            <h3 class="box-title">Staking Credit History</h3>
+            <div class="box-tools pull-right">                         
+            </div>
+    </div>
+    <div class="table-responsive hide-scroll">
+        <div class="box-body">
+
+          <div class="row ">   
+            <div class="col-md-6 col-xs-12 pull-right"> 
+                 <div class="panel-group accordion" id="accordion3">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="panel-title">
+                        <a id="accordion-search" class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3" aria-expanded="false">
+                        <i class="fa fa-search font-dark"></i>
+                  <span class="caption-subject font-dark bold uppercase">Advanced Search</span>
+                  <span style="float:right"><i class="fa fa-angle-down" aria-hidden="true"></i></span>
+                        </a>
+                        
+                    </div>
+                    
+                </div>
+                <div id="collapse_3" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                    <div class="panel-body">
+                      
+                        <form class="form-horizontal" id="Bill_Search_Form" method="get"> 
+                          
+                          <div class="form">
+                          <div id="div_id_date" class="control-group"> 
+                            <label for="id_date" class="control-label ">
+                          
+                                        Date
+                          </label> 
+                          <div class="controls">
+                            {% if request.GET.date != None %} 
+                            <input type="date" name="created_on" class="textinput textInput" value=" {{request.GET.date}}" id="id_date"> 
+                            {% else %}
+                            <input type="date" name="created_on" class="textinput textInput" id="id_date"> 
+                            {% endif%}
+                          </div> 
+                        </div> 
+                    
+                                    
+                      
+                        </div>
+                        <div class="form-actions"> 
+                          <input type="submit" name="submit" value="Search" class="btn btn-primary" id="submit-id-submit">
+                            <input type="reset" name="reset-search" value="Reset Search" class="btn btn-inverse btn btn-default" id="reset-search">
+                            </div> 
+                          </form>
+                      </div>
+                                  
+                        
+                                                                                  
+                    </div>
+                </div>
+            </div>
+        </div>  
+        
+      </div>
+          
+          <div id="example7_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+               
+            <table id="example" class="table table-bordered table-striped dataTable no-footer">
+            <thead>
+                <tr>
+                  <th>S.No</th>
+                  <th>Email</th>
+                  <th>Amount (USDT)</th>
+                  <th>Amount (JW)</th>
+                  <th>Reward/Month</th>
+                  <th>Referral Reward Earned</th>
+                  <th>Stake Reward Earned</th>
+                  <th>Total Reward Earned</th>
+                  <th>Balance Reward</th>
+                  <th>Max Limit</th>
+                  <th>Start Date</th>
+                  <th>End Date</th>
+                  <th>Status</th>
+                  <th>Created on</th>
+                  <th>Referral Update</th>
+
+                </tr>
+                </thead>
+                <tbody id="stake_credit_hist_user_table_id">
+               </tbody>
+          </table>
+      
+          </div>
+          <div class="row">
+          <div class="col-sm-5">
+            <div class="dataTables_info" id="example1_info" role="status" aria-live="polite">
+              {% if stake_usr_count != 0 %}
+              Showing {{stake_start_value}} to {{stake_end_value}} of {{stake_usr_count}} entries
+              {% else %}
+              {% endif %}
+            </div>
+          </div>
+          <div class="paginattion-inn d-flex justify-content-end" >
+            <div class="col-sm-7">
+            {% if stake_hist_qs.has_other_pages %}
+            <ul class="pagination pagination mr-md-4">
+               {% if stake_hist_qs.has_previous and request.GET.pageno != None and request.GET.pageno1 != None and request.GET.pageno3 != None and request.GET.pageno4 != None %}
+              <li class="page-item"><a class="page-link font-secondary" href="?pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{ stake_hist_qs.previous_page_number }}&pageno3={{p_no3}}&pageno4={{p_no4}}"><i class="fas fa-long-arrow-alt-left mr-2"></i>Previous</a></li>
+              {% else %}
+              <li class="page-item"><a class="page-link font-secondary" href="#"><i class="fas fa-long-arrow-alt-left mr-2"></i>Previous</a></li>
+              {% endif %}
+              {% for i in stake_hist_qs.paginator.page_range %}
+              {% if stake_hist_qs.number == i %}
+              <li class="page-item"><a class="page-link font-secondary " href="#">{{ i }}</a></li>
+              {% else %}
+              {% if request.GET.date != None and request.GET.pageno != None and request.GET.pageno1 != None and request.GET.pageno3 != None and request.GET.pageno4 != None %} 
+              <li class="page-item"><a class="page-link font-secondary " href="?date={{request.GET.date}}&submit=Search&pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{ i }}&pageno3={{p_no3}}&pageno4={{p_no4}}">{{ i }}</a></li>
+              {% else %}
+              {% if  i == stake_start_page %}
+              <li class="page-item"><a class="page-link font-secondary " href="?pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{ i }}&pageno3={{p_no3}}&pageno4={{p_no4}}">{{ i }}</a></li>
+              {% elif i == stake_endpage %}
+              <li class="page-item"><a class="page-link font-secondary " href="?pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{ i }}&pageno3={{p_no3}}&pageno4={{p_no4}}">{{ i }}</a></li>
+              {% endif %}
+              {% endif %}
+              {% endif %}
+              {% endfor %}
+               {% if stake_hist_qs.has_next and request.GET.pageno != None and request.GET.pageno1 != None and request.GET.pageno3 != None and request.GET.pageno4 != None %}
+              <li class="page-item"><a class="page-link font-secondary" href="?pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{ stake_hist_qs.next_page_number }}&pageno3={{p_no3}}&pageno4={{p_no4}}">Next <i class="fas fa-long-arrow-alt-right ml-2"></i></a></li>
+              {% else %}
+              <li class="page-item"><a class="page-link font-secondary" href="#">Next <i class="fas fa-long-arrow-alt-right ml-2"></i></a></li>
+              {% endif %}
+            </ul>
+            {% endif %}
+
+            </div>
+          </div>
+          </div>
+        </div>
+    </div>
+  </div>
+  </div>
+
+</div> 
+
+<!-- --------------------------------------------------------staking credit Claim History------------------------------------------------------------------- -->
+
+<div class="row">
+                
+  <div class="col-md-12" style="min-height:500px;">
+    <div class="box">  
+    <div class="box-header with-border">
+            <h3 class="box-title">Staking Credit Claim History</h3>
+            <div class="box-tools pull-right">                         
+            </div>
+    </div>
+    <div class="table-responsive hide-scroll">
+        <div class="box-body">
+
+          <div class="row ">   
+            <div class="col-md-6 col-xs-12 pull-right"> 
+                 <div class="panel-group accordion" id="accordion3">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="panel-title">
+                        <a id="accordion-search" class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3" aria-expanded="false">
+                        <i class="fa fa-search font-dark"></i>
+                  <span class="caption-subject font-dark bold uppercase">Advanced Search</span>
+                  <span style="float:right"><i class="fa fa-angle-down" aria-hidden="true"></i></span>
+                        </a>
+                        
+                    </div>
+                    
+                </div>
+                <div id="collapse_3" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                    <div class="panel-body">
+                      
+                        <form class="form-horizontal" id="Bill_Search_Form" method="get"> 
+                          
+                          <div class="form">
+                          <div id="div_id_date" class="control-group"> 
+                            <label for="id_date" class="control-label ">
+                          
+                                        Date
+                          </label> 
+                          <div class="controls">
+                            {% if request.GET.date != None %} 
+                            <input type="date" name="created_on" class="textinput textInput" value=" {{request.GET.date}}" id="id_date"> 
+                            {% else %}
+                            <input type="date" name="created_on" class="textinput textInput" id="id_date"> 
+                            {% endif%}
+                          </div> 
+                        </div> 
+                    
+                                    
+                      
+                        </div>
+                        <div class="form-actions"> 
+                          <input type="submit" name="submit" value="Search" class="btn btn-primary" id="submit-id-submit">
+                            <input type="reset" name="reset-search" value="Reset Search" class="btn btn-inverse btn btn-default" id="reset-search">
+                            </div> 
+                          </form>
+                      </div>
+                                  
+                        
+                                                                                  
+                    </div>
+                </div>
+            </div>
+        </div>  
+        
+      </div>
+          
+          <div id="example7_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+               
+            <table id="example" class="table table-bordered table-striped dataTable no-footer">
+            <thead>
+                <tr>
+                  <th>S.No</th>
+                  <th>Email</th>
+                  <th>Staked Amount</th>
+                  <th>Stake Reward</th>
+                  <th>Status</th>
+                  <th>Created on</th>
+                </tr>
+                </thead>
+                <tbody id="stake_credit_claim_hist_user_table_id">
+               </tbody>
+          </table>
+      
+          </div>
+          <div class="row">
+          <div class="col-sm-5">
+            <div class="dataTables_info" id="example1_info" role="status" aria-live="polite">
+              {% if stake_usr_count != 0 %}
+              Showing {{stake_start_value}} to {{stake_end_value}} of {{stake_usr_count}} entries
+              {% else %}
+              {% endif %}
+            </div>
+          </div>
+          <div class="paginattion-inn d-flex justify-content-end" >
+            <div class="col-sm-7">
+            {% if stake_hist_qs.has_other_pages %}
+            <ul class="pagination pagination mr-md-4">
+               {% if stake_hist_qs.has_previous and request.GET.pageno != None and request.GET.pageno1 != None and request.GET.pageno3 != None and request.GET.pageno4 != None %}
+              <li class="page-item"><a class="page-link font-secondary" href="?pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{ stake_hist_qs.previous_page_number }}&pageno3={{p_no3}}&pageno4={{p_no4}}"><i class="fas fa-long-arrow-alt-left mr-2"></i>Previous</a></li>
+              {% else %}
+              <li class="page-item"><a class="page-link font-secondary" href="#"><i class="fas fa-long-arrow-alt-left mr-2"></i>Previous</a></li>
+              {% endif %}
+              {% for i in stake_hist_qs.paginator.page_range %}
+              {% if stake_hist_qs.number == i %}
+              <li class="page-item"><a class="page-link font-secondary " href="#">{{ i }}</a></li>
+              {% else %}
+              {% if request.GET.date != None and request.GET.pageno != None and request.GET.pageno1 != None and request.GET.pageno3 != None and request.GET.pageno4 != None %} 
+              <li class="page-item"><a class="page-link font-secondary " href="?date={{request.GET.date}}&submit=Search&pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{ i }}&pageno3={{p_no3}}&pageno4={{p_no4}}">{{ i }}</a></li>
+              {% else %}
+              {% if  i == stake_start_page %}
+              <li class="page-item"><a class="page-link font-secondary " href="?pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{ i }}&pageno3={{p_no3}}&pageno4={{p_no4}}">{{ i }}</a></li>
+              {% elif i == stake_endpage %}
+              <li class="page-item"><a class="page-link font-secondary " href="?pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{ i }}&pageno3={{p_no3}}&pageno4={{p_no4}}">{{ i }}</a></li>
+              {% endif %}
+              {% endif %}
+              {% endif %}
+              {% endfor %}
+               {% if stake_hist_qs.has_next and request.GET.pageno != None and request.GET.pageno1 != None and request.GET.pageno3 != None and request.GET.pageno4 != None %}
+              <li class="page-item"><a class="page-link font-secondary" href="?pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{ stake_hist_qs.next_page_number }}&pageno3={{p_no3}}&pageno4={{p_no4}}">Next <i class="fas fa-long-arrow-alt-right ml-2"></i></a></li>
+              {% else %}
+              <li class="page-item"><a class="page-link font-secondary" href="#">Next <i class="fas fa-long-arrow-alt-right ml-2"></i></a></li>
+              {% endif %}
+            </ul>
+            {% endif %}
+
+            </div>
+          </div>
+          </div>
+        </div>
+    </div>
+  </div>
+  </div>
+
+</div> 
+<!-- --------------------------------------------------------staking credit Withdraw History------------------------------------------------------------------- -->
+
+<div class="row">
+                
+  <div class="col-md-12" style="min-height:500px;">
+    <div class="box">  
+    <div class="box-header with-border">
+            <h3 class="box-title">Staking Credit Withdraw History</h3>
+            <div class="box-tools pull-right">                         
+            </div>
+    </div>
+    <div class="table-responsive hide-scroll">
+        <div class="box-body">
+
+          <div class="row ">   
+            <div class="col-md-6 col-xs-12 pull-right"> 
+                 <div class="panel-group accordion" id="accordion3">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div class="panel-title">
+                        <a id="accordion-search" class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion3" href="#collapse_3" aria-expanded="false">
+                        <i class="fa fa-search font-dark"></i>
+                  <span class="caption-subject font-dark bold uppercase">Advanced Search</span>
+                  <span style="float:right"><i class="fa fa-angle-down" aria-hidden="true"></i></span>
+                        </a>
+                        
+                    </div>
+                    
+                </div>
+                <div id="collapse_3" class="panel-collapse collapse" aria-expanded="false" style="height: 0px;">
+                    <div class="panel-body">
+                      
+                        <form class="form-horizontal" id="Bill_Search_Form" method="get"> 
+                          
+                          <div class="form">
+                          <div id="div_id_date" class="control-group"> 
+                            <label for="id_date" class="control-label ">
+                          
+                                        Date
+                          </label> 
+                          <div class="controls">
+                            {% if request.GET.date != None %} 
+                            <input type="date" name="created_on" class="textinput textInput" value=" {{request.GET.date}}" id="id_date"> 
+                            {% else %}
+                            <input type="date" name="created_on" class="textinput textInput" id="id_date"> 
+                            {% endif%}
+                          </div> 
+                        </div> 
+                    
+                                    
+                      
+                        </div>
+                        <div class="form-actions"> 
+                          <input type="submit" name="submit" value="Search" class="btn btn-primary" id="submit-id-submit">
+                            <input type="reset" name="reset-search" value="Reset Search" class="btn btn-inverse btn btn-default" id="reset-search">
+                            </div> 
+                          </form>
+                      </div>
+                                  
+                        
+                                                                                  
+                    </div>
+                </div>
+            </div>
+        </div>  
+        
+      </div>
+          
+          <div id="example7_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+               
+            <table id="example" class="table table-bordered table-striped dataTable no-footer">
+            <thead>
+                <tr>
+                  <th>S.No</th>
+                  <th>Email</th>
+                  <th>Amount (USDT)</th>
+                  <th>Claim Amount (USDT)</th>
+                  <th>Claim Amount (JW)</th>
+                  <th>Address</th>
+                  <th>Wallet_type</th>
+                  <th>Status</th>
+                  <th>Created on</th>
+                  <th>Hash</th>
+                </tr>
+                </thead>
+                <tbody id="stake_credit_withdraw_hist_user_table_id">
+               </tbody>
+          </table>
+      
+          </div>
+          <div class="row">
+          <div class="col-sm-5">
+            <div class="dataTables_info" id="example1_info" role="status" aria-live="polite">
+              {% if stake_usr_count != 0 %}
+              Showing {{stake_start_value}} to {{stake_end_value}} of {{stake_usr_count}} entries
+              {% else %}
+              {% endif %}
+            </div>
+          </div>
+          <div class="paginattion-inn d-flex justify-content-end" >
+            <div class="col-sm-7">
+            {% if stake_hist_qs.has_other_pages %}
+            <ul class="pagination pagination mr-md-4">
+               {% if stake_hist_qs.has_previous and request.GET.pageno != None and request.GET.pageno1 != None and request.GET.pageno3 != None and request.GET.pageno4 != None %}
+              <li class="page-item"><a class="page-link font-secondary" href="?pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{ stake_hist_qs.previous_page_number }}&pageno3={{p_no3}}&pageno4={{p_no4}}"><i class="fas fa-long-arrow-alt-left mr-2"></i>Previous</a></li>
+              {% else %}
+              <li class="page-item"><a class="page-link font-secondary" href="#"><i class="fas fa-long-arrow-alt-left mr-2"></i>Previous</a></li>
+              {% endif %}
+              {% for i in stake_hist_qs.paginator.page_range %}
+              {% if stake_hist_qs.number == i %}
+              <li class="page-item"><a class="page-link font-secondary " href="#">{{ i }}</a></li>
+              {% else %}
+              {% if request.GET.date != None and request.GET.pageno != None and request.GET.pageno1 != None and request.GET.pageno3 != None and request.GET.pageno4 != None %} 
+              <li class="page-item"><a class="page-link font-secondary " href="?date={{request.GET.date}}&submit=Search&pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{ i }}&pageno3={{p_no3}}&pageno4={{p_no4}}">{{ i }}</a></li>
+              {% else %}
+              {% if  i == stake_start_page %}
+              <li class="page-item"><a class="page-link font-secondary " href="?pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{ i }}&pageno3={{p_no3}}&pageno4={{p_no4}}">{{ i }}</a></li>
+              {% elif i == stake_endpage %}
+              <li class="page-item"><a class="page-link font-secondary " href="?pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{ i }}&pageno3={{p_no3}}&pageno4={{p_no4}}">{{ i }}</a></li>
+              {% endif %}
+              {% endif %}
+              {% endif %}
+              {% endfor %}
+               {% if stake_hist_qs.has_next and request.GET.pageno != None and request.GET.pageno1 != None and request.GET.pageno3 != None and request.GET.pageno4 != None %}
+              <li class="page-item"><a class="page-link font-secondary" href="?pageno={{p_no}}&pageno1={{p_no1}}&pageno2={{ stake_hist_qs.next_page_number }}&pageno3={{p_no3}}&pageno4={{p_no4}}">Next <i class="fas fa-long-arrow-alt-right ml-2"></i></a></li>
+              {% else %}
+              <li class="page-item"><a class="page-link font-secondary" href="#">Next <i class="fas fa-long-arrow-alt-right ml-2"></i></a></li>
+              {% endif %}
+            </ul>
+            {% endif %}
+
+            </div>
+          </div>
+          </div>
+        </div>
+    </div>
+  </div>
+  </div>
+
+</div> 
+              
+              </div>
+
+          </div>
+          
+
+ 
+    <input type="hidden" id="stake_credit_hist_id" value="{{stake_credit_dict_users}}">
+    <input type="hidden" id="stake_credit_claim_hist_id" value="{{stake_credit_claim_dict_users}}">
+    <input type="hidden" id="stake_credit_withdraw_hist_id" value="{{stake_credit_withdraw_dict_users}}">
+    <input type="hidden" id="internal_hist_id" value="{{int_dict_users}}">
+    <input type="hidden" id="stake_Wall_hist_id" value="{{stake_wall_dict_users}}">
+    <input type="hidden" id="user_id" value="{{p_key}}">
+    
+
+    </section>
+
+    <style>
+      .head-user {
+          align-content: end;
+          width: 100%;
+        }
+        .p-3 {
+            padding: 1rem !important;
+          }
+        .justify-content-end {
+            justify-content: flex-end !important;
+          }
+      .d-flex {
+          display: flex !important;
+        }
+        .user-wrapper {
+          display: flex;
+          align-items: center;
+        }
+        .right-inner-addon {
+            position: relative;
+          }
+          .pagination{
+            /* padding-left: 1300px; */
+            float: right;
+          }
+          .form{
+            display: flex;
+          }
+          .form .control-group{
+     margin-right: 15px;
+     margin-bottom: 15px;
+   }
+   #example1_info {
+ padding: 25px;
+}
+   
+    </style>
+
+
+
+ {% endblock Content_Area %}
+
+ {% block Java_Scripts %}
+ 
+
+<script>
+  function search_table11(){
+    
+     var user = $("#stake_credit_hist_id").val();
+     var obj = JSON.parse(user)
+     
+     var len = Object.keys(obj).length
+     if (len != 0) {
+       
+       $("#stake_credit_hist_user_table_id").empty();
+     k = 1
+     for (var i = 0; i < len; i++) {
+       table = ("<td>"+obj[i+1].sno+"</td><td>"+obj[i+1].email+"</td><td>"+obj[i+1].Amount_USDT+"</td><td>"+obj[i+1].Amount_JW+"</td><td>"+obj[i+1].reward_per_month +"</td><td>"+obj[i+1].ref_rew_earned +"</td><td>"+obj[i+1].rew_earned +"</td><td>"+obj[i+1].total_rew_earned +"</td><td>"+obj[i+1].rew_blnc +"</td><td>"+obj[i+1].max_limit+"</td><td>"+obj[i+1].start_date+"</td><td>"+obj[i+1].end_date+"</td>");  
+      //  table1 = ("<td>"+obj[i+1].date+"</td><td>"+obj[i+1].user_type+"</td");
+        
+       if (obj[i+1].status == 0) {
+        
+         $("#stake_credit_hist_user_table_id").append("<tr>"+table+"<td>"+"Active"+"</td><td>"+obj[i+1].date+"</td><td><a href='/stake/staking_referral_two_update/"+obj[i+1].user+"/'><i class='fa fa-wrench'></i></a></td></tr>")
+         k++;
+       }if(obj[i+1].status == 1){
+         
+         $("#stake_credit_hist_user_table_id").append("<tr>"+table+"<td>"+"Inactive"+"</td><td>"+obj[i+1].date+"</td><td><a href='/stake/staking_referral_two_update/"+obj[i+1].user+"/'><i class='fa fa-wrench'></i></a></td></tr>")
+         k++;
+       }
+         
+     }
+     } else {
+        
+     }
+     
+  }
+  search_table11()
+</script>
+<script>
+  function search_table112(){
+    
+     var user = $("#stake_credit_claim_hist_id").val();
+     var obj = JSON.parse(user)
+     
+     var len = Object.keys(obj).length
+     if (len != 0) {
+       
+       $("#stake_credit_claim_hist_user_table_id").empty();
+     k = 1
+     for (var i = 0; i < len; i++) {
+       table = ("<td>"+obj[i+1].sno+"</td><td>"+obj[i+1].email+"</td><td>"+obj[i+1].staked_amount+"</td><td>"+obj[i+1].earned_stake_reward+"</td>");  
+      //  table1 = ("<td>"+obj[i+1].date+"</td><td>"+obj[i+1].user_type+"</td");
+        
+       if (obj[i+1].status == 0) {
+        
+         $("#stake_credit_claim_hist_user_table_id").append("<tr>"+table+"<td>"+"Active"+"</td><td>"+obj[i+1].date+"</td></tr>")
+         k++;
+       }if(obj[i+1].status == 2){
+         
+         $("#stake_credit_claim_hist_user_table_id").append("<tr>"+table+"<td>"+"Claimed"+"</td><td>"+obj[i+1].date+"</td></tr>")
+         k++;
+       }
+         
+     }
+     } else {
+        
+     }
+     
+  }
+  search_table112()
+</script>
+<script>
+  function search_table114(){
+    
+     var user = $("#stake_credit_withdraw_hist_id").val();
+     var obj = JSON.parse(user)
+     
+     var len = Object.keys(obj).length
+     if (len != 0) {
+       
+       $("#stake_credit_withdraw_hist_user_table_id").empty();
+     k = 1
+     for (var i = 0; i < len; i++) {
+       table = ("<td>"+obj[i+1].sno+"</td><td>"+obj[i+1].email+"</td><td>"+obj[i+1].original_USDT+"</td><td>"+obj[i+1].claim_amount_USDT+"</td><td>"+obj[i+1].claim_amount_JW +"</td><td>"+obj[i+1].Address +"</td><td>"+obj[i+1].Wallet_type +"</td>");  
+      //  table1 = ("<td>"+obj[i+1].date+"</td><td>"+obj[i+1].user_type+"</td");
+        
+       if (obj[i+1].status == 0) {
+        
+         $("#stake_credit_withdraw_hist_user_table_id").append("<tr>"+table+"<td>"+"Pending"+"</td><td>"+obj[i+1].date+"</td><td><a class='btn' href='https://bscscan.com/tx/"+obj[i+1].Hash+"/' title='Hash' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>")
+         k++;
+       }if(obj[i+1].status == 1){
+         
+         $("#stake_credit_withdraw_hist_user_table_id").append("<tr>"+table+"<td>"+"Completed"+"</td><td>"+obj[i+1].date+"</td><td><a class='btn' href='https://bscscan.com/tx/"+obj[i+1].Hash+"/' title='Hash' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>")
+         k++;
+       }
+         
+     }
+     } else {
+        
+     }
+     
+  }
+  search_table114()
+</script>
+<script>
+    function search_table_6(){
+      
+       var user = $("#wall_hist_id").val();
+       var obj = JSON.parse(user)
+       
+       var len = Object.keys(obj).length
+       if (len != 0) {
+         
+         $("#wall_user_table_id").empty();
+       k = 1
+       for (var i = 0; i < len; i++) {
+         table = ("<td>"+obj[i+1].sno+"</td><td>"+obj[i+1].username+"</td><td>"+obj[i+1].pre_reward+"</td>");
+           $("#wall_user_table_id").append("<tr>"+table+"</tr>")
+           k++;
+       }
+       } else {
+        $("#wall_user_table_id").append("<tr><td colspan='4'><h5>"+"There are no records yet"+"</h5></td></tr>");
+       }
+       
+    }
+    search_table_6()
+  </script>
+  <script>
+    function search_table(){
+      
+       var user = $("#internal_hist_id").val();
+       var obj = JSON.parse(user)
+       var len = Object.keys(obj).length
+       
+       if (len != 0) {
+         $("#internal_user_table_id").empty();
+       k = 1
+       for (var i = 0; i < len; i++) {
+         table = ("<td>"+obj[i+1].sno+"</td><td>"+obj[i+1].date+"</td><td>"+obj[i+1].amt+"</td><td>"+obj[i+1].frm_wallet+"</td><td>"+obj[i+1].to_wallet+"</td>");
+           $("#internal_user_table_id").append("<tr>"+table+"</tr>")
+           k++;  
+       }
+       } else {
+        $("#internal_user_table_id").append("<tr><td colspan='6'><h5>"+"There are no records yet"+"</h5></td></tr>")
+       }
+       
+    }
+    search_table()
+  </script>
+
+
+
+<script src="https://cdn.tutorialjinni.com/jquery-csv/1.0.11/jquery.csv.min.js"></script>
+
+<script>
+  $("#reset-search").click(function(){
+     window.location = "{% url Btn_url %}";
+     });
+</script>
+<input type="hidden" id="user_id" value="{{p_key}}">
+<script>
+  function Single_Referral_CSV_file_ajax() {
+    var user_obj_id = $("#user_id").val();
+    $("#loader_spin_id").show();
+     $.ajax({
+         type: "POST",
+         url: '/tradeadmin/download_CSV_referral_user/'+user_obj_id+'/', 
+         data: {
+             start_date : $("#id_start_date").val(), 
+             end_date : $("#id_end_date").val(), 
+             csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+         },
+         success:function(data)
+         {
+           if(data.start_date != "" && data.end_date != ""){
+              if(data.start_date <= data.end_date){
+                  if(data.data != ""){
+                    
+                      if (data.status == "true") {
+                        
+                        const str_date = data.start_date
+                        const end_date = data.end_date
+
+                        const csv = $.csv.fromObjects(data.data);
+                        downloadBlobAsFile(csv, str_date + '_to_' + end_date + ' transaction.csv' );
+                        $("#loader_spin_id").hide();
+                      } else {
+                        alert("No records found !!!!")
+                        $("#loader_spin_id").hide();
+                      }
+                }else{
+                  alert("No records found.")
+                  $("#loader_spin_id").hide();
+              }
+            }else{
+              alert("Invalid end date.")
+              $("#loader_spin_id").hide();
+            }
+          }else{
+            alert("Make sure select date.")
+            $("#loader_spin_id").hide();
+          }
+         },
+     });
+     };
+
+    const downloadBlobAsFile = function(csv, filename){
+      var downloadLink = document.createElement("a");
+      var blob = new Blob([csv], { type: 'text/csv' });
+      var url = URL.createObjectURL(blob);
+      downloadLink.href = url;
+      downloadLink.download = filename;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
+
+ </script>
+<style>
+  /*-- -- -- -- -|| Loader Styles Start Here ||- -- -- -- --*/
+  .loader {
+      background: rgba(0, 4, 10, 0.9) none repeat scroll 0 0;
+      bottom: 0;
+      height: 100%;
+      left: 0;
+      position: fixed;
+      right: 0;
+      top: 0;
+      width: 100%;
+      z-index: 9999;
+  }
+  .spinner {
+      height: 40px;
+      margin: auto;
+      position: absolute;
+      width: 40px;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+  }
+  .double-bounce1, .double-bounce2 {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background-color: #fff;
+      opacity: 0.6;
+      position: absolute;
+      top: 0;
+      left: 0;
+      -webkit-animation: sk-bounce 2.0s infinite ease-in-out;
+      animation: sk-bounce 2.0s infinite ease-in-out;
+  }
+  .double-bounce2 {
+      -webkit-animation-delay: -1.0s;
+      animation-delay: -1.0s;
+  }
+  /*-- -- -- -- -|| Loader Styles End Here ||- -- -- -- --*/
+  
+  </style>
+    </script>
+
+ {% endblock %}
+
+ 
+  
