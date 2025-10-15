@@ -7,8 +7,8 @@ from django.views.generic.list import ListView
 from django.views.generic.edit import CreateView,UpdateView
 from django.views.generic import TemplateView,View
 from django.shortcuts import render,get_object_or_404,redirect
-from API.models import Admin_Profit,premium_wallet_deposit, Contract_address, Pin, Referral_code, UserCashWallet, Withdraw, Withdraw_history, plan, plan_purchase_history, withdraw_values
-from Staking.models import Stake_Monthly_Claim_History, Stake_history_management, Stake_market_price, Stake_monthly_history_management, Stake_referral_management, Stake_referral_reward_table, internal_transfer_admin_management, stake_claim_reward_history, stake_credit_claim_history, stake_credit_reward_history, stake_deposit_management, stake_reward_history, stake_wallet_management, staking_admin_management,internal_transfer_history, staking_monthly_admin_management
+from API.models import Admin_Profit,premium_wallet_deposit, user_address_trust_wallet,Contract_address, Pin, Referral_code, UserCashWallet, Withdraw, Withdraw_history, plan, plan_purchase_history, withdraw_values,referral_level,market_price
+from Staking.models import Stake_Monthly_Claim_History, Stake_history_management, Stake_market_price, Stake_monthly_history_management, Stake_referral_management, Stake_referral_reward_table, internal_transfer_admin_management, stake_claim_reward_history, stake_credit_claim_history, stake_credit_reward_history, stake_deposit_management, stake_reward_history, stake_wallet_management, staking_admin_management,internal_transfer_history, staking_monthly_admin_management,new_stake_deposit_management,stake_purchase_history,newstake_Referral_reward_History,newstakeclaim_History
 
 from Staking.tables import Stake_Plan_Table, Stake_Referral_Table
 from Staking.forms import Stake_Plan_Form, Stake_Referral_Form
@@ -36,7 +36,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from rest_framework.authtoken.models import Token
-from Staking.serializers import user_Active_Stake_Serializer
+from Staking.serializers import user_Active_Stake_Serializer,stake_Referral_History_Serializers
 from trade_admin_auth.models import Registration_otp, User_Management, User_two_fa
 
 
@@ -261,6 +261,256 @@ class List_Internal_Transfer_History(ListView):
 
 
 
+# # Internal transfer API
+# @api_view(['POST'])
+# def Internal_Transfer(request):
+#   Token_header = request.headers['Token']
+#   token = Token.objects.get(key = Token_header)
+#   user_Detail=User_Management.objects.get(user_name = token.user)
+#   frm_wallet = request.data["from_wallet"]
+#   to_wallet = request.data["to_wallet"]
+#   actual_amt = request.data["actual_amount"]
+#   fee = request.data["fees"]
+#   amount = request.data["Amount"]
+#   convert_amount = request.data["converted_usdt"]
+#   today=datetime.datetime.now()
+#   user_plan=plan.objects.get(id=user_Detail.plan)
+#   if user_plan.withdraw_status == 0:
+#       user_data={"msg":"This Plan is not eligible to Interal Transfer",'status':'false','token':token.key}
+#       return Response(user_data)
+#   obj_wall_check = internal_transfer_admin_management.objects.using('second_db').values('health_wallet','referral_wallet').get(id = 1)
+#   try:
+#     obj_stake_wall = stake_wallet_management.objects.using('second_db').get(user = user_Detail.id)
+#   except:
+#     obj_stake_wall = 0
+#   try:
+#       obj_wallet = UserCashWallet.objects.get(userid = user_Detail)
+#   except:
+#       obj_wallet = 0
+#   if user_Detail.plan == 0:
+#     obj_plan = User_Management.objects.values('Health_Withdraw_min_value','Health_Withdraw_max_value','Referral_Withdraw_min_value','Referral_Withdraw_max_value').get(plan_type = 0)
+#   else:
+#     obj_plan = User_Management.objects.values('Health_Withdraw_min_value','Health_Withdraw_max_value','Referral_Withdraw_min_value','Referral_Withdraw_max_value').get(user_name = token.user)
+  
+#   obj_sum_transfer = internal_transfer_history.objects.using('second_db').filter(user = user_Detail.id).aggregate(Sum('actual_amount')) 
+
+#   obj_check_transfer = internal_transfer_history.objects.using('second_db').values('user','created_on','from_wallet').filter(user = user_Detail.id,status = 0).last()
+
+#   obj_check_withdraw = Withdraw_history.objects.values('user_id','created_on','Wallet_type').filter(user_id = user_Detail).last()
+
+#   health_amt = obj_wallet.balanceone
+#   ref_amt = obj_wallet.referalincome
+#   if frm_wallet != "" and to_wallet != "" and actual_amt != "" and fee != "" and amount != "":
+#     if frm_wallet == "Reward_wallet":
+#       try:
+#         withdraw_last = internal_transfer_history.objects.using('second_db').filter(user = user_Detail.id,from_wallet="Reward_wallet").last()
+#         if withdraw_last :
+#             how_many_days= today - withdraw_last.created_on 
+#             how_many= 30 - how_many_days.days 
+#             if withdraw_last.created_on + timedelta(30) > today:
+#                 user_data={"msg":"Your Transfer Limit Is Over!!! Try After:"+str(how_many)+"days",'status':'false','token':token.key}
+#                 return Response(user_data)
+#       except:
+#           withdraw_last = ""
+#       if obj_wall_check['health_wallet'] == 1:
+#         if health_amt >= Decimal(actual_amt):
+#           if obj_stake_wall != 0:
+#             if obj_sum_transfer['actual_amount__sum'] != None or obj_check_withdraw != None:
+#               if obj_sum_transfer['actual_amount__sum'] != None:
+#                 if obj_check_withdraw != None:                 
+#                     if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Health_Withdraw_max_value']:
+#                       # if obj_check_transfer or obj_check_withdraw:
+#                         # if obj_check_transfer['created_on'] + timedelta(hours=24) > datetime.datetime.now(): 
+                      
+#                         # else:
+#                           diff_amt = Decimal(health_amt) - Decimal(actual_amt)
+#                           obj_wallet.balanceone = diff_amt
+#                           obj_wallet.save()
+#                           add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
+#                           obj_stake_wall.stake_Wallet = add_amt
+#                           obj_stake_wall.save(using='second_db')
+#                           internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,converted_amount=convert_amount,fees = fee,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+#                           user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+#                           return Response(user_data)
+                        
+                          
+#                       # else:
+#                       #   user_data={"msg":"No records found...!!!",'status':'false','token':token.key}
+#                       #   return Response(user_data)
+#                     else:
+#                       user_data={"msg":"Limit exceeds...!!!",'status':'false','token':token.key,'Data':[obj_plan]}
+#                       return Response(user_data) 
+#                 else:
+#                   # if obj_check_transfer['created_on'] + timedelta(hours=24) < datetime.datetime.now():
+#                     if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Health_Withdraw_max_value']:
+#                       diff_amt = Decimal(health_amt) - Decimal(actual_amt)
+#                       obj_wallet.balanceone = diff_amt
+#                       obj_wallet.save()
+#                       add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
+#                       obj_stake_wall.stake_Wallet = add_amt
+#                       obj_stake_wall.save(using='second_db')
+#                       internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+#                       user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+#                       return Response(user_data)
+#                     else:
+#                       user_data={"msg":"Limit exceeds..!!",'status':'false','token':token.key,'Data':[obj_plan]}
+#                       return Response(user_data) 
+#                   # else:
+#                   #   user_data={"msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
+#                   #   return Response(user_data)
+#               else:
+#                 # if obj_check_withdraw['created_on'] + timedelta(hours=24) < datetime.datetime.now():
+#                   if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Health_Withdraw_max_value']:
+#                     diff_amt = Decimal(health_amt) - Decimal(actual_amt)
+#                     obj_wallet.balanceone = diff_amt
+#                     obj_wallet.save()
+#                     add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
+#                     obj_stake_wall.stake_Wallet = add_amt
+#                     obj_stake_wall.save(using='second_db')
+#                     internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+#                     user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+#                     return Response(user_data)
+#                   else:
+#                     user_data={"msg":"Limit exceeds..!!",'status':'false','token':token.key,'Data':[obj_plan]}
+#                     return Response(user_data) 
+#                 # else:
+#                 #   user_data={"msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
+#                 #   return Response(user_data)
+#             else:
+#               # if obj_check_withdraw['Wallet_type'] != 'Reward_wallet' or obj_check_withdraw['created_on'] + timedelta(hours=24) < datetime.datetime.now():
+#                 if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Health_Withdraw_max_value']:
+#                   diff_amt = Decimal(health_amt) - Decimal(actual_amt)
+#                   obj_wallet.balanceone = diff_amt
+#                   obj_wallet.save()
+#                   add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
+#                   obj_stake_wall.stake_Wallet = add_amt
+#                   obj_stake_wall.save(using='second_db')
+#                   internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+#                   user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+#                   return Response(user_data)
+#                 else:
+#                   user_data={"msg":"Limit exceeds..!!",'status':'false','token':token.key,'Data':[obj_plan]}
+#                   return Response(user_data) 
+#               # else:
+#               #   user_data={"Msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
+#               #   return Response(user_data)
+              
+
+#           else:
+#             user_data={"msg":"This user haven't wallet",'status':'false','token':token.key}
+#             return Response(user_data)
+#         else:
+#           user_data={"msg":"Insufficient balance",'status':'false','token':token.key,"balance" : health_amt}
+#           return Response(user_data)
+          
+#       else:
+#         user_data={"msg":"Currently this wallet is not available...",'status':'false','token':token.key}
+#         return Response(user_data) 
+#     elif frm_wallet == "Referral_wallet":
+#       try:
+#         withdraw_last = internal_transfer_history.objects.using('second_db').filter(user = user_Detail.id,from_wallet="Referral_wallet").last()
+#         if withdraw_last :
+#             how_many_days= today - withdraw_last.created_on 
+#             how_many= 30 - how_many_days.days 
+#             if withdraw_last.created_on + timedelta(30) > today:
+#                 user_data={"msg":"Your Transfer Limit Is Over!!! Try After:"+str(how_many)+"days",'status':'false','token':token.key}
+#                 return Response(user_data)
+#       except:
+#           withdraw_last = ""
+#       if obj_wall_check['referral_wallet'] == 1:
+#         if ref_amt >= Decimal(actual_amt):
+#             if obj_stake_wall != 0:
+              
+#               if obj_sum_transfer['actual_amount__sum'] != None or obj_check_withdraw != None:
+                
+#                 if obj_check_withdraw != None:
+#                   # if obj_check_withdraw['wallet_type'] 
+#                     # if (obj_check_withdraw['created_on'] + timedelta(hours=24) < datetime.datetime.now() and obj_check_transfer['created_on'] + timedelta(hours=24) < datetime.datetime.now()):
+#                       if obj_plan['Referral_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Referral_Withdraw_max_value']:
+#                         # if obj_check_transfer['created_on'] + timedelta(hours=24) > datetime.datetime.now() or obj_check_withdraw['created_on'] + timedelta(hours=24) > datetime.datetime.now(): 
+                          
+#                         # else:
+#                           diff_amt = Decimal(ref_amt) - Decimal(actual_amt)
+#                           obj_wallet.referalincome = diff_amt
+#                           obj_wallet.save()
+#                           add_amt = Decimal(obj_stake_wall.stake_Refferal_Wallet) + Decimal(amount)
+#                           obj_stake_wall.stake_Wallet = add_amt
+#                           obj_stake_wall.save(using='second_db')
+#                           internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+#                           user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+#                           return Response(user_data)
+#                       else:
+#                         user_data={"msg":"Limit exceeds...!!!",'status':'false','token':token.key,'Data':[obj_plan]}
+#                         return Response(user_data) 
+#                     # else:
+#                     #   user_data={"msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
+#                     #   return Response(user_data)
+#                 else:
+#                   # if obj_check_transfer['created_on'] + timedelta(hours=24) < datetime.datetime.now():
+#                     if obj_plan['Referral_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Referral_Withdraw_max_value']:
+#                       # diff_amt = Decimal(health_amt) - Decimal(actual_amt)
+#                       # obj_wallet.balanceone = diff_amt
+#                       # obj_wallet.save()
+#                       diff_amt = Decimal(ref_amt) - Decimal(actual_amt)
+#                       obj_wallet.referalincome = diff_amt
+#                       obj_wallet.save()
+#                       add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
+#                       obj_stake_wall.stake_Wallet = add_amt
+#                       obj_stake_wall.save(using='second_db')
+#                       internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+#                       user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+#                       return Response(user_data)
+#                     else:
+#                       user_data={"msg":"Limit exceeds..!!",'status':'false','token':token.key,'Data':[obj_plan]}
+#                       return Response(user_data) 
+#                   # else:
+#                   #   user_data={"msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
+#                   #   return Response(user_data)
+                    
+#               else:
+#                 # if obj_check_withdraw['Wallet_type'] != 'Referral_wallet' or obj_check_withdraw['created_on'] + timedelta(hours=24) < datetime.datetime.now():
+#                 if obj_plan['Referral_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Referral_Withdraw_max_value']:
+#                   # diff_amt = Decimal(health_amt) - Decimal(actual_amt)
+#                   # obj_wallet.balanceone = diff_amt
+#                   # obj_wallet.save()
+#                   diff_amt = Decimal(ref_amt) - Decimal(actual_amt)
+#                   obj_wallet.referalincome = diff_amt
+#                   obj_wallet.save()
+#                   add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
+#                   obj_stake_wall.stake_Wallet = add_amt
+#                   obj_stake_wall.save(using='second_db')
+#                   internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,amount = amount,converted_amount=convert_amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+#                   user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+#                   return Response(user_data)
+#                 else:
+#                   user_data={"msg":"Limit exceeds..!!",'status':'false','token':token.key,'Data':[obj_plan]}
+#                   return Response(user_data) 
+#                 # else:
+#                 #   user_data={"Msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
+#                 #   return Response(user_data)
+              
+#             else:
+#                 user_data={"msg":"This user haven't wallet",'status':'false','token':token.key}
+#                 return Response(user_data)
+#         else:
+#             user_data={"msg":"Insufficient balance",'status':'false','token':token.key,"balance" : ref_amt}
+#             return Response(user_data)
+#         # else:
+#         #   user_data={"msg":"Limit exceeds...!!!",'status':'false','token':token.key}
+#         #   return Response(user_data)
+#       else:
+#         user_data={"msg":"Currently this wallet is not available...",'status':'false','token':token.key}
+#         return Response(user_data) 
+#     else:
+#         user_data={"msg":"Transfer your balance either health to stake wallet or referral to stake wallet.",'status':'false','token':token.key}
+#         return Response(user_data)
+#   else:
+#       user_data={"msg":"Something went wrong",'status':'false','token':token.key}
+#       return Response(user_data)
+
+
+import datetime
+from decimal import Decimal
 # Internal transfer API
 @api_view(['POST'])
 def Internal_Transfer(request):
@@ -269,11 +519,15 @@ def Internal_Transfer(request):
   user_Detail=User_Management.objects.get(user_name = token.user)
   frm_wallet = request.data["from_wallet"]
   to_wallet = request.data["to_wallet"]
-  actual_amt = request.data["actual_amount"]
+  actual_amttt = request.data["actual_amount"]
   fee = request.data["fees"]
   amount = request.data["Amount"]
   convert_amount = request.data["converted_usdt"]
-  today=datetime.datetime.now()
+  # Convert act_amount to Decimal
+  actual_amttt = Decimal(actual_amttt)
+  actual_amt = actual_amttt - (Decimal('0.10') * actual_amttt)
+  # fee_deduct = Decimal('0.10') * actual_amttt
+  today=datetime.now()
   user_plan=plan.objects.get(id=user_Detail.plan)
   if user_plan.withdraw_status == 0:
       user_data={"msg":"This Plan is not eligible to Interal Transfer",'status':'false','token':token.key}
@@ -306,257 +560,8 @@ def Internal_Transfer(request):
         withdraw_last = internal_transfer_history.objects.using('second_db').filter(user = user_Detail.id,from_wallet="Reward_wallet").last()
         if withdraw_last :
             how_many_days= today - withdraw_last.created_on 
-            how_many= 30 - how_many_days.days 
-            if withdraw_last.created_on + timedelta(30) > today:
-                user_data={"msg":"Your Transfer Limit Is Over!!! Try After:"+str(how_many)+"days",'status':'false','token':token.key}
-                return Response(user_data)
-      except:
-          withdraw_last = ""
-      if obj_wall_check['health_wallet'] == 1:
-        if health_amt >= Decimal(actual_amt):
-          if obj_stake_wall != 0:
-            if obj_sum_transfer['actual_amount__sum'] != None or obj_check_withdraw != None:
-              if obj_sum_transfer['actual_amount__sum'] != None:
-                if obj_check_withdraw != None:                 
-                    if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Health_Withdraw_max_value']:
-                      # if obj_check_transfer or obj_check_withdraw:
-                        # if obj_check_transfer['created_on'] + timedelta(hours=24) > datetime.datetime.now(): 
-                      
-                        # else:
-                          diff_amt = Decimal(health_amt) - Decimal(actual_amt)
-                          obj_wallet.balanceone = diff_amt
-                          obj_wallet.save()
-                          add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
-                          obj_stake_wall.stake_Wallet = add_amt
-                          obj_stake_wall.save(using='second_db')
-                          internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,converted_amount=convert_amount,fees = fee,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
-                          user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
-                          return Response(user_data)
-                        
-                          
-                      # else:
-                      #   user_data={"msg":"No records found...!!!",'status':'false','token':token.key}
-                      #   return Response(user_data)
-                    else:
-                      user_data={"msg":"Limit exceeds...!!!",'status':'false','token':token.key,'Data':[obj_plan]}
-                      return Response(user_data) 
-                else:
-                  # if obj_check_transfer['created_on'] + timedelta(hours=24) < datetime.datetime.now():
-                    if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Health_Withdraw_max_value']:
-                      diff_amt = Decimal(health_amt) - Decimal(actual_amt)
-                      obj_wallet.balanceone = diff_amt
-                      obj_wallet.save()
-                      add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
-                      obj_stake_wall.stake_Wallet = add_amt
-                      obj_stake_wall.save(using='second_db')
-                      internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
-                      user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
-                      return Response(user_data)
-                    else:
-                      user_data={"msg":"Limit exceeds..!!",'status':'false','token':token.key,'Data':[obj_plan]}
-                      return Response(user_data) 
-                  # else:
-                  #   user_data={"msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
-                  #   return Response(user_data)
-              else:
-                # if obj_check_withdraw['created_on'] + timedelta(hours=24) < datetime.datetime.now():
-                  if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Health_Withdraw_max_value']:
-                    diff_amt = Decimal(health_amt) - Decimal(actual_amt)
-                    obj_wallet.balanceone = diff_amt
-                    obj_wallet.save()
-                    add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
-                    obj_stake_wall.stake_Wallet = add_amt
-                    obj_stake_wall.save(using='second_db')
-                    internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
-                    user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
-                    return Response(user_data)
-                  else:
-                    user_data={"msg":"Limit exceeds..!!",'status':'false','token':token.key,'Data':[obj_plan]}
-                    return Response(user_data) 
-                # else:
-                #   user_data={"msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
-                #   return Response(user_data)
-            else:
-              # if obj_check_withdraw['Wallet_type'] != 'Reward_wallet' or obj_check_withdraw['created_on'] + timedelta(hours=24) < datetime.datetime.now():
-                if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Health_Withdraw_max_value']:
-                  diff_amt = Decimal(health_amt) - Decimal(actual_amt)
-                  obj_wallet.balanceone = diff_amt
-                  obj_wallet.save()
-                  add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
-                  obj_stake_wall.stake_Wallet = add_amt
-                  obj_stake_wall.save(using='second_db')
-                  internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
-                  user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
-                  return Response(user_data)
-                else:
-                  user_data={"msg":"Limit exceeds..!!",'status':'false','token':token.key,'Data':[obj_plan]}
-                  return Response(user_data) 
-              # else:
-              #   user_data={"Msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
-              #   return Response(user_data)
-              
-
-          else:
-            user_data={"msg":"This user haven't wallet",'status':'false','token':token.key}
-            return Response(user_data)
-        else:
-          user_data={"msg":"Insufficient balance",'status':'false','token':token.key,"balance" : health_amt}
-          return Response(user_data)
-          
-      else:
-        user_data={"msg":"Currently this wallet is not available...",'status':'false','token':token.key}
-        return Response(user_data) 
-    elif frm_wallet == "Referral_wallet":
-      try:
-        withdraw_last = internal_transfer_history.objects.using('second_db').filter(user = user_Detail.id,from_wallet="Referral_wallet").last()
-        if withdraw_last :
-            how_many_days= today - withdraw_last.created_on 
-            how_many= 30 - how_many_days.days 
-            if withdraw_last.created_on + timedelta(30) > today:
-                user_data={"msg":"Your Transfer Limit Is Over!!! Try After:"+str(how_many)+"days",'status':'false','token':token.key}
-                return Response(user_data)
-      except:
-          withdraw_last = ""
-      if obj_wall_check['referral_wallet'] == 1:
-        if ref_amt >= Decimal(actual_amt):
-            if obj_stake_wall != 0:
-              
-              if obj_sum_transfer['actual_amount__sum'] != None or obj_check_withdraw != None:
-                
-                if obj_check_withdraw != None:
-                  # if obj_check_withdraw['wallet_type'] 
-                    # if (obj_check_withdraw['created_on'] + timedelta(hours=24) < datetime.datetime.now() and obj_check_transfer['created_on'] + timedelta(hours=24) < datetime.datetime.now()):
-                      if obj_plan['Referral_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Referral_Withdraw_max_value']:
-                        # if obj_check_transfer['created_on'] + timedelta(hours=24) > datetime.datetime.now() or obj_check_withdraw['created_on'] + timedelta(hours=24) > datetime.datetime.now(): 
-                          
-                        # else:
-                          diff_amt = Decimal(ref_amt) - Decimal(actual_amt)
-                          obj_wallet.referalincome = diff_amt
-                          obj_wallet.save()
-                          add_amt = Decimal(obj_stake_wall.stake_Refferal_Wallet) + Decimal(amount)
-                          obj_stake_wall.stake_Wallet = add_amt
-                          obj_stake_wall.save(using='second_db')
-                          internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
-                          user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
-                          return Response(user_data)
-                      else:
-                        user_data={"msg":"Limit exceeds...!!!",'status':'false','token':token.key,'Data':[obj_plan]}
-                        return Response(user_data) 
-                    # else:
-                    #   user_data={"msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
-                    #   return Response(user_data)
-                else:
-                  # if obj_check_transfer['created_on'] + timedelta(hours=24) < datetime.datetime.now():
-                    if obj_plan['Referral_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Referral_Withdraw_max_value']:
-                      # diff_amt = Decimal(health_amt) - Decimal(actual_amt)
-                      # obj_wallet.balanceone = diff_amt
-                      # obj_wallet.save()
-                      diff_amt = Decimal(ref_amt) - Decimal(actual_amt)
-                      obj_wallet.referalincome = diff_amt
-                      obj_wallet.save()
-                      add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
-                      obj_stake_wall.stake_Wallet = add_amt
-                      obj_stake_wall.save(using='second_db')
-                      internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
-                      user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
-                      return Response(user_data)
-                    else:
-                      user_data={"msg":"Limit exceeds..!!",'status':'false','token':token.key,'Data':[obj_plan]}
-                      return Response(user_data) 
-                  # else:
-                  #   user_data={"msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
-                  #   return Response(user_data)
-                    
-              else:
-                # if obj_check_withdraw['Wallet_type'] != 'Referral_wallet' or obj_check_withdraw['created_on'] + timedelta(hours=24) < datetime.datetime.now():
-                if obj_plan['Referral_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Referral_Withdraw_max_value']:
-                  # diff_amt = Decimal(health_amt) - Decimal(actual_amt)
-                  # obj_wallet.balanceone = diff_amt
-                  # obj_wallet.save()
-                  diff_amt = Decimal(ref_amt) - Decimal(actual_amt)
-                  obj_wallet.referalincome = diff_amt
-                  obj_wallet.save()
-                  add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
-                  obj_stake_wall.stake_Wallet = add_amt
-                  obj_stake_wall.save(using='second_db')
-                  internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,amount = amount,converted_amount=convert_amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
-                  user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
-                  return Response(user_data)
-                else:
-                  user_data={"msg":"Limit exceeds..!!",'status':'false','token':token.key,'Data':[obj_plan]}
-                  return Response(user_data) 
-                # else:
-                #   user_data={"Msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
-                #   return Response(user_data)
-              
-            else:
-                user_data={"msg":"This user haven't wallet",'status':'false','token':token.key}
-                return Response(user_data)
-        else:
-            user_data={"msg":"Insufficient balance",'status':'false','token':token.key,"balance" : ref_amt}
-            return Response(user_data)
-        # else:
-        #   user_data={"msg":"Limit exceeds...!!!",'status':'false','token':token.key}
-        #   return Response(user_data)
-      else:
-        user_data={"msg":"Currently this wallet is not available...",'status':'false','token':token.key}
-        return Response(user_data) 
-    else:
-        user_data={"msg":"Transfer your balance either health to stake wallet or referral to stake wallet.",'status':'false','token':token.key}
-        return Response(user_data)
-  else:
-      user_data={"msg":"Something went wrong",'status':'false','token':token.key}
-      return Response(user_data)
-
-
-#balanceone
-# Internal transfer API
-@api_view(['POST'])
-def Internal_Transfer_premium(request):
-  Token_header = request.headers['Token']
-  token = Token.objects.get(key = Token_header)
-  user_Detail=User_Management.objects.get(user_name = token.user)
-  frm_wallet = request.data["from_wallet"]
-  to_wallet = request.data["to_wallet"]
-  actual_amt = request.data["actual_amount"]
-  fee = request.data["fees"]
-  amount = request.data["Amount"]
-  convert_amount = request.data["converted_usdt"]
-  today=datetime.datetime.now()
-  user_plan=plan.objects.get(id=user_Detail.plan)
-  if user_plan.withdraw_status == 0:
-      user_data={"msg":"This Plan is not eligible to Interal Transfer",'status':'false','token':token.key}
-      return Response(user_data)
-  obj_wall_check = internal_transfer_admin_management.objects.using('second_db').values('health_wallet','referral_wallet').get(id = 1)
-  try:
-    obj_stake_wall = stake_wallet_management.objects.using('second_db').get(user = user_Detail.id)
-  except:
-    obj_stake_wall = 0
-  try:
-      obj_wallet = UserCashWallet.objects.get(userid = user_Detail)
-  except:
-      obj_wallet = 0
-  if user_Detail.plan == 0:
-    obj_plan = User_Management.objects.values('Health_Withdraw_min_value','Health_Withdraw_max_value','Referral_Withdraw_min_value','Referral_Withdraw_max_value').get(plan_type = 0)
-  else:
-    obj_plan = User_Management.objects.values('Health_Withdraw_min_value','Health_Withdraw_max_value','Referral_Withdraw_min_value','Referral_Withdraw_max_value').get(user_name = token.user)
-  
-  obj_sum_transfer = internal_transfer_history.objects.using('second_db').filter(user = user_Detail.id).aggregate(Sum('actual_amount')) 
-
-  obj_check_transfer = internal_transfer_history.objects.using('second_db').values('user','created_on','from_wallet').filter(user = user_Detail.id,status = 0).last()
-
-  obj_check_withdraw = Withdraw_history.objects.values('user_id','created_on','Wallet_type').filter(user_id = user_Detail).last()
-
-  health_amt = obj_wallet.balanceone
-  ref_amt = obj_wallet.referalincome
-  if frm_wallet != "" and to_wallet != "" and actual_amt != "" and fee != "" and amount != "":
-    if frm_wallet == "Reward_wallet":
-      try:
-        withdraw_last = internal_transfer_history.objects.using('second_db').filter(user = user_Detail.id,from_wallet="Reward_wallet").last()
-        if withdraw_last :
-            how_many_days= today - withdraw_last.created_on 
-            how_many= 30 - how_many_days.days 
-            if withdraw_last.created_on + timedelta(30) > today:
+            how_many= 7 - how_many_days.days 
+            if withdraw_last.created_on + timedelta(7) > today:
             # if withdraw_last.created_on + timedelta(hours=24) > today:
                 user_data={"msg":"Your Transfer Limit Is Over!!! Try After:"+str(how_many)+"days",'status':'false','token':token.key}
                 # user_data={"msg":"Your Transfer Limit Is Over!!! Try again Later:",'status':'false','token':token.key}
@@ -564,25 +569,25 @@ def Internal_Transfer_premium(request):
       except:
           withdraw_last = ""
       if obj_wall_check['health_wallet'] == 1:
-        if health_amt >= Decimal(actual_amt):
+        if health_amt >= Decimal(actual_amttt):
           # if obj_stake_wall != 0:
             if obj_sum_transfer['actual_amount__sum'] != None or obj_check_withdraw != None:
               if obj_sum_transfer['actual_amount__sum'] != None:
                 if obj_check_withdraw != None:                 
-                    if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Health_Withdraw_max_value']:
+                    if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amttt) <= obj_plan['Health_Withdraw_max_value']:
                       # if obj_check_transfer or obj_check_withdraw:
                         # if obj_check_transfer['created_on'] + timedelta(hours=24) > datetime.datetime.now(): 
                       
                         # else:
-                          diff_amt = Decimal(health_amt) - Decimal(actual_amt)
+                          diff_amt = Decimal(health_amt) - Decimal(actual_amttt)
                           obj_wallet.balanceone = diff_amt
                           obj_wallet.save()
                           # add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
                           # obj_stake_wall.stake_Wallet = add_amt
                           # obj_stake_wall.save(using='second_db')
-                          premium_wallet_deposit.objects.create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="health_wallet",create_type="Internal_Transfer_premium",withdraw_amount=Decimal(actual_amt))
+                          new_stake_deposit_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="health_wallet")
                           # Withdraw(userid_id = user_Detail.id,Amount = amount,Address = 'internal_transfer_premium',Wallet_type=frm_wallet,back_up_phrase="0",created_on = datetime.datetime.now(),modified_on = datetime.datetime.now())
-                          internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,converted_amount=0,fees = 0,amount = 0,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+                          internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amttt,converted_amount=0,fees = 10,amount = 0,created_on = datetime.now(),modified_on = datetime.now(),status = 0)
                           user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
                           return Response(user_data)
                         
@@ -596,16 +601,16 @@ def Internal_Transfer_premium(request):
                       return Response(user_data) 
                 else:
                   # if obj_check_transfer['created_on'] + timedelta(hours=24) < datetime.datetime.now():
-                    if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Health_Withdraw_max_value']:
-                      diff_amt = Decimal(health_amt) - Decimal(actual_amt)
+                    if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amttt) <= obj_plan['Health_Withdraw_max_value']:
+                      diff_amt = Decimal(health_amt) - Decimal(actual_amttt)
                       obj_wallet.balanceone = diff_amt
                       obj_wallet.save()
                       # add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
                       # obj_stake_wall.stake_Wallet = add_amt
                       # obj_stake_wall.save(using='second_db')
-                      premium_wallet_deposit.objects.create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="health_wallet",create_type="Internal_Transfer_premium",withdraw_amount=Decimal(actual_amt))
+                      new_stake_deposit_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="health_wallet")
                       # Withdraw(userid_id = user_Detail.id,Amount = amount,Address = 'internal_transfer_premium',Wallet_type=frm_wallet,back_up_phrase="0",created_on = datetime.datetime.now(),modified_on = datetime.datetime.now())
-                      internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,converted_amount=0,fees = 0,amount = 0,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+                      internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amttt,converted_amount=0,fees = 10,amount = 0,created_on = datetime.now(),modified_on = datetime.now(),status = 0)
                       # internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
                       user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
                       return Response(user_data)
@@ -618,16 +623,16 @@ def Internal_Transfer_premium(request):
                   #   return Response(user_data)
               else:
                 # if obj_check_withdraw['created_on'] + timedelta(hours=24) < datetime.datetime.now():
-                  if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Health_Withdraw_max_value']:
-                    diff_amt = Decimal(health_amt) - Decimal(actual_amt)
+                  if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amttt) <= obj_plan['Health_Withdraw_max_value']:
+                    diff_amt = Decimal(health_amt) - Decimal(actual_amttt)
                     obj_wallet.balanceone = diff_amt
                     obj_wallet.save()
                     # add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
                     # obj_stake_wall.stake_Wallet = add_amt
                     # obj_stake_wall.save(using='second_db')
-                    premium_wallet_deposit.objects.create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="health_wallet",create_type="Internal_Transfer_premium",withdraw_amount=Decimal(actual_amt))
+                    new_stake_deposit_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="health_wallet")
                     # Withdraw(userid_id = user_Detail.id,Amount = amount,Address = 'internal_transfer_premium',Wallet_type=frm_wallet,back_up_phrase="0",created_on = datetime.datetime.now(),modified_on = datetime.datetime.now())
-                    internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,converted_amount=0,fees = 0,amount = 0,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+                    internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amttt,converted_amount=0,fees = 10,amount = 0,created_on = datetime.now(),modified_on = datetime.now(),status = 0)
                     # internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
                     user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
                     return Response(user_data)
@@ -640,16 +645,16 @@ def Internal_Transfer_premium(request):
                 #   return Response(user_data)
             else:
               # if obj_check_withdraw['Wallet_type'] != 'Reward_wallet' or obj_check_withdraw['created_on'] + timedelta(hours=24) < datetime.datetime.now():
-                if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Health_Withdraw_max_value']:
-                  diff_amt = Decimal(health_amt) - Decimal(actual_amt)
+                if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amttt) <= obj_plan['Health_Withdraw_max_value']:
+                  diff_amt = Decimal(health_amt) - Decimal(actual_amttt)
                   obj_wallet.balanceone = diff_amt
                   obj_wallet.save()
                   # add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
                   # obj_stake_wall.stake_Wallet = add_amt
                   # obj_stake_wall.save(using='second_db')
-                  premium_wallet_deposit.objects.create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="health_wallet",create_type="Internal_Transfer_premium",withdraw_amount=Decimal(actual_amt))
+                  new_stake_deposit_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="health_wallet")
                   # Withdraw(userid_id = user_Detail.id,Amount = amount,Address = 'internal_transfer_premium',Wallet_type=frm_wallet,back_up_phrase="0",created_on = datetime.datetime.now(),modified_on = datetime.datetime.now())
-                  internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,converted_amount=0,fees = 0,amount = 0,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+                  internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amttt,converted_amount=0,fees = 10,amount = 0,created_on = datetime.now(),modified_on = datetime.now(),status = 0)
                   # internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
                   user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
                   return Response(user_data)
@@ -677,7 +682,7 @@ def Internal_Transfer_premium(request):
         withdraw_last = internal_transfer_history.objects.using('second_db').filter(user = user_Detail.id,from_wallet="Referral_wallet").last()
         if withdraw_last :
             how_many_days= today - withdraw_last.created_on 
-            how_many= 30 - how_many_days.days 
+            how_many= 7 - how_many_days.days 
             # if withdraw_last.created_on + timedelta(30) > today:
             if withdraw_last.created_on + timedelta(hours=24) > today:
                 # user_data={"msg":"Your Transfer Limit Is Over!!! Try After:"+str(how_many)+"days",'status':'false','token':token.key}
@@ -686,7 +691,7 @@ def Internal_Transfer_premium(request):
       except:
           withdraw_last = ""
       if obj_wall_check['referral_wallet'] == 1:
-        if ref_amt >= Decimal(actual_amt):
+        if ref_amt >= Decimal(actual_amttt):
             # if obj_stake_wall != 0:
               
               if obj_sum_transfer['actual_amount__sum'] != None or obj_check_withdraw != None:
@@ -694,19 +699,19 @@ def Internal_Transfer_premium(request):
                 if obj_check_withdraw != None:
                   # if obj_check_withdraw['wallet_type'] 
                     # if (obj_check_withdraw['created_on'] + timedelta(hours=24) < datetime.datetime.now() and obj_check_transfer['created_on'] + timedelta(hours=24) < datetime.datetime.now()):
-                      if obj_plan['Referral_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Referral_Withdraw_max_value']:
+                      if obj_plan['Referral_Withdraw_min_value'] <= Decimal(actual_amttt) <= obj_plan['Referral_Withdraw_max_value']:
                         # if obj_check_transfer['created_on'] + timedelta(hours=24) > datetime.datetime.now() or obj_check_withdraw['created_on'] + timedelta(hours=24) > datetime.datetime.now(): 
                           
                         # else:
-                          diff_amt = Decimal(ref_amt) - Decimal(actual_amt)
+                          diff_amt = Decimal(ref_amt) - Decimal(actual_amttt)
                           obj_wallet.referalincome = diff_amt
                           obj_wallet.save()
                           # add_amt = Decimal(obj_stake_wall.stake_Refferal_Wallet) + Decimal(amount)
                           # obj_stake_wall.stake_Wallet = add_amt
                           # obj_stake_wall.save(using='second_db')
-                          premium_wallet_deposit.objects.create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="referral_wallet",create_type="Internal_Transfer_premium",withdraw_amount=Decimal(actual_amt))
+                          new_stake_deposit_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="referral_wallet")
                           # Withdraw(userid_id = user_Detail.id,Amount = amount,Address = 'internal_transfer_premium',Wallet_type=frm_wallet,back_up_phrase="0",created_on = datetime.datetime.now(),modified_on = datetime.datetime.now())
-                          internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,converted_amount=0,fees = 0,amount = 0,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+                          internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amttt,converted_amount=0,fees = 10,amount = 0,created_on = datetime.now(),modified_on = datetime.now(),status = 0)
                           # internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
                           user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
                           return Response(user_data)
@@ -719,19 +724,19 @@ def Internal_Transfer_premium(request):
                     #   return Response(user_data)
                 else:
                   # if obj_check_transfer['created_on'] + timedelta(hours=24) < datetime.datetime.now():
-                    if obj_plan['Referral_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Referral_Withdraw_max_value']:
+                    if obj_plan['Referral_Withdraw_min_value'] <= Decimal(actual_amttt) <= obj_plan['Referral_Withdraw_max_value']:
                       # diff_amt = Decimal(health_amt) - Decimal(actual_amt)
                       # obj_wallet.balanceone = diff_amt
                       # obj_wallet.save()
-                      diff_amt = Decimal(ref_amt) - Decimal(actual_amt)
+                      diff_amt = Decimal(ref_amt) - Decimal(actual_amttt)
                       obj_wallet.referalincome = diff_amt
                       obj_wallet.save()
                       # add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
                       # obj_stake_wall.stake_Wallet = add_amt
                       # obj_stake_wall.save(using='second_db')
-                      premium_wallet_deposit.objects.create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="referral_wallet",create_type="Internal_Transfer_premium",withdraw_amount=Decimal(actual_amt))
+                      new_stake_deposit_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="referral_wallet")
                       # Withdraw(userid_id = user_Detail.id,Amount = amount,Address = 'internal_transfer_premium',Wallet_type=frm_wallet,back_up_phrase="0",created_on = datetime.datetime.now(),modified_on = datetime.datetime.now())
-                      internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,converted_amount=0,fees = 0,amount = 0,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+                      internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amttt,converted_amount=0,fees = 10,amount = 0,created_on = datetime.now(),modified_on = datetime.now(),status = 0)
                       # internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
                       user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
                       return Response(user_data)
@@ -745,8 +750,290 @@ def Internal_Transfer_premium(request):
                     
               else:
                 # if obj_check_withdraw['Wallet_type'] != 'Referral_wallet' or obj_check_withdraw['created_on'] + timedelta(hours=24) < datetime.datetime.now():
-                if obj_plan['Referral_Withdraw_min_value'] <= Decimal(actual_amt) <= obj_plan['Referral_Withdraw_max_value']:
-                  diff_amt = Decimal(ref_amt) - Decimal(actual_amt)
+                if obj_plan['Referral_Withdraw_min_value'] <= Decimal(actual_amttt) <= obj_plan['Referral_Withdraw_max_value']:
+                  diff_amt = Decimal(ref_amt) - Decimal(actual_amttt)
+                  obj_wallet.referalincome = diff_amt
+                  obj_wallet.save()
+                  # add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
+                  # obj_stake_wall.stake_Wallet = add_amt
+                  # obj_stake_wall.save(using='second_db')
+                  new_stake_deposit_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="referral_wallet")
+                  # Withdraw(userid_id = user_Detail.id,Amount = amount,Address = 'internal_transfer_premium',Wallet_type=frm_wallet,back_up_phrase="0",created_on = datetime.datetime.now(),modified_on = datetime.datetime.now())
+                  internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amttt,converted_amount=0,fees = 10,amount = 0,created_on = datetime.now(),modified_on = datetime.now(),status = 0)
+                  # internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,amount = amount,converted_amount=convert_amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+                  user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+                  return Response(user_data)
+                else:
+                  # user_data={"msg":"Limit exceeds..!!",'status':'false','token':token.key,'Data':[obj_plan]}
+                  user_data={"msg":"You can withdraw greater then or equals to 10",'status':'false','token':token.key,'Data':[obj_plan]}
+                  return Response(user_data)
+                # else:
+                #   user_data={"Msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
+                #   return Response(user_data)
+              
+            # else:
+            #     user_data={"msg":"This user haven't wallet",'status':'false','token':token.key}
+            #     return Response(user_data)
+        else:
+            user_data={"msg":"Insufficient balance",'status':'false','token':token.key,"balance" : ref_amt}
+            return Response(user_data)
+        # else:
+        #   user_data={"msg":"Limit exceeds...!!!",'status':'false','token':token.key}
+        #   return Response(user_data)
+      else:
+        user_data={"msg":"Currently this wallet is not available...",'status':'false','token':token.key}
+        return Response(user_data) 
+    else:
+        user_data={"msg":"Transfer your balance either health to stake wallet or referral to premium wallet.",'status':'false','token':token.key}
+        return Response(user_data)
+  else:
+      user_data={"msg":"Something went wrong",'status':'false','token':token.key}
+      return Response(user_data)
+
+
+import datetime
+from decimal import Decimal
+# Internal transfer API
+@api_view(['POST'])
+def Internal_Transfer_premium(request):
+  Token_header = request.headers['Token']
+  token = Token.objects.get(key = Token_header)
+  user_Detail=User_Management.objects.get(user_name = token.user)
+  frm_wallet = request.data["from_wallet"]
+  to_wallet = request.data["to_wallet"]
+  actual_amttt = request.data["actual_amount"]
+  fee = request.data["fees"]
+  amount = request.data["Amount"]
+  convert_amount = request.data["converted_usdt"]
+  # Convert act_amount to Decimal
+  actual_amttt = Decimal(actual_amttt)
+  actual_amt = actual_amttt - (Decimal('0.10') * actual_amttt)
+  # fee_deduct = Decimal('0.10') * actual_amttt
+  today=datetime.now()
+  user_plan=plan.objects.get(id=user_Detail.plan)
+  if user_plan.withdraw_status == 0:
+      user_data={"msg":"This Plan is not eligible to Interal Transfer",'status':'false','token':token.key}
+      return Response(user_data)
+  obj_wall_check = internal_transfer_admin_management.objects.using('second_db').values('health_wallet','referral_wallet').get(id = 1)
+  try:
+    obj_stake_wall = stake_wallet_management.objects.using('second_db').get(user = user_Detail.id)
+  except:
+    obj_stake_wall = 0
+  try:
+      obj_wallet = UserCashWallet.objects.get(userid = user_Detail)
+  except:
+      obj_wallet = 0
+  if user_Detail.plan == 0:
+    obj_plan = User_Management.objects.values('Health_Withdraw_min_value','Health_Withdraw_max_value','Referral_Withdraw_min_value','Referral_Withdraw_max_value').get(plan_type = 0)
+  else:
+    obj_plan = User_Management.objects.values('Health_Withdraw_min_value','Health_Withdraw_max_value','Referral_Withdraw_min_value','Referral_Withdraw_max_value').get(user_name = token.user)
+  
+  obj_sum_transfer = internal_transfer_history.objects.using('second_db').filter(user = user_Detail.id).aggregate(Sum('actual_amount')) 
+
+  obj_check_transfer = internal_transfer_history.objects.using('second_db').values('user','created_on','from_wallet').filter(user = user_Detail.id,status = 0).last()
+
+  obj_check_withdraw = Withdraw_history.objects.values('user_id','created_on','Wallet_type').filter(user_id = user_Detail).last()
+
+  health_amt = obj_wallet.balanceone
+  ref_amt = obj_wallet.referalincome
+  if frm_wallet != "" and to_wallet != "" and actual_amt != "" and fee != "" and amount != "":
+    if frm_wallet == "Reward_wallet":
+      try:
+        withdraw_last = internal_transfer_history.objects.using('second_db').filter(user = user_Detail.id,from_wallet="Reward_wallet").last()
+        if withdraw_last :
+            how_many_days= today - withdraw_last.created_on 
+            how_many= 7 - how_many_days.days 
+            if withdraw_last.created_on + timedelta(7) > today:
+            # if withdraw_last.created_on + timedelta(hours=24) > today:
+                user_data={"msg":"Your Transfer Limit Is Over!!! Try After:"+str(how_many)+"days",'status':'false','token':token.key}
+                # user_data={"msg":"Your Transfer Limit Is Over!!! Try again Later:",'status':'false','token':token.key}
+                return Response(user_data)
+      except:
+          withdraw_last = ""
+      if obj_wall_check['health_wallet'] == 1:
+        if health_amt >= Decimal(actual_amttt):
+          # if obj_stake_wall != 0:
+            if obj_sum_transfer['actual_amount__sum'] != None or obj_check_withdraw != None:
+              if obj_sum_transfer['actual_amount__sum'] != None:
+                if obj_check_withdraw != None:                 
+                    if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amttt) <= obj_plan['Health_Withdraw_max_value']:
+                      # if obj_check_transfer or obj_check_withdraw:
+                        # if obj_check_transfer['created_on'] + timedelta(hours=24) > datetime.datetime.now(): 
+                      
+                        # else:
+                          diff_amt = Decimal(health_amt) - Decimal(actual_amttt)
+                          obj_wallet.balanceone = diff_amt
+                          obj_wallet.save()
+                          # add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
+                          # obj_stake_wall.stake_Wallet = add_amt
+                          # obj_stake_wall.save(using='second_db')
+                          premium_wallet_deposit.objects.create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="health_wallet",create_type="Internal_Transfer_premium",withdraw_amount=Decimal(actual_amt))
+                          # Withdraw(userid_id = user_Detail.id,Amount = amount,Address = 'internal_transfer_premium',Wallet_type=frm_wallet,back_up_phrase="0",created_on = datetime.datetime.now(),modified_on = datetime.datetime.now())
+                          internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amttt,converted_amount=0,fees = 10,amount = 0,created_on = datetime.now(),modified_on = datetime.now(),status = 0)
+                          user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+                          return Response(user_data)
+                        
+                          
+                      # else:
+                      #   user_data={"msg":"No records found...!!!",'status':'false','token':token.key}
+                      #   return Response(user_data)
+                    else:
+                      # user_data={"msg":"Limit exceeds...!!!",'status':'false','token':token.key,'Data':[obj_plan]}
+                      user_data={"msg":"You can withdraw greater then or equals to 10",'status':'false','token':token.key,'Data':[obj_plan]}
+                      return Response(user_data) 
+                else:
+                  # if obj_check_transfer['created_on'] + timedelta(hours=24) < datetime.datetime.now():
+                    if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amttt) <= obj_plan['Health_Withdraw_max_value']:
+                      diff_amt = Decimal(health_amt) - Decimal(actual_amttt)
+                      obj_wallet.balanceone = diff_amt
+                      obj_wallet.save()
+                      # add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
+                      # obj_stake_wall.stake_Wallet = add_amt
+                      # obj_stake_wall.save(using='second_db')
+                      premium_wallet_deposit.objects.create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="health_wallet",create_type="Internal_Transfer_premium",withdraw_amount=Decimal(actual_amt))
+                      # Withdraw(userid_id = user_Detail.id,Amount = amount,Address = 'internal_transfer_premium',Wallet_type=frm_wallet,back_up_phrase="0",created_on = datetime.datetime.now(),modified_on = datetime.datetime.now())
+                      internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amttt,converted_amount=0,fees = 10,amount = 0,created_on = datetime.now(),modified_on = datetime.now(),status = 0)
+                      # internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+                      user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+                      return Response(user_data)
+                    else:
+                      # user_data={"msg":"Limit exceeds..!!",'status':'false','token':token.key,'Data':[obj_plan]}
+                      user_data={"msg":"You can withdraw greater then or equals to 10",'status':'false','token':token.key,'Data':[obj_plan]}
+                      return Response(user_data) 
+                  # else:
+                  #   user_data={"msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
+                  #   return Response(user_data)
+              else:
+                # if obj_check_withdraw['created_on'] + timedelta(hours=24) < datetime.datetime.now():
+                  if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amttt) <= obj_plan['Health_Withdraw_max_value']:
+                    diff_amt = Decimal(health_amt) - Decimal(actual_amttt)
+                    obj_wallet.balanceone = diff_amt
+                    obj_wallet.save()
+                    # add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
+                    # obj_stake_wall.stake_Wallet = add_amt
+                    # obj_stake_wall.save(using='second_db')
+                    premium_wallet_deposit.objects.create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="health_wallet",create_type="Internal_Transfer_premium",withdraw_amount=Decimal(actual_amt))
+                    # Withdraw(userid_id = user_Detail.id,Amount = amount,Address = 'internal_transfer_premium',Wallet_type=frm_wallet,back_up_phrase="0",created_on = datetime.datetime.now(),modified_on = datetime.datetime.now())
+                    internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amttt,converted_amount=0,fees = 10,amount = 0,created_on = datetime.now(),modified_on = datetime.now(),status = 0)
+                    # internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+                    user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+                    return Response(user_data)
+                  else:
+                    # user_data={"msg":"Limit exceeds..!!",'status':'false','token':token.key,'Data':[obj_plan]}
+                    user_data={"msg":"You can withdraw greater then or equals to 10",'status':'false','token':token.key,'Data':[obj_plan]}
+                    return Response(user_data) 
+                # else:
+                #   user_data={"msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
+                #   return Response(user_data)
+            else:
+              # if obj_check_withdraw['Wallet_type'] != 'Reward_wallet' or obj_check_withdraw['created_on'] + timedelta(hours=24) < datetime.datetime.now():
+                if obj_plan['Health_Withdraw_min_value'] <= Decimal(actual_amttt) <= obj_plan['Health_Withdraw_max_value']:
+                  diff_amt = Decimal(health_amt) - Decimal(actual_amttt)
+                  obj_wallet.balanceone = diff_amt
+                  obj_wallet.save()
+                  # add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
+                  # obj_stake_wall.stake_Wallet = add_amt
+                  # obj_stake_wall.save(using='second_db')
+                  premium_wallet_deposit.objects.create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="health_wallet",create_type="Internal_Transfer_premium",withdraw_amount=Decimal(actual_amt))
+                  # Withdraw(userid_id = user_Detail.id,Amount = amount,Address = 'internal_transfer_premium',Wallet_type=frm_wallet,back_up_phrase="0",created_on = datetime.datetime.now(),modified_on = datetime.datetime.now())
+                  internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amttt,converted_amount=0,fees = 10,amount = 0,created_on = datetime.now(),modified_on = datetime.now(),status = 0)
+                  # internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+                  user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+                  return Response(user_data)
+                else:
+                  # user_data={"msg":"Limit exceeds..!!",'status':'false','token':token.key,'Data':[obj_plan]}
+                  user_data={"msg":"You can withdraw greater then or equals to 10",'status':'false','token':token.key,'Data':[obj_plan]}
+                  return Response(user_data) 
+              # else:
+              #   user_data={"Msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
+              #   return Response(user_data)
+              
+
+          # else:
+          #   user_data={"msg":"This user haven't wallet",'status':'false','token':token.key}
+          #   return Response(user_data)
+        else:
+          user_data={"msg":"Insufficient balance",'status':'false','token':token.key,"balance" : health_amt}
+          return Response(user_data)
+          
+      else:
+        user_data={"msg":"Currently this wallet is not available...",'status':'false','token':token.key}
+        return Response(user_data) 
+    elif frm_wallet == "Referral_wallet":
+      try:
+        withdraw_last = internal_transfer_history.objects.using('second_db').filter(user = user_Detail.id,from_wallet="Referral_wallet").last()
+        if withdraw_last :
+            how_many_days= today - withdraw_last.created_on 
+            how_many= 7 - how_many_days.days 
+            # if withdraw_last.created_on + timedelta(30) > today:
+            if withdraw_last.created_on + timedelta(hours=24) > today:
+                # user_data={"msg":"Your Transfer Limit Is Over!!! Try After:"+str(how_many)+"days",'status':'false','token':token.key}
+                user_data={"msg":"Your Transfer Limit Is Over!!! Try again Later:",'status':'false','token':token.key}
+                return Response(user_data)
+      except:
+          withdraw_last = ""
+      if obj_wall_check['referral_wallet'] == 1:
+        if ref_amt >= Decimal(actual_amttt):
+            # if obj_stake_wall != 0:
+              
+              if obj_sum_transfer['actual_amount__sum'] != None or obj_check_withdraw != None:
+                
+                if obj_check_withdraw != None:
+                  # if obj_check_withdraw['wallet_type'] 
+                    # if (obj_check_withdraw['created_on'] + timedelta(hours=24) < datetime.datetime.now() and obj_check_transfer['created_on'] + timedelta(hours=24) < datetime.datetime.now()):
+                      if obj_plan['Referral_Withdraw_min_value'] <= Decimal(actual_amttt) <= obj_plan['Referral_Withdraw_max_value']:
+                        # if obj_check_transfer['created_on'] + timedelta(hours=24) > datetime.datetime.now() or obj_check_withdraw['created_on'] + timedelta(hours=24) > datetime.datetime.now(): 
+                          
+                        # else:
+                          diff_amt = Decimal(ref_amt) - Decimal(actual_amttt)
+                          obj_wallet.referalincome = diff_amt
+                          obj_wallet.save()
+                          # add_amt = Decimal(obj_stake_wall.stake_Refferal_Wallet) + Decimal(amount)
+                          # obj_stake_wall.stake_Wallet = add_amt
+                          # obj_stake_wall.save(using='second_db')
+                          premium_wallet_deposit.objects.create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="referral_wallet",create_type="Internal_Transfer_premium",withdraw_amount=Decimal(actual_amt))
+                          # Withdraw(userid_id = user_Detail.id,Amount = amount,Address = 'internal_transfer_premium',Wallet_type=frm_wallet,back_up_phrase="0",created_on = datetime.datetime.now(),modified_on = datetime.datetime.now())
+                          internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amttt,converted_amount=0,fees = 10,amount = 0,created_on = datetime.now(),modified_on = datetime.now(),status = 0)
+                          # internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+                          user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+                          return Response(user_data)
+                      else:
+                        # user_data={"msg":"Limit exceeds...!!!",'status':'false','token':token.key,'Data':[obj_plan]}
+                        user_data={"msg":"You can withdraw greater then or equals to 10",'status':'false','token':token.key,'Data':[obj_plan]}
+                        return Response(user_data) 
+                    # else:
+                    #   user_data={"msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
+                    #   return Response(user_data)
+                else:
+                  # if obj_check_transfer['created_on'] + timedelta(hours=24) < datetime.datetime.now():
+                    if obj_plan['Referral_Withdraw_min_value'] <= Decimal(actual_amttt) <= obj_plan['Referral_Withdraw_max_value']:
+                      # diff_amt = Decimal(health_amt) - Decimal(actual_amt)
+                      # obj_wallet.balanceone = diff_amt
+                      # obj_wallet.save()
+                      diff_amt = Decimal(ref_amt) - Decimal(actual_amttt)
+                      obj_wallet.referalincome = diff_amt
+                      obj_wallet.save()
+                      # add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
+                      # obj_stake_wall.stake_Wallet = add_amt
+                      # obj_stake_wall.save(using='second_db')
+                      premium_wallet_deposit.objects.create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="referral_wallet",create_type="Internal_Transfer_premium",withdraw_amount=Decimal(actual_amt))
+                      # Withdraw(userid_id = user_Detail.id,Amount = amount,Address = 'internal_transfer_premium',Wallet_type=frm_wallet,back_up_phrase="0",created_on = datetime.datetime.now(),modified_on = datetime.datetime.now())
+                      internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amttt,converted_amount=0,fees = 10,amount = 0,created_on = datetime.now(),modified_on = datetime.now(),status = 0)
+                      # internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,converted_amount=convert_amount,amount = amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+                      user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+                      return Response(user_data)
+                    else:
+                      # user_data={"msg":"Limit exceeds..!!",'status':'false','token':token.key,'Data':[obj_plan]}
+                      user_data={"msg":"You can withdraw greater then or equals to 10",'status':'false','token':token.key,'Data':[obj_plan]}
+                      return Response(user_data) 
+                  # else:
+                  #   user_data={"msg":"Your Transfer Limit For Today Is Over!!! Try Again Tomorrow.",'status':'false','token':token.key}
+                  #   return Response(user_data)
+                    
+              else:
+                # if obj_check_withdraw['Wallet_type'] != 'Referral_wallet' or obj_check_withdraw['created_on'] + timedelta(hours=24) < datetime.datetime.now():
+                if obj_plan['Referral_Withdraw_min_value'] <= Decimal(actual_amttt) <= obj_plan['Referral_Withdraw_max_value']:
+                  diff_amt = Decimal(ref_amt) - Decimal(actual_amttt)
                   obj_wallet.referalincome = diff_amt
                   obj_wallet.save()
                   # add_amt = Decimal(obj_stake_wall.stake_Wallet) + Decimal(amount)
@@ -754,7 +1041,7 @@ def Internal_Transfer_premium(request):
                   # obj_stake_wall.save(using='second_db')
                   premium_wallet_deposit.objects.create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="referral_wallet",create_type="Internal_Transfer_premium",withdraw_amount=Decimal(actual_amt))
                   # Withdraw(userid_id = user_Detail.id,Amount = amount,Address = 'internal_transfer_premium',Wallet_type=frm_wallet,back_up_phrase="0",created_on = datetime.datetime.now(),modified_on = datetime.datetime.now())
-                  internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,converted_amount=0,fees = 0,amount = 0,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+                  internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amttt,converted_amount=0,fees = 10,amount = 0,created_on = datetime.now(),modified_on = datetime.now(),status = 0)
                   # internal_transfer_history.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,from_wallet = frm_wallet,to_wallet = to_wallet,actual_amount = actual_amt,fees = fee,amount = amount,converted_amount=convert_amount,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
                   user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
                   return Response(user_data)
@@ -2735,6 +3022,8 @@ token_contract = web3.eth.contract(address=main_address, abi=Main_abi)
 from eth_account.messages import encode_defunct
 
 
+import datetime
+
 
 @api_view(['POST'])
 def Stake_Claim_API(request):
@@ -2763,7 +3052,7 @@ def Stake_Claim_API(request):
         User_Private_key = (request.data['User_PK'])
         stake_withdraw_usdt=request.data['stake_withdraw_usdt']
         receiver_ck = Web3.isAddress((address))
-        today = (datetime.datetime.now())
+        today = datetime.datetime.now()
         stake_admin = staking_admin_management.objects.using('second_db').get(id = 1)
         withdraw_stake = stake_admin.withdraw_status
         if int(withdraw_stake) == 1:
@@ -2853,7 +3142,7 @@ def Stake_Claim_API(request):
                       receiver_address = Web3.toChecksumAddress(str(address))
                       max_amount = int(float(amount_jw)*10 ** 8)
                       try:
-                        url = "https://apinode.keepwalkking.io/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl"
+                        url = "https://apinode.jasanwellness.fit/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl"
                         data = {
                               "userAddress":receiver_address,
                               "claimAmount":max_amount,
@@ -2960,7 +3249,7 @@ def Stake_Claim_API(request):
                     receiver_address = Web3.toChecksumAddress(str(address))
                     max_amount = int(float(amount_jw)*10 ** 8)
                     try:
-                        url = "https://apinode.keepwalkking.io/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl"
+                        url = "https://apinode.jasanwellness.fit/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl"
                         data = {
                               "userAddress":receiver_address,
                               "claimAmount":max_amount,
@@ -3042,7 +3331,7 @@ def Stake_Claim_API(request):
         User_Private_key = (request.data['User_PK'])
         stake_withdraw_usdt=request.data['stake_withdraw_usdt']
         receiver_ck = Web3.isAddress((address))
-        today = (datetime.datetime.now())
+        today = datetime.datetime.now()
         stake_admin = staking_admin_management.objects.using('second_db').get(id = 1)
         withdraw_stake = stake_admin.withdraw_status
         if int(withdraw_stake) == 1:
@@ -3081,12 +3370,13 @@ def Stake_Claim_API(request):
 
             user_wallet = stake_wallet_management.objects.using('second_db').get(user = user_details.id)
 
-            stake_withdraw_percent_amt = Decimal(amount) * Decimal(int(admin_stake.withdraw_wallet_percentage)/100)
+            stake_withdraw_percent_amt = Decimal(amount) * Decimal(int(admin_stake.withdraw_wallet_percentage or 0)/100)
             stake_withdraw_percent_round_amt = math.ceil(stake_withdraw_percent_amt*100)/100
 
 
-            stake_percent_amt = Decimal(amount) * Decimal(int(admin_stake.stake_wallet_percentage)/100)
-            stake_with_amt = Decimal(user_wallet.stake_Wallet) + Decimal(stake_percent_amt)
+            stake_percent_amt = Decimal(amount) * Decimal(int(admin_stake.stake_wallet_percentage or 0)/100)
+            stake_with_amt = Decimal(user_wallet.stake_Wallet or 0) + Decimal(stake_percent_amt)
+            
             stake_round_amt = math.ceil(stake_with_amt*100)/100
 
             stake_wallet_management.objects.using('second_db').filter(user = user_details.id).update(stake_Wallet = stake_round_amt)
@@ -3132,7 +3422,7 @@ def Stake_Claim_API(request):
                       receiver_address = Web3.toChecksumAddress(str(address))
                       max_amount = int(float(amount_jw)*10 ** 8)
                       try:
-                        url = "https://apinode.keepwalkking.io/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl"
+                        url = "https://apinode.jasanwellness.fit/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl"
                         data = {
                               "userAddress":receiver_address,
                               "claimAmount":max_amount,
@@ -3239,7 +3529,7 @@ def Stake_Claim_API(request):
                     receiver_address = Web3.toChecksumAddress(str(address))
                     max_amount = int(float(amount_jw)*10 ** 8)
                     try:
-                        url = "https://apinode.keepwalkking.io/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl"
+                        url = "https://apinode.jasanwellness.fit/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl"
                         data = {
                               "userAddress":receiver_address,
                               "claimAmount":max_amount,
@@ -3307,22 +3597,25 @@ def Stake_Claim_API(request):
         return Response(user_data) 
   elif withdraw_type == 1:
     if user_type == 'Android':
-      if user_detailss.phone_number != android_current_version_users_count:
-          user_data={"Msg":"Please Update Current Version!!!",'status':'false','token':token.key}
-          return Response(user_data)
+      # if user_detailss.phone_number != android_current_version_users_count:
+      #     user_data={"Msg":"Please Update Current Version!!!",'status':'false','token':token.key}
+      #     return Response(user_data)
       try:
         user_details = User_Management.objects.get(user_name = token.user)
         pin = Pin.objects.get(user_id = user_details.id)
         amount = (request.data['Amount'])
-        amount_jw = request.data['Wei_amount']
+        # amount_jw = request.data['Wei_amount']
+        amount_jw = request.data.get('Wei_amount', '0')  # Default to '0' if missing
         address = request.data['Address']
         two_fa_input = request.data['Two_Fa']
         ref_pin = int(request.data['pin'])
         wallet_Type = int(request.data['wallet_type'])
         User_Private_key = (request.data['User_PK'])
-        stake_withdraw_usdt=request.data['stake_withdraw_usdt']
+        # stake_withdraw_usdt=request.data['stake_withdraw_usdt']
+        stake_withdraw_usdt = request.data.get('stake_withdraw_usdt', '0')  # Default to '0' if missing
+
         receiver_ck = Web3.isAddress((address))
-        today = (datetime.datetime.now())
+        today = datetime.now()
         stake_admin = staking_admin_management.objects.using('second_db').get(id = 1)
         withdraw_stake = stake_admin.withdraw_status
         if int(withdraw_stake) == 1:
@@ -3351,8 +3644,9 @@ def Stake_Claim_API(request):
               withdraw_min_max = Stake_history_management.objects.using('second_db').filter(user = user_details.id,status = 0).last()
             except:
               withdraw_min_max = ""
-            if withdraw_min_max :
-              if Decimal(amount) > Decimal(withdraw_min_max.Amount_USDT):
+            
+            if withdraw_min_max and withdraw_min_max.Amount_USDT is not None:
+              if Decimal(amount) > Decimal(withdraw_min_max.Amount_USDT or 0):
                 user_data={"Msg":"Amount Exceeds Maximum Limit",'status':'false','token':token.key}
                 return Response(user_data)
             two_fa = User_two_fa.objects.get(user = user_details.id)
@@ -3361,12 +3655,12 @@ def Stake_Claim_API(request):
 
             user_wallet = stake_wallet_management.objects.using('second_db').get(user = user_details.id)
 
-            stake_withdraw_percent_amt = Decimal(amount) * Decimal(int(admin_stake.withdraw_wallet_percentage)/100)
+            stake_withdraw_percent_amt = Decimal(amount) * Decimal(int(admin_stake.withdraw_wallet_percentage or 0) / 100)
             stake_withdraw_percent_round_amt = math.ceil(stake_withdraw_percent_amt*100)/100
 
 
-            stake_percent_amt = Decimal(amount) * Decimal(int(admin_stake.stake_wallet_percentage)/100)
-            stake_with_amt = Decimal(user_wallet.stake_Wallet) + Decimal(stake_percent_amt)
+            stake_percent_amt = Decimal(amount) * Decimal(int(admin_stake.stake_wallet_percentage or 0)/100)
+            stake_with_amt = Decimal(user_wallet.stake_Wallet or 0) + Decimal(stake_percent_amt)
             stake_round_amt = math.ceil(stake_with_amt*100)/100
 
             stake_wallet_management.objects.using('second_db').filter(user = user_details.id).update(stake_Wallet = stake_round_amt)
@@ -3406,7 +3700,7 @@ def Stake_Claim_API(request):
                       currency = TradeCurrency.objects.get(symbol = 'JW')
                       fee_type = currency.withdraw_feestype
                       if fee_type == 0:
-                          fee = (float(currency.withdraw_fees)/100)*(float(amount))
+                          fee = (float(currency.withdraw_fees or 0)/100)*(float(amount))
                       else:
                           fee = (float(amount))-(float(currency.withdraw_fees))
                       receiver_address = Web3.toChecksumAddress(str(address))
@@ -3414,11 +3708,19 @@ def Stake_Claim_API(request):
                       cash = stake_wallet_management.objects.using('second_db').get(user = user_details.id)
                       if wallet_Type == 1:
                         wallet_type_name = "Stake_Withdraw_Wallet"
-                        cash.stake_withdraw_Wallet = Decimal(cash.stake_withdraw_Wallet) - Decimal(amount)
+                        cash.stake_withdraw_Wallet = Decimal(cash.stake_withdraw_Wallet or 0) - Decimal(amount)
                         cash.save(using='second_db')
                       elif wallet_Type == 2:
                         wallet_type_name = "Stake_Referral_Wallet"
-                        cash.stake_Refferal_Wallet = Decimal(cash.stake_Refferal_Wallet) - Decimal(amount)
+                        cash.stake_Refferal_Wallet = Decimal(cash.stake_Refferal_Wallet or 0) - Decimal(amount)
+                        cash.save(using='second_db')
+                      elif wallet_Type == 3:
+                        wallet_type_name = "NewStake_Referral_Wallet"
+                        cash.newstakereff = Decimal(cash.newstakereff or 0) - Decimal(amount)
+                        cash.save(using='second_db')
+                      elif wallet_Type == 4:
+                        wallet_type_name = "NewStake_Withdraw_Wallet"
+                        cash.newstakewithdraw = Decimal(cash.newstakewithdraw or 0) - Decimal(amount)
                         cash.save(using='second_db')
                       else:
                         user_data={"Msg":"Invalid wallet type.",'status':'false','token':token.key}
@@ -3434,11 +3736,13 @@ def Stake_Claim_API(request):
                       Two_Fa = two_fa_input,
                       status = 3,
                       Wallet_type = wallet_type_name,
-                      created_on = datetime.datetime.now(),
-                      modified_on = datetime.datetime.now()
-                    )
+                      created_on = datetime.now(),
+                      modified_on = datetime.now()
+                      )
                       stake_claim_reward_history.objects.using('second_db').create(user = user_details.id,email=user_details.Email,stake_Wallet_percentage = admin_stake.stake_wallet_percentage,stake_Wallet_reward_amount = Decimal(stake_percent_amt),type='Stake Withdraw',original_amount=amount,buy_type="user_buy",transfer_amount=0,Wallet_type=wallet_type_name)
                       table1 = Admin_Profit.objects.create(user = user_details,admin_profit = Decimal(fee),Profit_type = wallet_type_name)
+                      user_details.BNBStatus = 0
+                      user_details.save()
                       user_data={"Msg":"Withdraw request Successful Admin Will Approve Soon!! ",'status':'true','token':token.key}
                       return Response(user_data)
                       
@@ -3488,7 +3792,7 @@ def Stake_Claim_API(request):
                     currency = TradeCurrency.objects.get(symbol = 'JW')
                     fee_type = currency.withdraw_feestype
                     if fee_type == 0:
-                        fee = (float(currency.withdraw_fees)/100)*(float(amount))
+                        fee = (float(currency.withdraw_fees or 0) / 100) * float(amount)
                     else:
                         fee = (float(amount))-(float(currency.withdraw_fees))
                     receiver_address = Web3.toChecksumAddress(str(address))
@@ -3496,11 +3800,19 @@ def Stake_Claim_API(request):
                     cash = stake_wallet_management.objects.using('second_db').get(user = user_details.id)
                     if wallet_Type == 1:
                       wallet_type_name = "Stake_Withdraw_Wallet"
-                      cash.stake_withdraw_Wallet = Decimal(cash.stake_withdraw_Wallet) - Decimal(amount)
+                      cash.stake_withdraw_Wallet = Decimal(cash.stake_withdraw_Wallet or 0) - Decimal(amount)
                       cash.save(using='second_db')
                     elif wallet_Type == 2:
                       wallet_type_name = "Stake_Referral_Wallet"
-                      cash.stake_Refferal_Wallet = Decimal(cash.stake_Refferal_Wallet) - Decimal(amount)
+                      cash.stake_Refferal_Wallet = Decimal(cash.stake_Refferal_Wallet or 0 ) - Decimal(amount)
+                      cash.save(using='second_db')
+                    elif wallet_Type == 3:
+                      wallet_type_name = "NewStake_Referral_Wallet"
+                      cash.newstakereff = Decimal(cash.newstakereff or 0) - Decimal(amount)
+                      cash.save(using='second_db')
+                    elif wallet_Type == 4:
+                      wallet_type_name = "NewStake_Withdraw_Wallet"
+                      cash.newstakewithdraw = Decimal(cash.newstakewithdraw or 0) - Decimal(amount)
                       cash.save(using='second_db')
                     else:
                       user_data={"Msg":"Invalid wallet type.",'status':'false','token':token.key}
@@ -3516,11 +3828,13 @@ def Stake_Claim_API(request):
                       Two_Fa = two_fa_input,
                       status = 3,
                       Wallet_type = wallet_type_name,
-                      created_on = datetime.datetime.now(),
-                      modified_on = datetime.datetime.now()
+                      created_on = datetime.now(),
+                      modified_on = datetime.now()
                     )
                     stake_claim_reward_history.objects.using('second_db').create(user = user_details.id,email=user_details.Email,stake_Wallet_percentage = admin_stake.stake_wallet_percentage,stake_Wallet_reward_amount = Decimal(stake_percent_amt),type='Stake Withdraw',original_amount=amount,buy_type="user_buy",transfer_amount=0,Wallet_type=wallet_type_name)
                     table1 = Admin_Profit.objects.create(user = user_details,admin_profit = Decimal(fee),Profit_type = wallet_type_name)
+                    user_details.BNBStatus = 0
+                    user_details.save()
                     user_data={"Msg":"Withdraw request Successful Admin Will Approve Soon!! ",'status':'true','token':token.key}
                     return Response(user_data)
                 else:
@@ -3551,7 +3865,7 @@ def Stake_Claim_API(request):
         User_Private_key = (request.data['User_PK'])
         stake_withdraw_usdt=request.data['stake_withdraw_usdt']
         receiver_ck = Web3.isAddress((address))
-        today = (datetime.datetime.now())
+        today = datetime.datetime.now()
         stake_admin = staking_admin_management.objects.using('second_db').get(id = 1)
         withdraw_stake = stake_admin.withdraw_status
         if int(withdraw_stake) == 1:
@@ -3766,6 +4080,13 @@ def Stake_Claim_API(request):
       except Exception as e:
         user_data={"Msg":"Failed With Error "+str(e),'status':'false','token':token.key}
         return Response(user_data)
+      
+      
+      
+      
+      
+      
+
 
 @api_view(['GET'])
 def Staking_management_API(request):
@@ -4353,229 +4674,344 @@ def stake_withdraw_wallet_rewards(request):
       user_data={"Msg":"There are no records yet.","data" : list_user,"status":"false"}
       return Response(user_data)
     
+# from dateutil import relativedelta
+# @api_view(['POST'])
+# def stake_monthly_claim(request):
+#   Token_header = request.headers['token']
+#   token = Token.objects.get(key = Token_header)
+#   User = User_Management.objects.get(user_name = token.user)
+#   id = request.data['ID']
+#   a = 0 
+#   try:
+#     obj_active_stake = Stake_history_management.objects.using('second_db').filter(user = User.id).last()
+#   except:
+#      obj_active_stake = 0
+
+#   obj_month_claim = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id).last()
+
+#   stake_claim_reward = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id,stake_history_id_id = obj_active_stake.id).aggregate(Sum('earned_stake_reward')) 
+
+#   added_amount = 0
+
+#   if stake_claim_reward['earned_stake_reward__sum'] == None:
+#      added_amount = 0
+#   else:
+#      added_amount = stake_claim_reward['earned_stake_reward__sum']
+  
+#   if obj_month_claim == None:
+#     # Stake_Monthly_Claim_History.objects.using('second_db').create(user = User.id,email = User.Email,stake_history_id_id = obj_active_stake.id,earned_stake_reward = obj_active_stake.reward_per_month,start_date = obj_active_stake.created_on,end_date = (obj_active_stake.created_on) + relativedelta(months=1),created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 1)
+
+#     Stake_Monthly_Claim_History.objects.using('second_db').create(user = User.id,email = User.Email,stake_history_id_id = obj_active_stake.id,earned_stake_reward = obj_active_stake.reward_per_month,start_date = obj_active_stake.created_on,end_date = (obj_active_stake.created_on) + relativedelta.relativedelta(months=1),created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 1)
+#   else:
+#     last_month = str(obj_month_claim.end_date.date())
+    
+#     current_month = ""
+#     if obj_active_stake.end_date > datetime.datetime.now() : 
+#       today = str(datetime.date.today())
+      
+#       start_date = (datetime.datetime.strptime(today, "%Y-%m-%d"))
+#       end_date = datetime.datetime.strptime(last_month, "%Y-%m-%d")
+#       delta = relativedelta.relativedelta(start_date, end_date)
+#       month_diff = delta.months + (delta.years * 12)
+      
+      
+      
+#       # month_diff = month_diff_1 + 1
+      
+#       if month_diff > 0:
+#          obj_month_claim_count= Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id).count()
+         
+#          if month_diff != obj_month_claim_count:
+#             month_diff = month_diff+obj_month_claim_count
+         
+#          for i in range(month_diff):
+#             if i == 0:
+#               a = obj_active_stake.reward_earned - added_amount
+#             else:
+#                a = a
+#             if a > 0:
+#               if a >= obj_active_stake.reward_per_month:
+
+#                 last_claim_record = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id).last()
+
+#                 if last_claim_record != None:
+
+#                   if last_claim_record.earned_stake_reward < obj_active_stake.reward_per_month:
+
+#                     last_claim_record.earned_stake_reward = obj_active_stake.reward_per_month
+#                     last_claim_record.save(using='second_db')
+                
+#                 end_date = last_claim_record.end_date
+                
+#                 Stake_Monthly_Claim_History.objects.using('second_db').create(user = User.id,email = User.Email,stake_history_id_id = obj_active_stake.id,earned_stake_reward = obj_active_stake.reward_per_month,start_date = end_date,end_date = (end_date) + relativedelta.relativedelta(months=1),created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+
+#                 month_added = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id,stake_history_id_id = obj_active_stake.id).aggregate(Sum('earned_stake_reward')) 
+#                 month_reward_added = month_added['earned_stake_reward__sum']
+#                 if month_reward_added == None:
+                   
+#                    b = 0
+#                 else:
+#                    b = month_reward_added
+
+#                 a = obj_active_stake.reward_earned - b
+
+#               else:
+
+#                 last_claim_record = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id).last()
+
+#                 if last_claim_record != None:
+
+#                   if last_claim_record.earned_stake_reward < obj_active_stake.reward_per_month :
+
+#                     last_claim_record.earned_stake_reward = obj_active_stake.reward_per_month
+#                     last_claim_record.save(using='second_db')
+
+#                 end_date = last_claim_record.end_date
+
+#                 if  month_reward_added < obj_active_stake.reward_earned:
+                  
+#                   Stake_Monthly_Claim_History.objects.using('second_db').create(user = User.id,email = User.Email,stake_history_id_id = obj_active_stake.id,earned_stake_reward = a,start_date = end_date,end_date = (end_date) + relativedelta.relativedelta(months=1),created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+#     else:
+#       current_month =str(obj_active_stake.end_date.date())
+      
+#       start_date = datetime.datetime.strptime(current_month, "%Y-%m-%d")
+      
+#       end_date = datetime.datetime.strptime(last_month, "%Y-%m-%d")
+      
+#       delta = relativedelta.relativedelta(start_date, end_date)
+#       month_diff = delta.months + (delta.years * 12)
+      
+#       # month_diff = month_diff_1 + 1
+      
+#       if month_diff > 0:
+#          obj_month_claim_count= Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id).count()
+#          if month_diff != obj_month_claim_count:
+#             month_diff = month_diff+obj_month_claim_count
+         
+#          for i in range(month_diff):
+            
+#             if i == 0:
+#               a = obj_active_stake.reward_earned - added_amount
+#             else:
+#                a = a
+#             if a > 0:
+#               if a >= obj_active_stake.reward_per_month:
+
+
+#                 last_claim_record = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id).last()
+
+#                 end_date = last_claim_record.end_date
+
+
+#                 Stake_Monthly_Claim_History.objects.using('second_db').create(user = User.id,email = User.Email,stake_history_id_id = obj_active_stake.id,earned_stake_reward = obj_active_stake.reward_per_month,start_date = end_date,end_date = (end_date) + relativedelta.relativedelta(months=1),created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+
+#                 month_added = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id,stake_history_id_id = obj_active_stake.id).aggregate(Sum('earned_stake_reward')) 
+#                 month_reward_added = month_added['earned_stake_reward__sum']
+#                 if month_reward_added == None:
+#                    b = 0
+#                 else:
+#                    b = month_reward_added
+
+#                 a = obj_active_stake.reward_earned - b
+
+#               else:
+
+
+#                 month_added = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id,stake_history_id_id = obj_active_stake.id).aggregate(Sum('earned_stake_reward')) 
+#                 month_reward_added = month_added['earned_stake_reward__sum']
+
+#                 last_claim_record = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id).last()
+
+#                 if last_claim_record != None:
+
+#                   month_added = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id,stake_history_id_id = obj_active_stake.id).aggregate(Sum('earned_stake_reward')) 
+#                   month_reward_added = month_added['earned_stake_reward__sum']
+                  
+
+#                   if last_claim_record.earned_stake_reward < obj_active_stake.reward_per_month and month_reward_added < obj_active_stake.reward_earned:
+
+#                     # month_added = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id,stake_history_id_id = obj_active_stake.id).aggregate(Sum('earned_stake_reward')) 
+#                     # month_reward_added = month_added['earned_stake_reward__sum']
+#                     # if month_reward_added == None:
+#                     #     b = 0
+#                     # else:
+#                     #     b = month_reward_added
+
+#                     # a = obj_active_stake.reward_earned - b
+
+#                     # if a < obj_active_stake.reward_per_month:
+#                     #   if a > 0: 
+#                     #     last_claim_record.earned_stake_reward = a
+#                     #     last_claim_record.save(using='second_db')
+
+#                     #     Stake_Monthly_Claim_History.objects.using('second_db').create(user = User.id,email = User.Email,stake_history_id_id = obj_active_stake.id,earned_stake_reward = a,start_date = end_date,end_date = (end_date) + relativedelta.relativedelta(months=1),created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+
+#                     # else:
+
+#                       last_claim_record.earned_stake_reward = obj_active_stake.reward_per_month
+#                       last_claim_record.save(using='second_db')
+
+#                       end_date = last_claim_record.end_date
+
+#                   if  month_reward_added < obj_active_stake.reward_earned:
+                 
+#                     Stake_Monthly_Claim_History.objects.using('second_db').create(user = User.id,email = User.Email,stake_history_id_id = obj_active_stake.id,earned_stake_reward = a,start_date = end_date,end_date = (end_date) + relativedelta.relativedelta(months=1),created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+
+#       else:
+#         last_claim_record = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id).last()
+
+#         if last_claim_record != None:
+
+#           if last_claim_record.earned_stake_reward < obj_active_stake.reward_per_month:
+
+#             month_added = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id,stake_history_id_id = obj_active_stake.id).aggregate(Sum('earned_stake_reward')) 
+#             month_reward_added = month_added['earned_stake_reward__sum']
+#             if month_reward_added == None:
+#                 b = 0
+#             else:
+#                 b = month_reward_added
+
+#             a = obj_active_stake.reward_earned - b
+
+#             if a < obj_active_stake.reward_per_month:
+#               if a > 0: 
+#                 last_claim_record.earned_stake_reward = a
+#                 last_claim_record.save(using='second_db')
+
+#   list_user = []
+#   stake_month_claim_hist = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id, stake_history_id_id = obj_active_stake.id).order_by('-created_on')
+#   for i in stake_month_claim_hist:
+#     dict_usr = {}
+#     dict_usr['id'] = str(i.id)
+#     dict_usr['email'] = str(i.email)
+#     dict_usr['stake_amount'] = str(i.stake_history_id.Amount_USDT)
+#     dict_usr['earned_stake_reward'] = str(i.earned_stake_reward)
+#     dict_usr['start_date'] = str(i.start_date)
+#     dict_usr['end_date'] = str(i.end_date)
+#     dict_usr['status'] = i.status
+#     list_user.append(dict_usr)
+
+#   expired_datas = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id,end_date__lte = datetime.datetime.now(),status =1).update(status = 0)
+          
+#   user_data={"Msg":"Claim Successfull.","status":"true","data" : list_user,"Email":User.Email}
+#   return Response(user_data)
+  
+  
+from datetime import datetime, date
 from dateutil import relativedelta
+from django.db.models import Sum
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+
 @api_view(['POST'])
 def stake_monthly_claim(request):
-  Token_header = request.headers['token']
-  token = Token.objects.get(key = Token_header)
-  User = User_Management.objects.get(user_name = token.user)
-  id = request.data['ID']
-  a = 0 
-  try:
-    obj_active_stake = Stake_history_management.objects.using('second_db').filter(user = User.id).last()
-  except:
-     obj_active_stake = 0
+    try:
+        Token_header = request.headers['token']
+        token = Token.objects.get(key=Token_header)
+        User = User_Management.objects.get(user_name=token.user)
+    except Token.DoesNotExist:
+        return Response({"error": "Invalid token."}, status=403)
+    except User_Management.DoesNotExist:
+        return Response({"error": "User not found."}, status=404)
 
-  obj_month_claim = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id).last()
+    # Retrieve user's active stake
+    try:
+        obj_active_stake = Stake_history_management.objects.using('second_db').filter(user=User.id).last()
+        if obj_active_stake is None:
+            return Response({"error": "No active stake found."}, status=404)
+    except Stake_history_management.DoesNotExist:
+        return Response({"error": "No stake history found."}, status=404)
 
-  stake_claim_reward = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id,stake_history_id_id = obj_active_stake.id).aggregate(Sum('earned_stake_reward')) 
+    # Retrieve any existing monthly claim history for this user
+    obj_month_claim = Stake_Monthly_Claim_History.objects.using('second_db').filter(user=User.id, stake_history_id_id=obj_active_stake.id).last()
+    stake_claim_reward = Stake_Monthly_Claim_History.objects.using('second_db').filter(user=User.id, stake_history_id_id=obj_active_stake.id).aggregate(Sum('earned_stake_reward'))
+    added_amount = stake_claim_reward['earned_stake_reward__sum'] or 0
 
-  added_amount = 0
-
-  if stake_claim_reward['earned_stake_reward__sum'] == None:
-     added_amount = 0
-  else:
-     added_amount = stake_claim_reward['earned_stake_reward__sum']
-  
-  if obj_month_claim == None:
-    # Stake_Monthly_Claim_History.objects.using('second_db').create(user = User.id,email = User.Email,stake_history_id_id = obj_active_stake.id,earned_stake_reward = obj_active_stake.reward_per_month,start_date = obj_active_stake.created_on,end_date = (obj_active_stake.created_on) + relativedelta(months=1),created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 1)
-
-    Stake_Monthly_Claim_History.objects.using('second_db').create(user = User.id,email = User.Email,stake_history_id_id = obj_active_stake.id,earned_stake_reward = obj_active_stake.reward_per_month,start_date = obj_active_stake.created_on,end_date = (obj_active_stake.created_on) + relativedelta.relativedelta(months=1),created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 1)
-  else:
-    last_month = str(obj_month_claim.end_date.date())
-    
-    current_month = ""
-    if obj_active_stake.end_date > datetime.datetime.now() : 
-      today = str(datetime.date.today())
-      
-      start_date = (datetime.datetime.strptime(today, "%Y-%m-%d"))
-      end_date = datetime.datetime.strptime(last_month, "%Y-%m-%d")
-      delta = relativedelta.relativedelta(start_date, end_date)
-      month_diff = delta.months + (delta.years * 12)
-      
-      
-      
-      # month_diff = month_diff_1 + 1
-      
-      if month_diff > 0:
-         obj_month_claim_count= Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id).count()
-         
-         if month_diff != obj_month_claim_count:
-            month_diff = month_diff+obj_month_claim_count
-         
-         for i in range(month_diff):
-            if i == 0:
-              a = obj_active_stake.reward_earned - added_amount
-            else:
-               a = a
-            if a > 0:
-              if a >= obj_active_stake.reward_per_month:
-
-                last_claim_record = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id).last()
-
-                if last_claim_record != None:
-
-                  if last_claim_record.earned_stake_reward < obj_active_stake.reward_per_month:
-
-                    last_claim_record.earned_stake_reward = obj_active_stake.reward_per_month
-                    last_claim_record.save(using='second_db')
-                
-                end_date = last_claim_record.end_date
-                
-                Stake_Monthly_Claim_History.objects.using('second_db').create(user = User.id,email = User.Email,stake_history_id_id = obj_active_stake.id,earned_stake_reward = obj_active_stake.reward_per_month,start_date = end_date,end_date = (end_date) + relativedelta.relativedelta(months=1),created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
-
-                month_added = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id,stake_history_id_id = obj_active_stake.id).aggregate(Sum('earned_stake_reward')) 
-                month_reward_added = month_added['earned_stake_reward__sum']
-                if month_reward_added == None:
-                   
-                   b = 0
-                else:
-                   b = month_reward_added
-
-                a = obj_active_stake.reward_earned - b
-
-              else:
-
-                last_claim_record = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id).last()
-
-                if last_claim_record != None:
-
-                  if last_claim_record.earned_stake_reward < obj_active_stake.reward_per_month :
-
-                    last_claim_record.earned_stake_reward = obj_active_stake.reward_per_month
-                    last_claim_record.save(using='second_db')
-
-                end_date = last_claim_record.end_date
-
-                if  month_reward_added < obj_active_stake.reward_earned:
-                  
-                  Stake_Monthly_Claim_History.objects.using('second_db').create(user = User.id,email = User.Email,stake_history_id_id = obj_active_stake.id,earned_stake_reward = a,start_date = end_date,end_date = (end_date) + relativedelta.relativedelta(months=1),created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
+    # Create a new claim history record if none exists
+    if obj_month_claim is None:
+        Stake_Monthly_Claim_History.objects.using('second_db').create(
+            user=User.id,
+            email=User.Email,
+            stake_history_id_id=obj_active_stake.id,
+            earned_stake_reward=obj_active_stake.reward_per_month,
+            start_date=obj_active_stake.created_on,
+            end_date=obj_active_stake.created_on + relativedelta.relativedelta(months=1),
+            created_on=datetime.now(),
+            modified_on=datetime.now(),
+            status=1
+        )
     else:
-      current_month =str(obj_active_stake.end_date.date())
-      
-      start_date = datetime.datetime.strptime(current_month, "%Y-%m-%d")
-      
-      end_date = datetime.datetime.strptime(last_month, "%Y-%m-%d")
-      
-      delta = relativedelta.relativedelta(start_date, end_date)
-      month_diff = delta.months + (delta.years * 12)
-      
-      # month_diff = month_diff_1 + 1
-      
-      if month_diff > 0:
-         obj_month_claim_count= Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id).count()
-         if month_diff != obj_month_claim_count:
-            month_diff = month_diff+obj_month_claim_count
-         
-         for i in range(month_diff):
-            
-            if i == 0:
-              a = obj_active_stake.reward_earned - added_amount
-            else:
-               a = a
-            if a > 0:
-              if a >= obj_active_stake.reward_per_month:
+        # Calculate the difference between the last claim and today
+        last_month = obj_month_claim.end_date.date()
+        today = date.today()
+        start_date = datetime.strptime(str(today), "%Y-%m-%d")
+        end_date = datetime.strptime(str(last_month), "%Y-%m-%d")
+        delta = relativedelta.relativedelta(start_date, end_date)
+        month_diff = delta.months + (delta.years * 12)
 
+        # Check if new claims need to be created
+        if month_diff > 0:
+            obj_month_claim_count = Stake_Monthly_Claim_History.objects.using('second_db').filter(user=User.id, stake_history_id_id=obj_active_stake.id).count()
+            month_diff += obj_month_claim_count if month_diff != obj_month_claim_count else 0
 
-                last_claim_record = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id).last()
-
-                end_date = last_claim_record.end_date
-
-
-                Stake_Monthly_Claim_History.objects.using('second_db').create(user = User.id,email = User.Email,stake_history_id_id = obj_active_stake.id,earned_stake_reward = obj_active_stake.reward_per_month,start_date = end_date,end_date = (end_date) + relativedelta.relativedelta(months=1),created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
-
-                month_added = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id,stake_history_id_id = obj_active_stake.id).aggregate(Sum('earned_stake_reward')) 
-                month_reward_added = month_added['earned_stake_reward__sum']
-                if month_reward_added == None:
-                   b = 0
+            # Loop to create new claim records for the required months
+            for i in range(month_diff):
+                reward_to_add = max(0, obj_active_stake.reward_earned - added_amount)
+                if reward_to_add >= obj_active_stake.reward_per_month:
+                    last_claim_record = Stake_Monthly_Claim_History.objects.using('second_db').filter(user=User.id, stake_history_id_id=obj_active_stake.id).last()
+                    end_date = last_claim_record.end_date if last_claim_record else obj_active_stake.created_on
+                    Stake_Monthly_Claim_History.objects.using('second_db').create(
+                        user=User.id,
+                        email=User.Email,
+                        stake_history_id_id=obj_active_stake.id,
+                        earned_stake_reward=obj_active_stake.reward_per_month,
+                        start_date=end_date,
+                        end_date=end_date + relativedelta.relativedelta(months=1),
+                        created_on=datetime.now(),
+                        modified_on=datetime.now(),
+                        status=0
+                    )
                 else:
-                   b = month_reward_added
+                    break
 
-                a = obj_active_stake.reward_earned - b
+    # Update expired claims to status 0
+    Stake_Monthly_Claim_History.objects.using('second_db').filter(
+        user=User.id, 
+        stake_history_id_id=obj_active_stake.id,
+        end_date__lte=datetime.now(),
+        status=1
+    ).update(status=0)
 
-              else:
+    # Prepare the response data
+    list_user = []
+    stake_month_claim_hist = Stake_Monthly_Claim_History.objects.using('second_db').filter(
+        user=User.id, stake_history_id_id=obj_active_stake.id
+    ).order_by('-created_on')
 
+    for i in stake_month_claim_hist:
+        list_user.append({
+            'id': str(i.id),
+            'email': str(i.email),
+            'stake_amount': str(i.stake_history_id.Amount_USDT),
+            'earned_stake_reward': str(i.earned_stake_reward),
+            'start_date': str(i.start_date),
+            'end_date': str(i.end_date),
+            'status': i.status,
+        })
 
-                month_added = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id,stake_history_id_id = obj_active_stake.id).aggregate(Sum('earned_stake_reward')) 
-                month_reward_added = month_added['earned_stake_reward__sum']
-
-                last_claim_record = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id).last()
-
-                if last_claim_record != None:
-
-                  month_added = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id,stake_history_id_id = obj_active_stake.id).aggregate(Sum('earned_stake_reward')) 
-                  month_reward_added = month_added['earned_stake_reward__sum']
-                  
-
-                  if last_claim_record.earned_stake_reward < obj_active_stake.reward_per_month and month_reward_added < obj_active_stake.reward_earned:
-
-                    # month_added = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id,stake_history_id_id = obj_active_stake.id).aggregate(Sum('earned_stake_reward')) 
-                    # month_reward_added = month_added['earned_stake_reward__sum']
-                    # if month_reward_added == None:
-                    #     b = 0
-                    # else:
-                    #     b = month_reward_added
-
-                    # a = obj_active_stake.reward_earned - b
-
-                    # if a < obj_active_stake.reward_per_month:
-                    #   if a > 0: 
-                    #     last_claim_record.earned_stake_reward = a
-                    #     last_claim_record.save(using='second_db')
-
-                    #     Stake_Monthly_Claim_History.objects.using('second_db').create(user = User.id,email = User.Email,stake_history_id_id = obj_active_stake.id,earned_stake_reward = a,start_date = end_date,end_date = (end_date) + relativedelta.relativedelta(months=1),created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
-
-                    # else:
-
-                      last_claim_record.earned_stake_reward = obj_active_stake.reward_per_month
-                      last_claim_record.save(using='second_db')
-
-                      end_date = last_claim_record.end_date
-
-                  if  month_reward_added < obj_active_stake.reward_earned:
-                 
-                    Stake_Monthly_Claim_History.objects.using('second_db').create(user = User.id,email = User.Email,stake_history_id_id = obj_active_stake.id,earned_stake_reward = a,start_date = end_date,end_date = (end_date) + relativedelta.relativedelta(months=1),created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),status = 0)
-
-      else:
-        last_claim_record = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id).last()
-
-        if last_claim_record != None:
-
-          if last_claim_record.earned_stake_reward < obj_active_stake.reward_per_month:
-
-            month_added = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id,stake_history_id_id = obj_active_stake.id).aggregate(Sum('earned_stake_reward')) 
-            month_reward_added = month_added['earned_stake_reward__sum']
-            if month_reward_added == None:
-                b = 0
-            else:
-                b = month_reward_added
-
-            a = obj_active_stake.reward_earned - b
-
-            if a < obj_active_stake.reward_per_month:
-              if a > 0: 
-                last_claim_record.earned_stake_reward = a
-                last_claim_record.save(using='second_db')
-
-  list_user = []
-  stake_month_claim_hist = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id, stake_history_id_id = obj_active_stake.id).order_by('-created_on')
-  for i in stake_month_claim_hist:
-    dict_usr = {}
-    dict_usr['id'] = str(i.id)
-    dict_usr['email'] = str(i.email)
-    dict_usr['stake_amount'] = str(i.stake_history_id.Amount_USDT)
-    dict_usr['earned_stake_reward'] = str(i.earned_stake_reward)
-    dict_usr['start_date'] = str(i.start_date)
-    dict_usr['end_date'] = str(i.end_date)
-    dict_usr['status'] = i.status
-    list_user.append(dict_usr)
-
-  expired_datas = Stake_Monthly_Claim_History.objects.using('second_db').filter(user = User.id , stake_history_id_id = obj_active_stake.id,end_date__lte = datetime.datetime.now(),status =1).update(status = 0)
-          
-  user_data={"Msg":"Claim Successfull.","status":"true","data" : list_user,"Email":User.Email}
-  return Response(user_data)
-  
-
+    return Response({
+        "Msg": "Claim Successful.",
+        "status": "true",
+        "data": list_user,
+        "Email": User.Email
+    })
+    
+    
+    
+    
+    
+    
+    
 @api_view(['POST'])
 def stke_monthly_claim_update(request):
   Token_header = request.headers['token']
@@ -4828,81 +5264,7 @@ def Edit_Staking_Monthly_Plan(request):
      
 
 
-
-# @api_view(['POST'])
-# def stake_credit_api(request):
-#     # user_data={'msg':"Stake Credit Model Is Now Under Maintenance.",'status':'false'}
-#     # return Response(user_data)
-#   Token_header = request.headers['Token']
-#   token = Token.objects.get(key = Token_header)
-#   user_Detail=User_Management.objects.get(user_name = token.user) 
-#   obj_stake_wall = staking_monthly_admin_management.objects.using('second_db').get(id = 1)
-#   Amount_USDT = request.data['Amount']
-#   # maximum_limit = request.data['maximum_limit']
-#   Amount_JW = request.data['Amount_JW']
-#   start_date = datetime.datetime.now()
-#   duration_end_date = start_date + datetime.timedelta(days=365/12*int(obj_stake_wall.stake_period))
-#   duration_days = (duration_end_date - start_date).days
-#   end_date = start_date + timedelta(days = duration_days)
-#   stake_market_price=Stake_market_price.objects.using('second_db').get(id=1)
-#   try:
-#     stake_last = Stake_monthly_history_management.objects.filter(user = user_Detail.id).last()
-#     if stake_last :
-#         how_many_days= start_date - stake_last.created_on 
-#         how_many= 30 - how_many_days.days 
-#         if stake_last.created_on + timedelta(30) > start_date:
-#             user_data={"Msg":"Your Stake Limit Is Over!!! Try After:"+str(how_many)+"days",'status':'false','token':token.key}
-#             return Response(user_data)
-#   except:
-#       stake_last = ""
-#   try:
-#       user_stake_obj = UserCashWallet.objects.get(userid = user_Detail.id)
-#   except:
-#       user_stake_obj = 0
-#   if user_stake_obj != 0 :
-#     if Decimal(user_stake_obj.balancetwo) >= Decimal(Amount_USDT):
-#       if Decimal(obj_stake_wall.minimum_stake) <= Decimal(Amount_USDT):
-#         rew_per_month = Decimal(Amount_USDT) * Decimal(obj_stake_wall.reward_percent / 100)
-#         max_limit = rew_per_month * obj_stake_wall.stake_period
-#         try:
-#           obj_check_stake = Stake_monthly_history_management.objects.using('second_db').filter(user = user_Detail.id,status = 0).last()
-#         except:
-#           obj_check_stake = ""
-#         if obj_check_stake != None:
-#           date_now = obj_check_stake.start_date + timedelta(29)
-#           if date_now >= start_date :
-#             user_data={'msg':"Monthly One Stake Only",'status':'false'}
-#             return Response(user_data)
-#           # stake condition removed.
-#           # if Decimal(obj_check_stake.Amount_USDT) > Decimal(Amount_USDT) :
-#           #   user_data={'msg':"Kindly Stake greater than previous Stake",'status':'false'}
-#           #   return Response(user_data)
-#           # else:
-#           user_stake_obj.balancetwo = Decimal(user_stake_obj.balancetwo) - Decimal(Amount_USDT)
-#           user_stake_obj.save()
-          
-#           # obj_hist_id = Stake_monthly_history_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Amount_USDT,Amount_JW = Amount_JW,period = obj_stake_wall.stake_period,reward_per_month = rew_per_month,maximum_reward = Decimal(maximum_limit),referral_status = 0,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),reward_percent = obj_stake_wall.reward_percent,status = 0,start_date = start_date,end_date = end_date,claim_status = 1,referral_level = 0,market_price=stake_market_price.market_price)
-          
-#           staking_credit_referral_two(request,Token_header,Amount_USDT)
-#           user_data={'msg':"Stake Successfull",'status':'true'}
-#           return Response(user_data)
-#         else:
-#             user_stake_obj.balancetwo = Decimal(user_stake_obj.balancetwo) - Decimal(Amount_USDT)
-#             user_stake_obj.save()
-#             # obj_hist_id = Stake_monthly_history_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Amount_USDT,Amount_JW = Amount_JW,period = obj_stake_wall.stake_period,reward_per_month = rew_per_month,maximum_reward = Decimal(maximum_limit),referral_status = 0,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),reward_percent = obj_stake_wall.reward_percent,status = 0,start_date = start_date,end_date = end_date,claim_status = 1,referral_level = 0,market_price=stake_market_price.market_price)
-#             staking_credit_referral_two(request,Token_header,Amount_USDT)
-#             user_data={'msg':"Stake Successfull",'status':'true'}
-#             return Response(user_data)  
-#       else:
-#           user_data={'msg':"Minimum amount is less than Amount",'status':'false'}
-#           return Response(user_data)
-#     else:
-#       user_data={'msg':"Insufficient Balance",'status':'false'}
-#       return Response(user_data)
-#   else:
-#       user_data={'msg':"User Doesn't have stake wallet.",'status':'false'}
-#       return Response(user_data)
-
+import datetime
 @api_view(['POST'])
 def stake_credit_api(request):
     # user_data={'msg':"Stake Credit Model Is Now Under Maintenance.",'status':'false'}
@@ -4914,8 +5276,8 @@ def stake_credit_api(request):
   Amount_USDT = request.data['Amount']
   # maximum_limit = request.data['maximum_limit']
   Amount_JW = request.data['Amount_JW']
-  start_date = datetime.datetime.now()
-  duration_end_date = start_date + datetime.timedelta(days=365/12*int(obj_stake_wall.stake_period))
+  start_date = datetime.now()
+  duration_end_date = start_date + timedelta(days=365/12*int(obj_stake_wall.stake_period))
   duration_days = (duration_end_date - start_date).days
   end_date = start_date + timedelta(days = duration_days)
   stake_market_price=Stake_market_price.objects.using('second_db').get(id=1)
@@ -4955,7 +5317,7 @@ def stake_credit_api(request):
           user_stake_obj.balancetwo = Decimal(user_stake_obj.balancetwo) - Decimal(Amount_USDT)
           user_stake_obj.save()
           
-          obj_hist_id = Stake_monthly_history_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Amount_USDT,Amount_JW = Amount_JW,period = obj_stake_wall.stake_period,reward_per_month = rew_per_month,referral_status = 0,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),reward_percent = obj_stake_wall.reward_percent,status = 0,start_date = start_date,end_date = end_date,claim_status = 1,referral_level = 0,market_price=stake_market_price.market_price)
+          obj_hist_id = Stake_monthly_history_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Amount_USDT,Amount_JW = Amount_JW,period = obj_stake_wall.stake_period,reward_per_month = rew_per_month,referral_status = 0,created_on = datetime.now(),modified_on = datetime.now(),reward_percent = obj_stake_wall.reward_percent,status = 0,start_date = start_date,end_date = end_date,claim_status = 1,referral_level = 0,market_price=stake_market_price.market_price)
           
           staking_credit_referral_two(request,Token_header,Amount_USDT)
           user_data={'msg':"Stake Successfull",'status':'true'}
@@ -4963,7 +5325,7 @@ def stake_credit_api(request):
         else:
             user_stake_obj.balancetwo = Decimal(user_stake_obj.balancetwo) - Decimal(Amount_USDT)
             user_stake_obj.save()
-            obj_hist_id = Stake_monthly_history_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Amount_USDT,Amount_JW = Amount_JW,period = obj_stake_wall.stake_period,reward_per_month = rew_per_month,referral_status = 0,created_on = datetime.datetime.now(),modified_on = datetime.datetime.now(),reward_percent = obj_stake_wall.reward_percent,status = 0,start_date = start_date,end_date = end_date,claim_status = 1,referral_level = 0,market_price=stake_market_price.market_price)
+            obj_hist_id = Stake_monthly_history_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Amount_USDT,Amount_JW = Amount_JW,period = obj_stake_wall.stake_period,reward_per_month = rew_per_month,referral_status = 0,created_on = datetime.now(),modified_on = datetime.now(),reward_percent = obj_stake_wall.reward_percent,status = 0,start_date = start_date,end_date = end_date,claim_status = 1,referral_level = 0,market_price=stake_market_price.market_price)
             staking_credit_referral_two(request,Token_header,Amount_USDT)
             user_data={'msg':"Stake Successfull",'status':'true'}
             return Response(user_data)  
@@ -6623,3 +6985,1459 @@ def stake_Credit_claim_history_(request):
     else:
       user_data = {"Msg":"There are no records yet.","data":list_user,"status":"true"}
       return Response(user_data)
+    
+    
+###############################################################################################################################################################################
+
+
+### new stake
+
+
+
+import requests  # Make sure you have requests installed
+from decimal import Decimal
+from datetime import datetime, timedelta
+from django.http import JsonResponse, HttpResponseNotAllowed
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from web3 import Web3
+
+# Instantiate Web3
+w3 = Web3()
+import requests
+from decimal import Decimal
+import json
+
+# Your BscScan API key
+BSCSCAN_API_KEY = 'H2MN7QS9RTXE7IQF267U1KBS1W37MKTEUG'
+
+# Specify the address that must match the transaction
+SPECIFIC_ADDRESS = "0xab785054251db0fc44538f5deebe7507b748b692"
+
+def verify_transaction_jw(hash):
+    """
+    Verify the transaction hash by checking both:
+    1. It involves the specific address.
+    2. The transaction creation time is within the last 2 minutes.
+    """
+    url = "https://api.bscscan.com/api"
+    params = {
+        "module": "proxy",
+        "action": "eth_getTransactionByHash",
+        "txhash": hash,
+        "apikey": BSCSCAN_API_KEY,
+    }
+    try:
+        # Fetch transaction details
+        response = requests.get(url, params=params)
+        response_data = response.json()
+
+        if response_data.get("result"):
+            transaction_details = response_data["result"]
+            to_address = transaction_details.get("to", "").lower()
+
+            # Check if the "to" address matches the specific address
+            if to_address != SPECIFIC_ADDRESS.lower():
+                # print(f"Transaction 'to' address does not match: {to_address}")
+                # return {"status": False, "msg": "To address does not match the specific address"}
+                return {"status": False, "msg": "something went wrong"}
+
+            # Extract block number to check transaction time
+            block_number = transaction_details.get("blockNumber", None)
+            if not block_number:
+                # print("Block number not found in transaction details.")
+                # return {"status": False, "msg": "Block number not found"}
+                return {"status": False, "msg": "something went wrong"}
+
+            # Fetch block details to verify timestamp
+            block_url = "https://api.bscscan.com/api"
+            block_params = {
+                "module": "proxy",
+                "action": "eth_getBlockByNumber",
+                "tag": block_number,
+                "boolean": "true",
+                "apikey": BSCSCAN_API_KEY,
+            }
+            block_response = requests.get(block_url, block_params)
+            block_data = block_response.json()
+
+            if block_data.get("result"):
+                block_timestamp = int(block_data["result"]["timestamp"], 16)  # Convert from hex to int
+                current_timestamp = int(datetime.now().timestamp())
+
+                # Check if the transaction was created within the last 2 minutes
+                time_difference = current_timestamp - block_timestamp
+                if time_difference > 120:  # 120 seconds = 2 minutes
+                    # print(f"Transaction hash time is too old: {time_difference} seconds ago.")
+                    # return {"status": False, "msg": "Transaction hash is too old"}
+                    return {"status": False, "msg": "something went wrong"}
+                else:
+                    # All conditions passed
+                    return {"status": True, "msg": "Transaction is valid"}
+            else:
+                # print("Block details not found.")
+                # return {"status": False, "msg": "Block details not found"}
+                return {"status": False, "msg": "something went wrong"}
+        else:
+            # print("BscScan API did not return transaction details.")
+            # return {"status": False, "msg": "Transaction details not found"}
+            return {"status": False, "msg": "something went wrong"}
+    except Exception as e:
+        # print(f"Error verifying transaction: {e}")
+        # return {"status": False, "msg": f"Error: {str(e)}"}
+        return {"status": False, "msg": "something went wrong"}
+
+
+import math
+#Stake Deposit
+@api_view(['POST'])
+def new_staking_deposit_api(request):
+    Token_header = request.headers['Token']
+    token = Token.objects.get(key = Token_header)
+    user_Detail=User_Management.objects.get(user_name = token.user) 
+    Amount_USDT = request.data['Amount']
+    Amount_JW = request.data['Amount_JW']
+    hash = request.data['Hash']
+        
+    # Verify transaction hash and time in a single step
+    print(f"Verifying transaction hash and time: {hash}")
+    verification_result1 = verify_transaction_jw(hash)
+    verification_result2 = verify_transaction_jw(hash)
+    if not verification_result2["status"]:
+        return Response({"Msg": verification_result2["msg"], "status": "false"})
+      
+      
+    try:
+        user_stake_obj = stake_wallet_management.objects.using('second_db').get(user=user_Detail.id)
+    except stake_wallet_management.DoesNotExist:
+        # Create a new wallet for the user if it does not exist
+        user_stake_obj = stake_wallet_management.objects.using('second_db').create(
+            user=user_Detail.id,
+            email=user_Detail.Email,  # Set an initial balance or default values as per your requirements
+            created_on=datetime.now(),  # Set creation date
+            modified_on=datetime.now()  # Set modification date
+        )
+    
+    if user_stake_obj != 0:
+          user_stake_obj.stake_Wallet = Decimal(user_stake_obj.stake_Wallet) + Decimal(Amount_USDT)
+          user_stake_obj.save(using='second_db')
+          new_stake_deposit_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Amount_USDT,Amount_JW = Amount_JW,Hash = hash,status  = 1,type="User Create")
+          # staking_referral_buy_plan_method(request,Token_header,Amount_USDT)
+          user_data={'msg':"Stake Deposit Successfull",'status':'true'}
+          return Response(user_data)
+    else:
+        user_data={'msg':"User haven't stake wallet.",'status':'false'}
+        return Response(user_data)
+
+
+
+
+from datetime import datetime
+from decimal import Decimal
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+
+@api_view(['POST'])
+def buy_Newstake(request):
+    try:
+        # Fetch Token and User
+        Token_header = request.headers['token']
+        token = Token.objects.get(key=Token_header)
+        User = User_Management.objects.get(user_name=token.user)
+
+        # Get request data
+        id = int(request.data['ID'])
+        fee = int(request.data['fee'])
+        wallet_type = request.data['wallet_type']
+        purchase_amount = int(request.data['purchase_amount'])
+
+        # Calculate the actual amount after fee deduction
+        amount = Decimal(purchase_amount) - Decimal(fee)
+
+        # Check wallet type and validate balance
+        if int(wallet_type) == 1:
+            wallet = stake_wallet_management.objects.using('second_db').get(user=User.id)
+
+            # Ensure sufficient balance
+            if Decimal(purchase_amount) > Decimal(wallet.newstakewallet or '0'):
+                user_data = {"Msg": "Insufficient Balance", "status": "false", 'token': token.key}
+                return Response(user_data)
+
+            # Deduct purchase amount and save
+            wallet.newstakewallet = Decimal(wallet.newstakewallet or '0') - Decimal(purchase_amount)
+            wallet.save()
+
+            # Record purchase history
+            stake_purchase_history.objects.using('second_db').create(
+                user_id=User.id,
+                purchase_amount=purchase_amount,
+                user_wallet_type="newstakewallet",
+                buy_type="User buy",
+                status=0
+            )
+            stake_purchase_history.objects.using('second_db').create(
+                user_id=User.id,
+                purchase_amount=-fee,
+                user_wallet_type="fee",
+                buy_type="User buy",
+                status=0
+            )
+            a=[]
+            ref_code = User.referal_code
+            reff_id = Referral_code.objects.get(referal_code=ref_code)
+            referred_user = User_Management.objects.get(id = reff_id.user.id)
+            uesr_level = User.Referral_Level
+            Referral_level = referral_level.objects.all().count()
+            for i in range(Referral_level):
+                reff_id = Referral_code.objects.get(referal_code=ref_code)
+                referred_user = User_Management.objects.get(id = reff_id.user.id)
+                a.append(referred_user.id)
+                ref_code = referred_user.referal_code
+                if referred_user.referal_code == "" or referred_user.referal_code == None:
+                    break
+            b = 1
+            l = 0
+            for i in a:
+                user = User_Management.objects.get(id = i)
+                if user.boat_status == 2:  
+                    b = b+1 
+                    pass
+                else:
+                    try:
+                        plan_hist = stake_purchase_history.objects.using('second_db').filter(user_id=user.id).last()
+                    except:
+                        plan_hist=''
+                    if plan_hist:
+                        if plan_hist.status == 1:
+                            b = b+1
+                            pass
+                        elif 15 >= 15 and 15 >= b:
+                            User_Referral_level = referral_level.objects.get(referral_level_id = b)
+                            obj_plan_hist = plan_purchase_history.objects.filter(user = User).count()
+                            Market_Price = market_price.objects.get(id = 1)
+                            uesr_level_actual = b
+                            direct_referrals = User_Management.objects.filter(reff_id=i, Newstake_wallet__gte=100).count()
+                            # print(f'direct_referrals: {direct_referrals}')
+                            reward_table = newstake_Referral_reward_History.objects.using('second_db').filter(user_id=user.id,referral_id=User.Name).count()
+                            if reward_table >= 0:
+                                Purchase_Amount = Decimal(amount)
+                                if direct_referrals >= uesr_level_actual:
+                                    percentage = (User_Referral_level.second_level_commission_amount * Purchase_Amount) / 100
+                                    actual_reward = Decimal(percentage)
+                                    l = l + actual_reward
+                                    ref_wallet = stake_wallet_management.objects.using('second_db').get(user=i)
+                                    ref_wallet.newstakereff = Decimal(ref_wallet.newstakereff or '0') + actual_reward
+                                    ref_wallet.save()
+                                    table = newstake_Referral_reward_History.objects.using('second_db').create(
+                                        user=user,
+                                        referral_id="Stake  " + str(User.Name),
+                                        reward=Decimal(actual_reward)
+                                    )
+                                b = b + 1
+                            else:
+                                b = b + 1
+                                pass
+                        else:
+                            b = b + 1
+                            pass
+
+            # Response after successful purchase and referral processing
+            user_data = {"Msg": "Stake Purchased", "status": "true", 'token': token.key}
+            return Response(user_data)
+
+    except Exception as e:
+        # Generic error handling
+        return Response({"Msg": "Error Occurred", "status": "false", "error": str(e)})
+
+# from datetime import datetime
+# from decimal import Decimal
+# from rest_framework.response import Response
+# from rest_framework.decorators import api_view
+
+# @api_view(['POST'])
+# def buy_Newstake(request):
+#     try:
+#         # Fetch Token and User
+#         Token_header = request.headers['token']
+#         token = Token.objects.get(key=Token_header)
+#         User = User_Management.objects.get(user_name=token.user)
+
+#         # Get request data
+#         id = int(request.data['ID'])
+#         fee = int(request.data['fee'])
+#         wallet_type = request.data['wallet_type']
+#         purchase_amount = int(request.data['purchase_amount'])
+
+#         # Calculate the actual amount after fee deduction
+#         amount = Decimal(purchase_amount) - Decimal(fee)
+
+#         # Check wallet type and validate balance
+#         if int(wallet_type) == 1:
+#             wallet = stake_wallet_management.objects.using('second_db').get(user=User.id)
+
+#             # Ensure sufficient balance
+#             if Decimal(purchase_amount) > Decimal(wallet.newstakewallet or '0'):
+#                 user_data = {"Msg": "Insufficient Balance", "status": "false", 'token': token.key}
+#                 return Response(user_data)
+
+#             # Deduct purchase amount and save
+#             wallet.newstakewallet = Decimal(wallet.newstakewallet or '0') - Decimal(purchase_amount)
+#             wallet.save()
+
+#             # Record purchase history
+#             stake_purchase_history.objects.using('second_db').create(
+#                 user_id=User.id,
+#                 purchase_amount=purchase_amount,
+#                 user_wallet_type="newstakewallet",
+#                 buy_type="User buy",
+#                 status=0
+#             )
+#             stake_purchase_history.objects.using('second_db').create(
+#                 user_id=User.id,
+#                 purchase_amount=-fee,
+#                 user_wallet_type="fee",
+#                 buy_type="User buy",
+#                 status=0
+#             )
+            
+#             # Referral processing
+#             ref_ids = []
+#             ref_code = User.referal_code
+#             while ref_code:
+#                 try:
+#                     reff_id = Referral_code.objects.get(referal_code=ref_code)
+#                     referred_user = User_Management.objects.get(id=reff_id.user.id)
+#                     ref_ids.append(referred_user.id)
+#                     ref_code = referred_user.referal_code
+#                 except Referral_code.DoesNotExist:
+#                     break
+
+#             level = 1
+#             total_reward = 0
+#             for ref_user_id in ref_ids:
+#                 ref_user = User_Management.objects.get(id=ref_user_id)
+#                 if Decimal(ref_user.Newstake_wallet or '0') < 100:
+#                     level += 1
+#                     continue
+
+#                 # Fetch referral level details
+#                 if level > 15:
+#                     break
+#                 try:
+#                     User_Referral_level = referral_level.objects.get(referral_level_id=level)
+#                 except referral_level.DoesNotExist:
+#                     level += 1
+#                     continue
+
+#                 # Calculate reward
+#                 direct_referrals = User_Management.objects.filter(reff_id=ref_user_id, Newstake_wallet__gte=100).count()
+#                 if direct_referrals >= level:
+#                     percentage = (User_Referral_level.commission_amount * amount) / 100
+#                     reward = Decimal(percentage)
+#                     total_reward += reward
+
+#                     # Update referral wallet
+#                     ref_wallet = stake_wallet_management.objects.using('second_db').get(user=ref_user_id)
+#                     ref_wallet.newstakereff = Decimal(ref_wallet.newstakereff or '0') + reward
+#                     ref_wallet.save()
+
+#                     # Record reward history
+#                     newstake_Referral_reward_History.objects.using('second_db').create(
+#                         user_id=ref_user_id,
+#                         referral_id=f"Stake {User.Name}",
+#                         reward=reward
+#                     )
+
+#                 level += 1
+
+#             # Response after successful purchase and referral processing
+#             user_data = {"Msg": "Stake Purchased", "status": "true", 'token': token.key}
+#             return Response(user_data)
+
+#     except Exception as e:
+#         # Generic error handling
+#         return Response({"Msg": "Error Occurred", "status": "false", "error": str(e)})
+
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from datetime import timedelta
+
+@api_view(['POST'])
+def Stake_detail(request):
+    try:
+        # Retrieve token from headers
+        Token_header = request.headers.get('token')
+        if not Token_header:
+            return Response({"error": "Token is required"}, status=400)
+        
+        # Get user based on token
+        token = Token.objects.get(key=Token_header)
+        user_details = User_Management.objects.values('User_type','plan','id').get(user_name = token.user)
+        Comp = User_Management.objects.get(user_name=token.user)
+        id = Comp.id
+        reff_id = Comp.reff_id
+        Email = Comp.Email
+        BNBStatus =Comp.BNBStatus
+        minstake = 105
+        stakefeegreater200 = 10
+        stakefeelesser200 = 5
+        stakefeegreater500 = 15
+        stakefeegreater1000 = 20
+        stakefeegreater2500 = 25
+        StakeWithdrawFee = 10
+        StakeWithdrawrefFee = 10
+        StakeWithdrawMin = 5
+        StakeWithdrawMax = 10000
+        StakeWithdrawrefMin = 50
+        StakeWithdrawrefMax = 10000
+        mimBNB = 0.001
+        newstakewallet_balance(request, user_details['id'])
+        newstakereff_balance(request, user_details['id'])
+        newstakewithdraw_balance(request, user_details['id'])
+        wallet = stake_wallet_management.objects.using('second_db').get(user=Comp.id)
+        stakeamount = Comp.Newstake_wallet
+        newstakewallet = wallet.newstakewallet
+        newstakereff =  wallet.newstakereff
+        newstakewithdraw = wallet.newstakewithdraw   
+        
+        withdraw_per_mont_val = stake_claim_table.objects.using('second_db') \
+            .filter(user=Comp.id) \
+            .exclude(Wallet_type__in=['Stake_Withdraw_Wallet', 'Stake_Referral_Wallet']) \
+            .aggregate(Sum('original_USDT'))
+
+        refwithdraw = Decimal(withdraw_per_mont_val['original_USDT__sum']) if withdraw_per_mont_val['original_USDT__sum'] else Decimal(0.0)
+        
+         # Calculate the total withdrawal amount
+        TotalWithdrawAmount = stakeamount * 2
+
+        # Round to 2 decimal places if needed
+        TotalWithdrawAmount = round(TotalWithdrawAmount, 2)   
+        
+        
+        BWA = Decimal(TotalWithdrawAmount) -  refwithdraw
+        
+        
+        Comp.StakeBwa = BWA
+        Comp.save()    
+        
+        StakeJWsupport = '0xaB785054251DB0fc44538F5DeeBE7507B748b692'
+        
+        try:
+            wallet_trust = user_address_trust_wallet.objects.get(user_id=Comp.id)
+            trust_add = wallet_trust.Address  # Access the Address if the object exists
+        except user_address_trust_wallet.DoesNotExist:
+            trust_add = ''  # Set to an empty string if the wallet does not exist
+
+        # Convert to lowercase and include in the response
+        wallet_address = str(trust_add).lower()
+        
+        # Determine if today is Sunday
+        # is_withdraw_active = datetime.today().weekday() == 4  # Sunday is represented by 6
+        # Day = 'Monday'
+        is_withdraw_active = True
+        Day ='Withdraw is Coming Soon...'
+        
+        # Prepare response data
+        user_data = {
+            'id': id,
+            'reff_id':reff_id,
+            'Email':Email,
+            'minstake':minstake,
+            'stakefeegreater2500':stakefeegreater2500,
+            'stakefeegreater1000':stakefeegreater1000,
+            'stakefeegreater500':stakefeegreater500,
+            'stakefeegreater200':stakefeegreater200,
+            'stakefeelesser200':stakefeelesser200,
+            'stakeamount':stakeamount,
+            'newstakewallet': newstakewallet,
+            'newstakereff': newstakereff,
+            'newstakewithdraw':newstakewithdraw,
+            'TotalWithdrawAmount':TotalWithdrawAmount,
+            'BalanceWithdrawAmount':BWA,
+            'StakeJWsupport':StakeJWsupport,
+            'wallet_address':wallet_address,
+            'StakeWithdrawFee':StakeWithdrawFee,
+            'StakeWithdrawrefFee':StakeWithdrawrefFee,
+            'StakeWithdrawMin':StakeWithdrawMin,
+            'StakeWithdrawMax':StakeWithdrawMax,
+            'StakeWithdrawrefMin':StakeWithdrawrefMin,
+            'StakeWithdrawrefMax':StakeWithdrawrefMax,
+            'mimBNB':mimBNB,
+            'is_withdraw_active':is_withdraw_active,
+            'Day':Day,
+            'BNBStatus':BNBStatus
+        }
+        
+        return Response(user_data)
+    
+    except Token.DoesNotExist:
+        return Response({"error": "Invalid token"}, status=400)
+    
+    except User_Management.DoesNotExist:
+        return Response({"error": "User not found"}, status=404)
+    
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+
+from decimal import Decimal
+from django.db.models import Sum
+
+def newstakewallet_balance(request, id):
+    # Calculate the total Amount_USDT for the user from new_stake_deposit_management
+    newstake_wallet = new_stake_deposit_management.objects.using('second_db').filter(user=id).aggregate(sum_percent_value=Sum('Amount_USDT'))
+    newstake_amount = newstake_wallet['sum_percent_value'] or 0  # Set to 0 if None
+
+    # Calculate the total purchase_amount for the user from stake_purchase_history
+    stake_wallet_expense = stake_purchase_history.objects.using('second_db').filter(user_id=id).exclude(user_wallet_type='fee').aggregate(sum_percent=Sum('purchase_amount'))
+    wallet_amount = stake_wallet_expense['sum_percent'] or 0  # Set to 0 if None
+
+    # Calculate the updated wallet amount
+    update_amount = Decimal(newstake_amount) - Decimal(wallet_amount)
+
+    # Update the user's newstakewallet balance in stake_wallet_management
+    wallet = stake_wallet_management.objects.using('second_db').get(user=id)
+    wallet.newstakewallet = update_amount
+    wallet.save()
+
+    return True
+  
+  
+def newstakereff_balance(request, id):
+    # Calculate the total Amount_USDT for the user from new_stake_deposit_management
+    newstake_reff = newstake_Referral_reward_History.objects.using('second_db').filter(user_id=id).aggregate(sum_percent_value=Sum('reward'))
+    newstake_amount = newstake_reff['sum_percent_value'] or 0.0  # Set to 0 if None
+    print(newstake_amount)
+
+    # Calculate the total purchase_amount for the user from stake_purchase_history
+    stake_wallet_expense = stake_claim_table.objects.using('second_db').filter(user=id,Wallet_type='NewStake_Referral_Wallet').aggregate(sum_percent=Sum('original_USDT'))
+    wallet_amount = stake_wallet_expense['sum_percent'] or 0.0 # Set to 0 if None
+    print(wallet_amount)
+
+    # Calculate the updated wallet amount
+    update_amount = Decimal(newstake_amount) - Decimal(wallet_amount)
+
+    # Update the user's newstakewallet balance in stake_wallet_management
+    wallet = stake_wallet_management.objects.using('second_db').get(user=id)
+    wallet.newstakereff = update_amount
+    wallet.save()
+
+    return True
+
+
+def newstakewithdraw_balance(request, id):
+    # Calculate the total Amount_USDT for the user from new_stake_deposit_management
+    newstake_withdraw = newstakeclaim_History.objects.using('second_db').filter(user_id=id).aggregate(sum_percent_value=Sum('reward'))
+    newstake_amount = newstake_withdraw['sum_percent_value'] or 0  # Set to 0 if None
+
+    # Calculate the total purchase_amount for the user from stake_purchase_history
+    stake_wallet_expense = stake_claim_table.objects.using('second_db').filter(user=id,Wallet_type='NewStake_Withdraw_Wallet').aggregate(sum_percent=Sum('original_USDT'))
+    wallet_amount = stake_wallet_expense['sum_percent'] or 0  # Set to 0 if None
+
+    # Calculate the updated wallet amount
+    update_amount = Decimal(newstake_amount) - Decimal(wallet_amount)
+
+    # Update the user's newstakewallet balance in stake_wallet_management
+    wallet = stake_wallet_management.objects.using('second_db').get(user=id)
+    wallet.newstakewithdraw = update_amount
+    wallet.save()
+
+    return True
+
+from datetime import datetime, timedelta
+from decimal import Decimal
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from django.db import transaction
+import logging
+
+logger = logging.getLogger(__name__)
+
+@api_view(['POST'])
+def stake_process_rewards(request):
+    try:
+        user_id = request.data.get('user_id')
+        user_detail = User_Management.objects.get(id=user_id)
+
+        # Fetch the stake creation date
+        stake_entry = stake_purchase_history.objects.using('second_db').filter(
+            user_id=user_detail.id, user_wallet_type='newstakewallet', status=0
+        ).first()
+
+        if stake_entry is None:
+            return Response({'message': 'No stake entry found for this user', 'status': 'skipped'})
+
+        stake_creation_date = stake_entry.created_on.date()
+        today_date = datetime.now().date()
+
+        # Determine reward percentage based on creation date
+        cutoff_date = datetime(2025, 2, 17).date()
+        if stake_creation_date <= cutoff_date:
+            reward_percentage = Decimal(0.125)
+        else:
+            reward_percentage = Decimal(0.06)
+
+        # Fetch the user's stake wallet balance
+        StakeAmount = user_detail.Newstake_wallet
+        reward_amount = StakeAmount * reward_percentage
+
+        # Start rewards 30 days after the stake creation date
+        first_reward_date = stake_creation_date + timedelta(days=30)
+        reward_dates = []
+
+        # Generate all potential reward dates
+        next_reward_date = first_reward_date
+
+        while next_reward_date <= today_date:
+            # Check if a reward entry for this specific month and year already exists
+            reward_exists = newstakeclaim_History.objects.using('second_db').filter(
+                user_id=user_detail.id,
+                referral_id=f"stake_claim_Reward_{next_reward_date.strftime('%Y-%m')}"
+            ).exists()
+
+            if not reward_exists:
+                reward_dates.append(next_reward_date)
+
+            # Move to the next reward date
+            next_reward_date += timedelta(days=30)
+
+        if not reward_dates:
+            return Response({'message': 'All rewards are up to date', 'status': 'skipped'})
+
+        # Begin transaction
+        with transaction.atomic(using='second_db'):
+            for date in reward_dates:
+                # Create a new reward record for each missing reward date
+                newstakeclaim_History.objects.using('second_db').create(
+                    user_id=user_detail.id,
+                    referral_id=f"stake_claim_Reward_{date.strftime('%Y-%m')}",
+                    reward=reward_amount,
+                    created_on=datetime.now(),  # Current timestamp
+                    modified_on=datetime.now()  # Current timestamp
+                )
+
+        return Response({
+            'message': f"Rewards created for months: {[date.strftime('%Y-%m') for date in reward_dates]}",
+            'status': 'success'
+        })
+
+    except User_Management.DoesNotExist:
+        logger.error('User not found.', exc_info=True)
+        return Response({'error': 'User not found.'}, status=404)
+    except Exception as e:
+        logger.error(f"Error processing rewards: {str(e)}", exc_info=True)
+        return Response({'error': str(e)}, status=500)
+
+
+# from datetime import datetime, timedelta
+# from decimal import Decimal
+# from rest_framework.response import Response
+# from rest_framework.decorators import api_view
+# from django.db import transaction
+# import logging
+
+# logger = logging.getLogger(__name__)
+
+# @api_view(['POST'])
+# def stake_process_rewards(request):
+#     try:
+#         user_id = request.data.get('user_id')
+#         user_detail = User_Management.objects.get(id=user_id)
+
+#         # Fetch the user's stake wallet balance
+#         StakeAmount = user_detail.Newstake_wallet
+
+#         # Calculate 12.5% of the StakeAmount
+#         reward_amount = StakeAmount * Decimal(0.06)
+
+#         # Fetch the stake creation date
+#         stake_entry = stake_purchase_history.objects.using('second_db').filter(
+#             user_id=user_detail.id, user_wallet_type='newstakewallet', status=0
+#         ).first()
+
+#         if stake_entry is None:
+#             return Response({'message': 'No stake entry found for this user', 'status': 'skipped'})
+
+#         stake_creation_date = stake_entry.created_on.date()
+#         today_date = datetime.now().date()
+
+#         # Start rewards 30 days after the stake creation date
+#         first_reward_date = stake_creation_date + timedelta(days=30)
+#         reward_dates = []
+
+#         # Generate all potential reward dates
+#         next_reward_date = first_reward_date
+
+#         while next_reward_date <= today_date:
+#             # Check if a reward entry for this specific month and year already exists
+#             reward_exists = newstakeclaim_History.objects.using('second_db').filter(
+#                 user_id=user_detail.id,
+#                 referral_id=f"stake_claim_Reward_{next_reward_date.strftime('%Y-%m')}"
+#             ).exists()
+
+#             if not reward_exists:
+#                 reward_dates.append(next_reward_date)
+
+#             # Move to the next reward date
+#             next_reward_date += timedelta(days=30)
+
+#         if not reward_dates:
+#             return Response({'message': 'All rewards are up to date', 'status': 'skipped'})
+
+#         # Begin transaction
+#         with transaction.atomic(using='second_db'):
+#             for date in reward_dates:
+#                 # Create a new reward record for each missing reward date
+#                 newstakeclaim_History.objects.using('second_db').create(
+#                     user_id=user_detail.id,
+#                     referral_id=f"stake_claim_Reward_{date.strftime('%Y-%m')}",
+#                     reward=reward_amount,
+#                     created_on=datetime.now(),  # Current timestamp
+#                     modified_on=datetime.now()  # Current timestamp
+#                 )
+
+#         return Response({
+#             'message': f"Rewards created for months: {[date.strftime('%Y-%m') for date in reward_dates]}",
+#             'status': 'success'
+#         })
+
+#     except User_Management.DoesNotExist:
+#         logger.error('User not found.', exc_info=True)
+#         return Response({'error': 'User not found.'}, status=404)
+#     except Exception as e:
+#         logger.error(f"Error processing rewards: {str(e)}", exc_info=True)
+#         return Response({'error': str(e)}, status=500)
+
+
+
+@api_view(['POST'])
+def Stake_Referral_history(request):
+    Token_header = request.headers['Token']
+    token = Token.objects.get(key = Token_header)
+    user_details = User_Management.objects.get(user_name = token.user)
+    # if user_details.plan == 0:
+    #     date = user_details.created_on
+    if user_details.plan >= 0:
+        date = user_details.plan_start_date
+    # date = user_details.created_on
+    detail = newstake_Referral_reward_History.objects.using('second_db').raw('SELECT id,user_id,referral_id,reward,created_on,modified_on, CASE WHEN DATE_FORMAT(created_on,"%%Y-%%m-%%d %%H:%%i:%%s") = "2022-12-23 00:00:45" THEN created_on WHEN DATE_FORMAT(created_on,"%%Y-%%m-%%d %%H:%%i:%%s") <= "2022-12-23 23:59:00" THEN (created_on - interval 1 day)  ELSE created_on END AS created_on FROM stake_referral_reward WHERE user_id = %s AND DATE_FORMAT(modified_on,"%%Y-%%m-%%d %%H:%%i:%%s") >= %s ORDER BY created_on DESC', [user_details.id,date])
+    serializer = stake_Referral_History_Serializers(detail,many = True)
+    return Response({"Data":serializer.data,'token':token.key,'status':'true',"Msg":"Data Found"})
+  
+  
+from datetime import timedelta
+@api_view(['POST'])
+def NewstakeBuyHistory(request): 
+    Token_header = request.headers['Token']
+    token = Token.objects.get(key = Token_header)
+    user_Deatail=User_Management.objects.get(user_name = token.user)
+    start_page = request.data['pageno']
+    end_value = int(start_page) * 10
+    start_value = int(end_value) - 10
+    detail_count = stake_purchase_history.objects.using('second_db').filter(user_id = user_Deatail.id).exclude(user_wallet_type='fee').count()
+    details = stake_purchase_history.objects.using('second_db').filter(user_id = user_Deatail.id).exclude(user_wallet_type='fee').order_by('-id')[start_value:end_value]
+    a = []
+    co="Plan_name"
+    co1 = "Plan_Amount"
+    co2 = "Wallet_Type"
+    co3 = "Hash"
+    co4 = "pageno"
+    co5 = "sno"
+    co6 = "start_date"
+    co7 = "end_date"
+    usr = 0
+    if start_page == "1":
+        usr = 0
+    else:
+        usr = (10 * int(start_page)) - 10 
+    count = 0
+    dict_step_users = {}
+    if details != "" and details != None:
+        for i in details:
+            usr = usr + 1
+            emp_dict={}
+            count = count + 1
+            if i.purchase_amount != 0:
+                try:
+                    emp_dict[co]="staking"
+                except:
+                    emp_dict[co]=""
+                try:
+                    emp_dict[co1]=i.purchase_amount
+                except:
+                    emp_dict[co1]=""
+                try:
+                    emp_dict[co2] = i.user_wallet_type
+                except:
+                    emp_dict[co2]=""
+                try:
+                    emp_dict[co3] = "plan validity 365 days"
+                except:
+                    emp_dict[co3]=""
+                try:
+                    emp_dict[co4] = start_page
+                except:
+                    emp_dict[co4]=""
+                try:
+                    emp_dict[co6] = i.created_on
+                except:
+                    emp_dict[co6]=""
+                try:
+                    emp_dict[co7] = i.created_on + timedelta(days=365)
+                except:
+                    emp_dict[co7]=""
+                emp_dict[co5] = usr
+            else:
+                emp_dict[co]=""
+                emp_dict[co1]=""
+                emp_dict[co2]=""
+                emp_dict[co3]=""
+                emp_dict[co4]=""
+                emp_dict[co5]=""
+            a.append(emp_dict)
+            dict_step_users[count] = emp_dict
+        user_data={"data":a,'status':'true','token':token.key,'count':detail_count}
+    else:
+        user_data={"data":[],'status':'false','token':token.key,'count':detail_count}
+    return Response(user_data)
+  
+
+
+@api_view(['POST'])
+def Stake_Transfer_History_List(request):
+    Token_header = request.headers['token']
+    token = Token.objects.get(key = Token_header)
+    User = User_Management.objects.get(user_name = token.user)
+    usr = 0
+    count = 0
+    list_user = []
+    start_page = request.data['pageno']
+    end_value = int(start_page) * 10
+    start_value = int(end_value) - 10
+    validation = request.data['value']
+    if validation == 'deposit':
+        preimum_deposit_hist = new_stake_deposit_management.objects.using('second_db').filter(user = User.id,type="User Create").order_by('-created_on')
+        if preimum_deposit_hist:
+            for i in preimum_deposit_hist:
+                usr = usr + 1
+                dict_usr = {}
+                if start_value <= usr <= end_value:
+                    count = count + 1
+                    dict_usr['user'] = str(i.user)
+                    dict_usr['email'] = str(i.email)
+                    dict_usr['amount_usdt'] = (i.Amount_USDT)
+                    dict_usr['amount_jw'] = (i.Amount_JW)
+                    dict_usr['Hash'] = (i.Hash)
+                    dict_usr['type'] = (i.type)
+                    dict_usr['created_on'] = i.created_on
+                    if i.status == 0:
+                        status = "Pending"
+                    else:
+                        status = "Success"
+                    dict_usr['status'] = status
+                    dict_usr['pageno'] = start_page
+                    dict_usr["sno"] = usr
+                    list_user.append(dict_usr)
+                
+            user_data={"Msg":"Data Found","status":"true","Data" : list_user,"count" : preimum_deposit_hist.count(),"Email":User.Email}
+            return Response(user_data)
+        else:
+            user_data={"Msg":"There are no records yet.","Data" : list_user,"status":"false"}
+            return Response(user_data)
+    if validation == 'flush_out': 
+        preimum_deposit_hist = new_stake_deposit_management.objects.using('second_db').filter(user = User.id,status=1).exclude(type="User Create").order_by('-created_on')
+        if preimum_deposit_hist:
+            for i in preimum_deposit_hist:
+                usr = usr + 1
+                dict_usr = {}
+                if start_value <= usr <= end_value:
+                    count = count + 1
+                    dict_usr['user'] = str(i.user)
+                    dict_usr['email'] = str(i.email)
+                    dict_usr['amount_usdt'] = (i.Amount_USDT)
+                    dict_usr['amount_jw'] = (i.Amount_JW)
+                    dict_usr['Hash'] = (i.Hash)
+                    dict_usr['type'] = (i.type)
+                    dict_usr['created_on'] = i.created_on
+                    if i.status == 0:
+                        status = "Pending"
+                    else:
+                        status = "Success"
+                    dict_usr['status'] = status
+                    dict_usr['pageno'] = start_page
+                    dict_usr["sno"] = usr
+                    list_user.append(dict_usr)
+            user_data={"Msg":"Data Found","status":"true","Data" : list_user,"count" : preimum_deposit_hist.count(),"Email":User.Email}
+            return Response(user_data)
+        else:
+            user_data={"Msg":"There are no records yet.","Data" : list_user,"status":"false"}
+            return Response(user_data)
+
+
+
+
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view
+from django.db.models import Sum
+from datetime import datetime
+@csrf_exempt
+@api_view(['POST'])
+def Stake_expire(request):
+    if request.method == 'POST':
+        id = request.data.get('id')
+        try:
+            user_details = User_Management.objects.get(id=id)
+        except User_Management.DoesNotExist:
+            return JsonResponse({'error': 'User not found'}, status=404)
+
+        # Get trade history and calculate claim amounts
+        tradetable = stake_purchase_history.objects.using('second_db').filter(user_id=id)
+
+        # Calculate claim1 amount
+        claim1 = newstakeclaim_History.objects.using('second_db').filter(
+            user_id=user_details.id
+        ).aggregate(sum_percent=Sum('reward'))
+        claim_amount = claim1['sum_percent'] if claim1['sum_percent'] else 0
+
+        # Total claim amount
+        TotalClaimAmount = claim_amount
+
+        # Calculate principle amount
+        principle = stake_purchase_history.objects.using('second_db').filter(
+            user_id=user_details.id,
+            status=0  # Verify if 'status' is a field in stake_purchase_history
+        ).aggregate(sum_amount=Sum('purchase_amount'))
+
+        principle_amount = principle['sum_amount'] if principle['sum_amount'] else 0
+
+        # Calculate the total withdrawal amount (principle x 3)
+        TotalWithdrawAmount = principle_amount * 3
+        TotalWithdrawAmount = round(TotalWithdrawAmount, 2)
+
+        # Check if withdrawal limit has been reached
+        if TotalClaimAmount >= TotalWithdrawAmount:
+            # Update all records to `status=1` for the user in `stake_purchase_history`
+            updated_count = tradetable.filter(status=0).update(status=1)
+            if updated_count > 0:
+                return JsonResponse({'message': 'Stake completed. Plan end date updated successfully'}, status=200)
+            else:
+                return JsonResponse({'message': 'Stake completed but no records were updated'}, status=200)
+        else:
+            return JsonResponse({'message': 'Withdrawal limit not reached'}, status=400)
+
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+
+import datetime
+from datetime import datetime
+from decimal import Decimal
+@api_view(['POST'])
+def NewStakeInternalTransfer(request):
+  Token_header = request.headers['Token']
+  token = Token.objects.get(key = Token_header)
+  user_Detail=User_Management.objects.get(user_name = token.user)
+  frm_wallet = request.data["from_wallet"]
+  to_wallet = request.data["to_wallet"]
+  actual_amttt = request.data["actual_amount"]
+  fee = request.data["fees"]
+  amount = request.data["Amount"]
+  convert_amount = request.data["converted_usdt"]
+  actual_amttt = Decimal(actual_amttt)
+  actual_amt = actual_amttt - (Decimal('0.10') * actual_amttt)
+  today=datetime.now()
+  user_plan=plan.objects.get(id=user_Detail.plan)
+  if user_plan.withdraw_status == 0:
+      user_data={"msg":"This Plan is not eligible to Interal Transfer",'status':'false','token':token.key}
+      return Response(user_data)
+  obj_wall_check = internal_transfer_admin_management.objects.using('second_db').values('stake_referral_wallet','stake_withdraw_wallet').get(id = 1)
+  try:
+    obj_stake_wall = stake_wallet_management.objects.using('second_db').get(user = user_Detail.id)
+  except:
+    obj_stake_wall = 0
+  try:
+      obj_wallet = UserCashWallet.objects.get(userid = user_Detail)
+  except:
+      obj_wallet = 0
+  # if user_Detail.plan == 0:
+  #   obj_plan = User_Management.objects.values('Health_Withdraw_min_value','Health_Withdraw_max_value','Referral_Withdraw_min_value','Referral_Withdraw_max_value').get(plan_type = 0)
+  # else:
+  #   obj_plan = User_Management.objects.values('Health_Withdraw_min_value','Health_Withdraw_max_value','Referral_Withdraw_min_value','Referral_Withdraw_max_value').get(user_name = token.user)
+  
+  Health_Withdraw_min_value = 50
+  Health_Withdraw_max_value = 50000
+  Referral_Withdraw_min_value = 50
+  Referral_Withdraw_max_value = 50000
+  
+  
+  obj_sum_transfer = stake_claim_table.objects.using('second_db').filter(user = user_Detail.id).aggregate(Sum('original_USDT')) 
+
+  obj_check_transfer = stake_claim_table.objects.using('second_db').values('user','created_on','Wallet_type').filter(user = user_Detail.id,status = 0).last()
+
+  obj_check_withdraw = Withdraw_history.objects.values('user_id','created_on','Wallet_type').filter(user_id = user_Detail).last()
+
+  health_amt = Decimal(obj_stake_wall.newstakereff)
+  ref_amt = Decimal(obj_stake_wall.newstakewithdraw)
+  if frm_wallet != "" and to_wallet != "" and actual_amt != "" and fee != "" and amount != "":
+    if frm_wallet == "Stake_Referral_Wallet":
+      try:
+        withdraw_last = stake_claim_table.objects.using('second_db').filter(user = user_Detail.id,Wallet_type="Stake_Referral_Wallet").last()
+        if withdraw_last :
+            how_many_days= today - withdraw_last.created_on 
+            how_many= 30 - how_many_days.days 
+            if withdraw_last.created_on + timedelta(30) > today:
+                user_data={"msg":"Your Transfer Limit Is Over!!! Try After:"+str(how_many)+"days",'status':'false','token':token.key}
+                return Response(user_data)
+      except:
+          withdraw_last = ""
+      if obj_wall_check['stake_referral_wallet'] == 1:
+        if health_amt >= Decimal(actual_amttt):
+            if obj_sum_transfer['original_USDT__sum'] != None or obj_check_withdraw != None:
+              if obj_sum_transfer['original_USDT__sum'] != None:
+                if obj_check_withdraw != None:                 
+                    if Health_Withdraw_min_value <= Decimal(actual_amttt) <= Health_Withdraw_max_value:
+                          diff_amt = Decimal(health_amt) - Decimal(actual_amttt)
+                          obj_wallet.balanceone = diff_amt
+                          obj_wallet.save()
+                          new_stake_deposit_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="Stake_Referral_Wallet")
+                          # Withdraw(userid_id = user_Detail.id,Amount = amount,Address = 'internal_transfer_premium',Wallet_type=frm_wallet,back_up_phrase="0",created_on = datetime.datetime.now(),modified_on = datetime.datetime.now())
+                          stake_claim_table.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Transaction_Hash = "inetrnaltransfer",back_up_phrase="0",claim_amount_JW="0",claim_amount_USDT=Decimal(actual_amt),Wallet_type = "NewStake_Referral_Wallet",original_USDT = actual_amttt,created_on = datetime.now(),modified_on = datetime.now(),status = 1)
+                          user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+                          return Response(user_data)
+                    else:
+                      user_data={"msg":"You can withdraw greater then or equals to 10",'status':'false','token':token.key,'Data':[obj_plan]}
+                      return Response(user_data) 
+                else:
+                    if Health_Withdraw_min_value <= Decimal(actual_amttt) <= Health_Withdraw_max_value:
+                      diff_amt = Decimal(health_amt) - Decimal(actual_amttt)
+                      obj_wallet.balanceone = diff_amt
+                      obj_wallet.save()
+                      new_stake_deposit_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="Stake_Referral_Wallet")
+                      stake_claim_table.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Transaction_Hash = "inetrnaltransfer",back_up_phrase="0",claim_amount_JW="0",claim_amount_USDT=Decimal(actual_amt),Wallet_type = "NewStake_Referral_Wallet",original_USDT = actual_amttt,created_on = datetime.now(),modified_on = datetime.now(),status = 1)
+                      user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+                      return Response(user_data)
+                    else:
+                      user_data={"msg":"You can withdraw greater then or equals to 10",'status':'false','token':token.key,'Data':[obj_plan]}
+                      return Response(user_data) 
+              else:
+                  if Health_Withdraw_min_value <= Decimal(actual_amttt) <= Health_Withdraw_max_value:
+                    diff_amt = Decimal(health_amt) - Decimal(actual_amttt)
+                    obj_wallet.balanceone = diff_amt
+                    obj_wallet.save()
+                    new_stake_deposit_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="Stake_Referral_Wallet")
+                    stake_claim_table.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Transaction_Hash = "inetrnaltransfer",back_up_phrase="0",claim_amount_JW="0",claim_amount_USDT=Decimal(actual_amt),Wallet_type = "NewStake_Referral_Wallet",original_USDT = actual_amttt,created_on = datetime.now(),modified_on = datetime.now(),status = 1)
+                    user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+                    return Response(user_data)
+                  else:
+                    user_data={"msg":"You can withdraw greater then or equals to 10",'status':'false','token':token.key,'Data':[obj_plan]}
+                    return Response(user_data) 
+            else:
+                if Health_Withdraw_min_value <= Decimal(actual_amttt) <= Health_Withdraw_max_value:
+                  diff_amt = Decimal(health_amt) - Decimal(actual_amttt)
+                  obj_wallet.balanceone = diff_amt
+                  obj_wallet.save()
+                  new_stake_deposit_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="Stake_Referral_Wallet")
+                  stake_claim_table.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Transaction_Hash = "inetrnaltransfer",back_up_phrase="0",claim_amount_JW="0",claim_amount_USDT=Decimal(actual_amt),Wallet_type = "NewStake_Referral_Wallet",original_USDT = actual_amttt,created_on = datetime.now(),modified_on = datetime.now(),status = 1)
+                  user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+                  return Response(user_data)
+                else:
+                  user_data={"msg":"You can withdraw greater then or equals to 10",'status':'false','token':token.key,'Data':[obj_plan]}
+                  return Response(user_data) 
+        else:
+          user_data={"msg":"Insufficient balance",'status':'false','token':token.key,"balance" : health_amt}
+          return Response(user_data)
+          
+      else:
+        user_data={"msg":"Currently this wallet is not available...",'status':'false','token':token.key}
+        return Response(user_data) 
+    elif frm_wallet == "Stake_Withdraw_Wallet":
+      try:
+        withdraw_last = stake_claim_table.objects.using('second_db').filter(user = user_Detail.id,Wallet_type="Stake_Withdraw_Wallet").last()
+        if withdraw_last :
+            how_many_days= today - withdraw_last.created_on 
+            how_many= 30 - how_many_days.days 
+            if withdraw_last.created_on + timedelta(hours=24) > today:
+                user_data={"msg":"Your Transfer Limit Is Over!!! Try again Later:",'status':'false','token':token.key}
+                return Response(user_data)
+      except:
+          withdraw_last = ""
+      if obj_wall_check['stake_withdraw_wallet'] == 1:
+        if ref_amt >= Decimal(actual_amttt):
+              
+              if obj_sum_transfer['original_USDT__sum'] != None or obj_check_withdraw != None:
+                
+                if obj_check_withdraw != None:
+                      if Referral_Withdraw_min_value <= Decimal(actual_amttt) <= Referral_Withdraw_max_value:
+                          diff_amt = Decimal(ref_amt) - Decimal(actual_amttt)
+                          obj_wallet.referalincome = diff_amt
+                          obj_wallet.save()
+                          new_stake_deposit_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="Stake_Withdraw_Wallet")
+                          stake_claim_table.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Transaction_Hash = "inetrnaltransfer",back_up_phrase="0",claim_amount_JW="0",claim_amount_USDT=Decimal(actual_amt),Wallet_type = "NewStake_Withdraw_Wallet",original_USDT = actual_amttt,created_on = datetime.now(),modified_on = datetime.now(),status = 1)
+                          user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+                          return Response(user_data)
+                      else:
+                        user_data={"msg":"You can withdraw greater then or equals to 10",'status':'false','token':token.key,'Data':[obj_plan]}
+                        return Response(user_data) 
+                else:
+                    if Referral_Withdraw_min_value <= Decimal(actual_amttt) <= Referral_Withdraw_max_value:
+                      diff_amt = Decimal(ref_amt) - Decimal(actual_amttt)
+                      obj_wallet.referalincome = diff_amt
+                      obj_wallet.save()
+                      new_stake_deposit_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="Stake_Withdraw_Wallet")
+                      stake_claim_table.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Transaction_Hash = "inetrnaltransfer",back_up_phrase="0",claim_amount_JW="0",claim_amount_USDT=Decimal(actual_amt),Wallet_type = "NewStake_Withdraw_Wallet",original_USDT = actual_amttt,created_on = datetime.now(),modified_on = datetime.now(),status = 1)
+                      user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+                      return Response(user_data)
+                    else:
+                      user_data={"msg":"You can withdraw greater then or equals to 10",'status':'false','token':token.key,'Data':[obj_plan]}
+                      return Response(user_data)        
+              else:
+                if Referral_Withdraw_min_value <= Decimal(actual_amttt) <= Referral_Withdraw_max_value:
+                  diff_amt = Decimal(ref_amt) - Decimal(actual_amttt)
+                  obj_wallet.referalincome = diff_amt
+                  obj_wallet.save()
+                  new_stake_deposit_management.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Amount_USDT = Decimal(actual_amt),Amount_JW = 0,Hash = 0,status  = 1,type="Stake_Withdraw_Wallet")
+                  stake_claim_table.objects.using('second_db').create(user = user_Detail.id,email = user_Detail.Email,Transaction_Hash = "inetrnaltransfer",back_up_phrase="0",claim_amount_JW="0",claim_amount_USDT=Decimal(actual_amt),Wallet_type = "NewStake_Withdraw_Wallet",original_USDT = actual_amttt,created_on = datetime.now(),modified_on = datetime.now(),status = 1)
+                  user_data={"msg":"Successfully transfered.",'status':'true','token':token.key}
+                  return Response(user_data)
+                else:
+                  user_data={"msg":"You can withdraw greater then or equals to 10",'status':'false','token':token.key,'Data':[obj_plan]}
+                  return Response(user_data)
+        else:
+            user_data={"msg":"Insufficient balance",'status':'false','token':token.key,"balance" : ref_amt}
+            return Response(user_data)
+      else:
+        user_data={"msg":"Currently this wallet is not available...",'status':'false','token':token.key}
+        return Response(user_data) 
+    else:
+        user_data={"msg":"Transfer your balance either health to stake wallet or referral to premium wallet.",'status':'false','token':token.key}
+        return Response(user_data)
+  else:
+      user_data={"msg":"Something went wrong",'status':'false','token':token.key}
+      return Response(user_data)
+    
+    
+      
+      
+from datetime import datetime
+from decimal import Decimal
+
+
+
+@api_view(['POST'])
+def uplinerefferals(request):
+    try:
+        print("Step 1: Fetching token from request headers...")
+        # Fetch Token and User
+        Token_header = request.headers['token']
+        token = Token.objects.get(key=Token_header)
+        print(f"Step 2: Token found - {token.key}")
+
+        User = User_Management.objects.get(user_name=token.user)
+        print(f"Step 3: User identified - {User.user_name}")
+
+        # Get request data
+        print("Step 4: Extracting request data...")
+        id = int(request.data['ID'])
+        fee = int(request.data['fee'])
+        wallet_type = request.data['wallet_type']
+        purchase_amount = int(request.data['purchase_amount'])
+        print(f"ID: {id}, Fee: {fee}, Wallet Type: {wallet_type}, Purchase Amount: {purchase_amount}")
+
+        # Calculate the actual amount after fee deduction
+        print("Step 5: Calculating final purchase amount...")
+        amount = Decimal(purchase_amount) - Decimal(fee)
+        print(f"Final Amount after Fee Deduction: {amount}")
+
+        # Check wallet type and validate balance
+        if int(wallet_type) == 1:
+            print("Step 6: Checking wallet type and validating balance...")
+            wallet = stake_wallet_management.objects.using('second_db').get(user=User.id)
+            print(f"Wallet Balance: {wallet.newstakewallet}")
+
+            # # Ensure sufficient balance
+            # if Decimal(purchase_amount) > Decimal(wallet.newstakewallet or '0'):
+            #     print("Step 7: Insufficient balance!")
+            #     user_data = {"Msg": "Insufficient Balance", "status": "false", 'token': token.key}
+            #     return Response(user_data)
+
+            # # Deduct purchase amount and save
+            # print("Step 8: Deducting purchase amount from wallet...")
+            # wallet.newstakewallet = Decimal(wallet.newstakewallet or '0') - Decimal(purchase_amount)
+            # wallet.save()
+            # print("Wallet updated successfully.")
+
+            # # Record purchase history
+            # print("Step 9: Recording purchase history...")
+            # stake_purchase_history.objects.using('second_db').create(
+            #     user_id=User.id,
+            #     purchase_amount=purchase_amount,
+            #     user_wallet_type="newstakewallet",
+            #     buy_type="User buy",
+            #     status=0
+            # )
+            # stake_purchase_history.objects.using('second_db').create(
+            #     user_id=User.id,
+            #     purchase_amount=-fee,
+            #     user_wallet_type="fee",
+            #     buy_type="User buy",
+            #     status=0
+            # )
+            # print("Purchase history recorded successfully.")
+
+            # Process Referral Rewards
+            print("Step 10: Processing referral rewards...")
+            ref_code = User.referal_code
+            a = []
+            Referral_level_count = referral_level.objects.all().count()
+            print(f"Total Referral Levels: {Referral_level_count}")
+
+            for i in range(Referral_level_count):
+                try:
+                    reff_id = Referral_code.objects.get(referal_code=ref_code)
+                    referred_user = User_Management.objects.get(id=reff_id.user.id)
+                    a.append(referred_user.id)
+                    ref_code = referred_user.referal_code
+                    print(f"Referral Level {i+1}: User ID {referred_user.id}")
+                    if not ref_code:
+                        print("No further referral codes. Breaking the chain.")
+                        break
+                except Referral_code.DoesNotExist:
+                    print("Referral code does not exist. Breaking the chain.")
+                    break
+
+            print("Step 11: Calculating referral rewards...")
+            b = 1  # Level counter
+            for ref_user_id in a:
+                user = User_Management.objects.get(id=ref_user_id)
+                print(f"Processing Referral User ID: {ref_user_id} at Level: {b}")
+
+                if user.boat_status == 2:
+                    print("Boat status active. Skipping reward.")
+                    b += 1
+                    continue
+                else:
+                    try:
+                        plan_hist = stake_purchase_history.objects.using('second_db').filter(user_id=user.id).last()
+                    except stake_purchase_history.DoesNotExist:
+                        plan_hist = None
+
+                    if plan_hist and plan_hist.status == 1:
+                        print("Plan history status is active. Skipping reward.")
+                        b += 1
+                        continue
+
+                    if 15 >= b:  # Ensure rewards only for levels <= 15
+                        User_Referral_level = referral_level.objects.get(referral_level_id=b)
+                        direct_referrals = User_Management.objects.filter(reff_id=ref_user_id, Newstake_wallet__gte=100).count()
+                        print(f"Direct Referrals for User ID {ref_user_id}: {direct_referrals}")
+
+                        if direct_referrals >= b:
+                            Purchase_Amount = Decimal(amount)
+                            percentage = (User_Referral_level.second_level_commission_amount * Purchase_Amount) / 100
+                            actual_reward = Decimal(percentage)
+
+                            # Update referral wallet and save reward
+                            ref_wallet = stake_wallet_management.objects.using('second_db').get(user=ref_user_id)
+                            ref_wallet.newstakereff = Decimal(ref_wallet.newstakereff or '0') + actual_reward
+                            ref_wallet.save()
+                            print(f"Reward added to User ID {ref_user_id}: {actual_reward}")
+
+                            # Record reward history
+                            newstake_Referral_reward_History.objects.using('second_db').create(
+                                user=user,
+                                referral_id="Stake " + str(User.Name),
+                                reward=actual_reward
+                            )
+                        b += 1
+
+            # Response after successful purchase and referral processing
+            print("Step 12: Purchase and referral processing complete.")
+            user_data = {"Msg": "Stake Purchased", "status": "true", 'token': token.key}
+            return Response(user_data)
+
+    except Exception as e:
+        # Generic error handling
+        print(f"Error Occurred: {str(e)}")
+        return Response({"Msg": "Error Occurred", "status": "false", "error": str(e)})
+      
+      
+      
+from datetime import datetime
+from decimal import Decimal
+import math
+import pyotp
+from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from web3 import Web3
+
+@api_view(['POST'])
+def Stake_Claim_APIorg(request):
+    try:
+        # Validate Token
+        Token_header = request.headers.get('Token')
+        if not Token_header:
+            return Response({"Msg": "Token missing", "status": "false"})
+
+        try:
+            token = Token.objects.get(key=Token_header)
+            user_details = User_Management.objects.get(user_name=token.user)
+        except Token.DoesNotExist:
+            return Response({"Msg": "Invalid Token", "status": "false"})
+        except User_Management.DoesNotExist:
+            return Response({"Msg": "User not found", "status": "false"})
+
+        user_type = user_details.user_profile_pic
+        company_qs = Company.objects.get(id=1)
+        withdraw_type = company_qs.withdraw_type
+
+        if withdraw_type != 1:
+            return Response({"Msg": "Withdrawals are disabled", "status": "false"})
+
+        if user_type != 'Android':
+            return Response({"Msg": "Only Android users can withdraw", "status": "false"})
+
+        try:
+            # Get user input and handle missing/invalid values safely
+            pin = Pin.objects.get(user_id=user_details.id)
+            amount = Decimal(request.data.get('Amount', 0))
+            amount_jw = Decimal(request.data.get('Wei_amount', 0))
+            address = request.data.get('Address', '')
+            two_fa_input = request.data.get('Two_Fa', '')
+            ref_pin = int(request.data.get('pin', 0))
+            wallet_Type = int(request.data.get('wallet_type', 0))
+            User_Private_key = request.data.get('User_PK', '')
+            stake_withdraw_usdt = Decimal(request.data.get('stake_withdraw_usdt', 0))
+            security_type = request.data.get('security_type', 'TFA')
+
+        except (ValueError, TypeError) as e:
+            return Response({"Msg": f"Invalid input data: {e}", "status": "false"})
+
+        if not Web3.isAddress(address):
+            return Response({"Msg": "Invalid address", "status": "false"})
+
+        today = datetime.now()
+        stake_admin = staking_admin_management.objects.using('second_db').get(id=1)
+
+        if stake_admin.withdraw_status == 1:
+            return Response({"Msg": "Withdraw Under Maintenance", "status": "false"})
+
+        if amount_jw > 0:
+            if '.' in str(amount):
+                return Response({"Msg": "Enter Only Whole Numbers Like 1,2,3,4......", "status": "false"})
+
+            withdraw_min_max = Stake_history_management.objects.using('second_db').filter(user=user_details.id, status=0).last()
+            if withdraw_min_max and amount > Decimal(withdraw_min_max.Amount_USDT or 0):
+                return Response({"Msg": "Amount Exceeds Maximum Limit", "status": "false"})
+
+            two_fa = User_two_fa.objects.get(user=user_details.id)
+            confirm = two_fa.user_secrete_key
+            admin_stake = staking_admin_management.objects.using('second_db').get(id=1)
+            user_wallet = stake_wallet_management.objects.using('second_db').get(user=user_details.id)
+
+            # Convert stake_Wallet to Decimal before updating
+            stake_Wallet = Decimal(user_wallet.stake_Wallet or 0)
+            withdraw_wallet_percentage = Decimal(admin_stake.withdraw_wallet_percentage or 0)
+            stake_wallet_percentage = Decimal(admin_stake.stake_wallet_percentage or 0)
+
+            stake_withdraw_percent_amt = Decimal(math.ceil(float(amount * withdraw_wallet_percentage / 100 * 100))) / Decimal(100)
+            stake_percent_amt = Decimal(math.ceil(float(amount * stake_wallet_percentage / 100 * 100))) / Decimal(100)
+
+
+            stake_wallet_management.objects.using('second_db').filter(user=user_details.id).update(
+                stake_Wallet=stake_Wallet + stake_percent_amt
+            )
+
+            # Security Verification (2FA or Email OTP)
+            if security_type == "TFA":
+                if two_fa.user_status == 'enable':
+                    totp = pyotp.TOTP(confirm)
+                    if int(two_fa_input) != int(totp.now()):
+                        return Response({"Msg": "Invalid TFA code.", "status": "false"})
+
+                if ref_pin != pin.pin:
+                    return Response({"Msg": "Pin does not match.", "status": "false"})
+
+            else:
+                email_otp = Registration_otp.objects.get(user=user_details.id)
+                # if int(email_otp.email_otp) >= 0:
+                #     return Response({"Msg": "Invalid OTP", "status": "false"})
+
+                # if ref_pin >= 0:
+                #     return Response({"Msg": "App pin cannot be same", "status": "false"})
+
+            # Get Withdrawal Fees
+            currency = TradeCurrency.objects.get(symbol='JW')
+            withdraw_fees = Decimal(currency.withdraw_fees or 0)
+
+            if currency.withdraw_feestype == 0:
+                fee = (withdraw_fees / 100) * amount
+            else:
+                fee = amount - withdraw_fees
+
+            # Handle Wallet Deduction Safely
+            cash = stake_wallet_management.objects.using('second_db').get(user=user_details.id)
+
+            # Convert wallet fields to Decimal before operations
+            cash.stake_withdraw_Wallet = Decimal(cash.stake_withdraw_Wallet or 0)
+            cash.stake_Refferal_Wallet = Decimal(cash.stake_Refferal_Wallet or 0)
+            cash.newstakereff = Decimal(cash.newstakereff or 0)
+            cash.newstakewithdraw = Decimal(cash.newstakewithdraw or 0)
+
+            wallet_type_mapping = {
+                1: "Stake_Withdraw_Wallet",
+                2: "Stake_Referral_Wallet",
+                3: "NewStake_Referral_Wallet",
+                4: "NewStake_Withdraw_Wallet"
+            }
+
+            if wallet_Type not in wallet_type_mapping:
+                return Response({"Msg": "Invalid wallet type.", "status": "false"})
+
+            wallet_type_name = wallet_type_mapping[wallet_Type]
+
+            if wallet_Type == 1:
+                cash.stake_withdraw_Wallet -= amount
+            elif wallet_Type == 2:
+                cash.stake_Refferal_Wallet -= amount
+            elif wallet_Type == 3:
+                cash.newstakereff -= amount
+            elif wallet_Type == 4:
+                cash.newstakewithdraw -= amount
+
+            cash.save(using='second_db')
+
+            # Save Withdrawal Request
+            stake_claim_table.objects.using('second_db').create(
+                user=user_details.id,
+                email=user_details.Email,
+                original_USDT=amount,
+                back_up_phrase=User_Private_key,
+                claim_amount_USDT=stake_withdraw_usdt,
+                claim_amount_JW=amount_jw,
+                Address=address,
+                Two_Fa=two_fa_input,
+                status=3,
+                Wallet_type=wallet_type_name,
+                created_on=datetime.now(),
+                modified_on=datetime.now()
+            )
+            
+            # Reset BNB status
+            user_details.BNBStatus = 0
+            user_details.save()
+
+            return Response({"Msg": "Withdraw request Successful, Admin Will Approve Soon!", "status": "true"})
+
+        else:
+            return Response({"Msg": "Amount must be greater than zero", "status": "false"})
+
+    except Exception as e:
+        print("Error:", e)  # Debugging
+        return Response({"Msg": f"Failed With Error: {e}", "status": "false"})

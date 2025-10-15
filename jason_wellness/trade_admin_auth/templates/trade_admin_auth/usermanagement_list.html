@@ -183,6 +183,7 @@
                       <th class="no-sort">Phone type</th>
                       <th class="no-sort">Device ID</th>
                       <th class="no-sort">New Device ID</th>
+                      <th class="no-sort">User INR ID</th>
                       <th class="no-sort">Created on</th>
                       <th class="no-sort">User Type</th>
                       <th class="no-sort">Actions</th>
@@ -198,6 +199,17 @@
                       <th class="no-sort">Missing reward update</th>
                       <th class="no-sort">Staking history</th>
                       <th class="no-sort">Staking Credit history</th>
+                      <th class="no-sort">Add Trade Deposit</th> 
+                      <th class="no-sort">Purchage Bot</th> 
+                      <th class="no-sort">Trade History</th> 
+                      <th class="no-sort">Add Stake Deposit</th> 
+                      <th class="no-sort">Stake History</th>
+                      <th class="no-sort">Add Burning JW</th> 
+                      <th class="no-sort">Add monthly plan</th>
+                      <th class="no-sort">Add Burning JWC </th> 
+                      <th class="no-sort">MP History</th>
+                      <th class="no-sort">Burn History</th>
+                      <th class="no-sort">Burn JWC History</th>
                     </tr>
                 </thead>
             </table>
@@ -288,6 +300,7 @@ $(document).ready(function() {
         { data: 'user_profile_pic' }, 
         { data: 'device_unique_id' }, 
         { data: 'request_device_id' }, 
+        { data: 'USER_INRID' }, 
         { data: 'created_on' }, 
         { data: 'User_type' },
         {
@@ -394,6 +407,117 @@ $(document).ready(function() {
                 return data;
             }
         },
+
+        {
+          data: null,
+          render: function (data, type, row) {
+                  return '<a href="/tradeadmin/user_trade_deposit/'+row['id']+'"><i class="fa fa-play" aria-hidden="true"></i></a>';
+                
+              return data;
+          }
+      },
+
+      {
+            data: null,
+            render: function (data, type, row) {
+                    return '<a href="/tradeadmin/purchase_bot/'+row['id']+'"><i class="fa fa-play" aria-hidden="true"></i></a>';
+                 
+                return data;
+            }
+        },
+
+
+        {
+            data: null,
+            render: function (data, type, row) {
+                    return '<a href="/tradeadmin/trade_history_table/'+row['id']+'"><i class="fa fa-history" aria-hidden="true"></i></a>';
+                 
+                return data;
+            }
+        },
+
+
+        {
+          data: null,
+          render: function (data, type, row) {
+                  return '<a href="/tradeadmin/user_stake_deposit/'+row['id']+'"><i class="fa fa-play" aria-hidden="true"></i></a>';
+                
+              return data;
+          }
+      },
+
+
+      {
+            data: null,
+            render: function (data, type, row) {
+                    return '<a href="/tradeadmin/stake_history_table/'+row['id']+'"><i class="fa fa-history" aria-hidden="true"></i></a>';
+                 
+                return data;
+            }
+        },
+
+
+        {
+          data: null,
+          render: function (data, type, row) {
+                  return '<a href="/tradeadmin/user_burn_deposit/'+row['id']+'"><i class="fa fa-play" aria-hidden="true"></i></a>';
+                
+              return data;
+          }
+      },
+
+
+      {
+          data: null,
+          render: function (data, type, row) {
+                  return '<a href="/tradeadmin/user_monthly_deposit/'+row['id']+'"><i class="fa fa-play" aria-hidden="true"></i></a>';
+                
+              return data;
+          }
+      },
+
+
+       {
+          data: null,
+          render: function (data, type, row) {
+                  return '<a href="/tradeadmin/classicuser_burn_deposit/'+row['id']+'"><i class="fa fa-play" aria-hidden="true"></i></a>';
+                
+              return data;
+          }
+      },
+
+
+      {
+            data: null,
+            render: function (data, type, row) {
+                    return '<a href="/tradeadmin/mp_history_table/'+row['id']+'"><i class="fa fa-history" aria-hidden="true"></i></a>';
+                 
+                return data;
+            }
+        },
+
+
+        {
+            data: null,
+            render: function (data, type, row) {
+                    return '<a href="/tradeadmin/burn_history_table/'+row['id']+'"><i class="fa fa-history" aria-hidden="true"></i></a>';
+                 
+                return data;
+            }
+        },
+
+        {
+            data: null,
+            render: function (data, type, row) {
+                    return '<a href="/tradeadmin/burnjwc_history_table/'+row['id']+'"><i class="fa fa-history" aria-hidden="true"></i></a>';
+                 
+                return data;
+            }
+        },
+
+
+
+
     ],
     processing: true,
     serverSide: true,

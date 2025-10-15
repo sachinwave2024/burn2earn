@@ -141,6 +141,21 @@ urlpatterns = [
 
 
 
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+                                    #New stake__wallet
+    path('new_staking_deposit/',views.new_staking_deposit_api,name="staking_api"),
+    path('buy_Newstake/',views.buy_Newstake,name="buy_Newstake"),
+    path('Stake_detail/',views.Stake_detail,name="Stake_detail"),
+    path('stake_process_rewards/',views.stake_process_rewards,name="stake_process_rewards"),
+    path('Stake_Referral_history/',views.Stake_Referral_history,name="Stake_Referral_history"),
+    path('NewstakeBuyHistory/',views.NewstakeBuyHistory,name="NewstakeBuyHistory"),
+    path('Stake_Transfer_History_List/',views.Stake_Transfer_History_List,name="Stake_Transfer_History_List"),
+    path('Stake_expire/',views.Stake_expire,name="Stake_expire"),
+    path('NewStakeInternalTransfer/',views.NewStakeInternalTransfer,name="NewStakeInternalTransfer"),
+    path('uplinerefferals/',views.uplinerefferals,name="uplinerefferals"),
+    path('Stake_Claim_APIorg/',views.Stake_Claim_APIorg,name="Stake_Claim_APIorg"),
 
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

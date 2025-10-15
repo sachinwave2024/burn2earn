@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from API.models import Contract_address, Delete_Account_Management, Delete_Account_Reason_Management, Google_Fitness, Internal_transfer_history, Pin, Plan_purchase_wallet, Referral_reward_History, Reward_History, User_2x_Boost, User_address, UserCashWallet, Withdraw, Withdraw_history, plan, referral_level
+from API.models import Contract_address, Delete_Account_Management, Delete_Account_Reason_Management, Google_Fitness, Internal_transfer_history, Pin, Plan_purchase_wallet, Referral_reward_History, Reward_History, User_2x_Boost, User_address, UserCashWallet, Withdraw, Withdraw_history, plan, referral_level,Boat_Referral_reward_History,Roi_Reward_History,Boat_Referral_income_History,MPPlanlist,MPRewardHistory,MPDailyRewardHistory,BurnRewardHistory,BurnMonthRewardHistory,BurnWithdraw,CBurnRewardHistory,CBurnMonthRewardHistory
 from locations.models import Country,State
 from trade_master.models import Cms_StaticContent, Faq,SupportCategory,Stake_Credit_History
 from trade_admin_auth.models import Registration_otp,  Steps_history,  User_Management, User_two_fa
@@ -33,7 +33,7 @@ class user_DeatailSerializers(serializers.ModelSerializer):
 class User_see(serializers.ModelSerializer):
     class Meta:
         model= User_Management
-        fields = ['id','user_name','Name','Email','User_Verification_Status','Direct_referral_id','phone_number','user_profile_pic','device_unique_id','request_device_id','created_on','User_type']
+        fields = ['id','user_name','Name','Email','User_Verification_Status','Direct_referral_id','phone_number','user_profile_pic','device_unique_id','request_device_id','USER_INRID','created_on','User_type']
 
 class two_fa_Serializers(serializers.ModelSerializer):
   
@@ -41,11 +41,27 @@ class two_fa_Serializers(serializers.ModelSerializer):
         model=User_two_fa
         fields = ['user_totp']
 
+# class user_ref_upline(serializers.ModelSerializer):
+
+#     class Meta:
+#         model= User_Management
+#         fields = ['id','Name','Email','user','user_name','plan_start_date','plan_end_date','plan','Newstake_wallet','TradeBwa']
+
+
+
 class user_ref_upline(serializers.ModelSerializer):
+    # Define a computed field for TradeBwa divided by 3, rounded to 2 decimal places
+    TradeBwa_divided = serializers.SerializerMethodField()
 
     class Meta:
-        model= User_Management
-        fields = ['id','Name','Email','user','user_name','plan_start_date','plan_end_date','plan']
+        model = User_Management
+        fields = ['id', 'Name', 'Email', 'user', 'user_name', 'plan_start_date', 'plan_end_date', 'plan', 'Newstake_wallet', 'TradeBwa', 'TradeBwa_divided','MPlan','Burnamount','Burnamountjwc']
+
+    def get_TradeBwa_divided(self, obj):
+        # Divide TradeBwa by 3 and round to 2 decimal places
+        return round(obj.TradeBwa / 3, 2) if obj.TradeBwa is not None else 0
+    
+    
 
 class Google_fitness_Serializers(serializers.ModelSerializer):
 
@@ -118,11 +134,26 @@ class Withdraw_history_Serializers(serializers.ModelSerializer):
     class Meta:
         model= Withdraw
         fields = '__all__'
+        
+        
+class burnWithdraw_history_Serializers(serializers.ModelSerializer):
+
+    class Meta:
+        model= BurnWithdraw
+        fields = '__all__'
+        
 
 class User_withdraw_see(serializers.ModelSerializer):
     class Meta:
         model= Withdraw
         fields = ['id','userid','Amount','Withdraw_fee','Withdraw_USDT','Withdraw_JW','Address','Transaction_Hash', 'created_on', 'Month_stake', 'Wallet_type' , 'status','back_up_phrase']
+
+
+class User_BurnWithdraw_see(serializers.ModelSerializer):
+    class Meta:
+        model= BurnWithdraw
+        fields = ['id','userid','Amount','Withdraw_fee','Withdraw_USDT','Withdraw_JW','Address','Transaction_Hash', 'created_on', 'Month_stake', 'Wallet_type' , 'status','back_up_phrase']
+
 
 class User_stake_withdraw_see(serializers.ModelSerializer):
     class Meta:
@@ -195,3 +226,63 @@ class User_device_see(serializers.ModelSerializer):
     class Meta:
         model= User_Management
         fields = ['id','Name','Email','user_phone_number','device_unique_id','user_profile_pic','status']
+        
+class Trade_Referral_History_Serializers(serializers.ModelSerializer):
+
+    class Meta:
+        model = Boat_Referral_reward_History
+        fields = '__all__'
+
+class Bot_Referral_history_Serializers(serializers.ModelSerializer):
+
+    class Meta:
+        model = Boat_Referral_income_History
+        fields = '__all__'
+
+class Trade_Reward_History_Serializers(serializers.ModelSerializer):
+
+    class Meta:
+        model= Roi_Reward_History
+        fields = '__all__'
+
+
+class MPPlanlistSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MPPlanlist
+        fields = '__all__'
+
+class MPlan_Reward_History_Serializers(serializers.ModelSerializer):
+    class Meta:
+        model= MPDailyRewardHistory
+        fields = '__all__'
+        
+class MPlan_Referral_history_Serializers(serializers.ModelSerializer):
+    class Meta:
+        model = MPRewardHistory
+        fields = '__all__'
+        
+        
+
+
+class burn_Reward_History_Serializers(serializers.ModelSerializer):
+    class Meta:
+        model= BurnMonthRewardHistory
+        fields = '__all__'
+        
+class burn_Referral_history_Serializers(serializers.ModelSerializer):
+    class Meta:
+        model = BurnRewardHistory
+        fields = '__all__'
+        
+        
+
+class Cburn_Reward_History_Serializers(serializers.ModelSerializer):
+    class Meta:
+        model= CBurnMonthRewardHistory
+        fields = '__all__'
+        
+class Cburn_Referral_history_Serializers(serializers.ModelSerializer):
+    class Meta:
+        model = CBurnRewardHistory
+        fields = '__all__'
+        

@@ -92,6 +92,14 @@
                   </label>
                     {%render_field form.status class+="form-control" placeholder=form.status.label %}
                 </div>
+
+
+                <div class="form-group">
+                 <label >{{form.USER_INRID.label}}
+                    {% if form.USER_INRID|req_label  %} <span class="text-danger"> * </span>{% endif %}
+                  </label>
+                    {%render_field form.USER_INRID class+="form-control" placeholder=form.USER_INRID.label %}
+                </div>
               
              
             </div>

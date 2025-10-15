@@ -85,6 +85,9 @@ float: right;
         <th>Current Plan</th>
         <th>Plan Start Date</th>
         <th>Plan End Date</th>
+        <th>Current Stake</th>  
+        <th>Current Trade</th>
+        <th>MP Plan</th>
       </tr>
   </thead>
   {{plan_his}}
@@ -99,6 +102,9 @@ float: right;
        <td>{{ item.user_name}}</td>
        <td>{{ item.plan_start_date}}</td>
        <td>{{ item.plan_end_date}}</td>
+       <td>{{ item.Newstake_wallet}}</td>
+       <td>{{ item.TradeBwa_divided}}</td>
+       <td>{{ item.MPlan}}</td>
 
      </tr>
       {% endfor %}

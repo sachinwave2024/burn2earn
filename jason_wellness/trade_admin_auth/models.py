@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils.timezone import now
 from django.conf import settings
 
 from django.contrib.auth.models import User,Group
@@ -247,11 +247,34 @@ class User_Management(models.Model):
 	USDT_status=models.IntegerField(verbose_name='USDT_status',default=0)	
 	plan_rewards_earned = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 	plan_rewards_released = models.CharField(max_length=500, blank=True, null=True)
-	# rewards_earned = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-	# last_reward_dates = models.IntegerField(default=0, verbose_name="last_reward_dates")  # To track last reward dates for each rank
-	# rewards_weeks_released = models.IntegerField(default=0, verbose_name="rewards_weeks_released")
-	# admin_stop_withdraw=models.IntegerField(choices=User_Status,verbose_name='admin_stop_withdraw')	
-	# user_unique_device_id = models.CharField(max_length=150,verbose_name="User Unique Device Id",blank=True,null=True)
+	boat_status=models.IntegerField(verbose_name='boat_status',default=1)
+	Newstake_wallet = models.IntegerField(default=0, verbose_name="Newstake_wallet")
+	USER_INRID = models.CharField(max_length=50,verbose_name='USER INRID',blank=True,null=True)
+	PlanBwa = models.IntegerField(default=0, verbose_name="PlanBwa")
+	TradeBwa = models.IntegerField(default=0, verbose_name="TradeBwa")
+	StakeBwa = models.IntegerField(default=0, verbose_name="StakeBwa")
+	transferpw = models.IntegerField(default=0, verbose_name="transferpw")
+	xvalue = models.IntegerField(default=3, verbose_name="xvalue")
+	MPlan = models.IntegerField(verbose_name="MPlan Plan",blank=True,null=True,default=0)
+	MPminwithdraw = models.IntegerField(verbose_name="MPminwithdraw",blank=True,null=True,default=0)
+	MPmaxwithdraw = models.IntegerField(verbose_name="MPmaxwithdraw",blank=True,null=True,default=0)
+	Mpuserelegilelevl = models.IntegerField(verbose_name="Mpuserelegilelevl",blank=True,null=True,default=0)
+	Mpdailyreward = models.DecimalField(max_digits=10, decimal_places=2)
+	MPlanBWA = models.IntegerField(default=0, verbose_name="MPlanBWA")
+	Mpuserleg1 = models.IntegerField(verbose_name="Mpuserleg1",blank=True,null=True,default=0)
+	Mpuserlegall = models.IntegerField(verbose_name="Mpuserlegall",blank=True,null=True,default=0)
+	Mplan_start_date = models.DateTimeField(default=now,verbose_name='Mplan Start Date')
+	MPlanTWA = models.IntegerField(default=0, verbose_name="MPlanTWA")
+	BNBStatus=models.IntegerField(verbose_name='BNBStatus',default=0)
+	Burnamount = models.IntegerField(default=0, verbose_name="Burnamount")
+	Burnelegibility = models.IntegerField(verbose_name="Burnelegibility",blank=True,null=True,default=0)
+	Burnamountjwc = models.IntegerField(default=0, verbose_name="Burnamountjwc")
+	Burnelegibilityjwc = models.IntegerField(verbose_name="Burnelegibilityjwc",blank=True,null=True,default=0)
+	burnamountafter20may = models.IntegerField(default=0, verbose_name="burnamountafter20may")
+	burn_rewards_earned = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+	burn_rewards_released = models.CharField(max_length=500, blank=True, null=True)
+	rewards_month_released = models.CharField(max_length=500, blank=True, null=True)
+	burnteamamonthafter20may = models.IntegerField(default=0, verbose_name="burnteamamonthafter20may")
 
 	def __str__(self):
 		return "%s" % self.Name
@@ -380,3 +403,113 @@ class WithdrawSendUSDTHistory(models.Model):
 	class Meta:
 		verbose_name ='WithdrawSendUSDTHistory'
 		db_table='USDWzWkaJsitsYeR'
+  
+class WithdrawSendUSDTHistoryboat(models.Model):
+	user = models.CharField(max_length=100,blank=True,null=True,verbose_name="Username")
+	email = models.ForeignKey(User_Management,verbose_name="Email",on_delete=models.CASCADE,blank=True,null=True)
+	claim_amount = models.CharField(max_length=100,blank=True,null=True,verbose_name="Claim Amount")
+	type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Type")
+	from_address = models.CharField(max_length=50,verbose_name='From Address',blank=True,null=True)
+	to_address = models.CharField(max_length=50,verbose_name='To Address',blank=True,null=True)
+	Transaction_Hash = models.CharField(max_length=200,verbose_name='TransactionHash',blank=True,null=True,default="")
+	send_status =models.IntegerField(choices=SEND_STATUS,default=3,verbose_name='Send Status')
+	currency = models.CharField(max_length=50,verbose_name='Currency',blank=True,null=True)
+	plan_start_date=models.DateTimeField(default=timezone.now,verbose_name='plan Start Date')
+	plan_end_date=models.DateTimeField(default=timezone.now,verbose_name='plan End Date')
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+
+
+	class Meta:
+		verbose_name ='WithdrawSendUSDTHistoryboat'
+		db_table='BOAT_supportusdt'
+  
+
+
+###### mp plan  
+
+
+class MPfeeHistory(models.Model):
+	user = models.CharField(max_length=100,blank=True,null=True,verbose_name="Username")
+	email = models.ForeignKey(User_Management,verbose_name="Email",on_delete=models.CASCADE,blank=True,null=True)
+	claim_amount = models.CharField(max_length=100,blank=True,null=True,verbose_name="Claim Amount")
+	type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Type")
+	from_address = models.CharField(max_length=50,verbose_name='From Address',blank=True,null=True)
+	to_address = models.CharField(max_length=50,verbose_name='To Address',blank=True,null=True)
+	Transaction_Hash = models.CharField(max_length=200,verbose_name='TransactionHash',blank=True,null=True,default="")
+	send_status =models.IntegerField(choices=SEND_STATUS,default=3,verbose_name='Send Status')
+	currency = models.CharField(max_length=50,verbose_name='Currency',blank=True,null=True)
+	plan_start_date=models.DateTimeField(default=timezone.now,verbose_name='plan Start Date')
+	plan_end_date=models.DateTimeField(default=timezone.now,verbose_name='plan End Date')
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+
+
+	class Meta:
+		verbose_name ='MPfeeHistory'
+		db_table='MPSubFee'
+  
+  
+class MPPLanHistory(models.Model):
+	user = models.CharField(max_length=100,blank=True,null=True,verbose_name="Username")
+	email = models.ForeignKey(User_Management,verbose_name="Email",on_delete=models.CASCADE,blank=True,null=True)
+	plan_amount = models.CharField(max_length=100,blank=True,null=True,verbose_name="Claim Amount")
+	type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Type")
+	from_address = models.CharField(max_length=50,verbose_name='From Address',blank=True,null=True)
+	to_address = models.CharField(max_length=50,verbose_name='To Address',blank=True,null=True)
+	Transaction_Hash = models.CharField(max_length=200,verbose_name='TransactionHash',blank=True,null=True,default="")
+	send_status =models.IntegerField(choices=SEND_STATUS,default=3,verbose_name='Send Status')
+	currency = models.CharField(max_length=50,verbose_name='Currency',blank=True,null=True)
+	plan_start_date=models.DateTimeField(default=timezone.now,verbose_name='plan Start Date')
+	plan_end_date=models.DateTimeField(default=timezone.now,verbose_name='plan End Date')
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+
+
+	class Meta:
+		verbose_name ='MPPLanHistory'
+		db_table='MPPlan'
+  
+  
+  
+class BurntoearnHistory(models.Model):
+	user = models.CharField(max_length=100,blank=True,null=True,verbose_name="Username")
+	email = models.ForeignKey(User_Management,verbose_name="Email",on_delete=models.CASCADE,blank=True,null=True)
+	plan_amount = models.CharField(max_length=100,blank=True,null=True,verbose_name="Claim Amount")
+	type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Type")
+	from_address = models.CharField(max_length=50,verbose_name='From Address',blank=True,null=True)
+	to_address = models.CharField(max_length=50,verbose_name='To Address',blank=True,null=True)
+	Transaction_Hash = models.CharField(max_length=200,verbose_name='TransactionHash',blank=True,null=True,default="")
+	send_status =models.IntegerField(choices=SEND_STATUS,default=3,verbose_name='Send Status')
+	currency = models.CharField(max_length=50,verbose_name='Currency',blank=True,null=True)
+	plan_start_date=models.DateTimeField(default=timezone.now,verbose_name='plan Start Date')
+	plan_end_date=models.DateTimeField(default=timezone.now,verbose_name='plan End Date')
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+
+
+	class Meta:
+		verbose_name ='BurntoearnHistory'
+		db_table='BurnToEarn'
+
+
+
+class CBurntoearnHistory(models.Model):
+	user = models.CharField(max_length=100,blank=True,null=True,verbose_name="Username")
+	email = models.ForeignKey(User_Management,verbose_name="Email",on_delete=models.CASCADE,blank=True,null=True)
+	plan_amount = models.CharField(max_length=100,blank=True,null=True,verbose_name="Claim Amount")
+	type = models.CharField(max_length=100,blank=True,null=True,verbose_name="Type")
+	from_address = models.CharField(max_length=50,verbose_name='From Address',blank=True,null=True)
+	to_address = models.CharField(max_length=50,verbose_name='To Address',blank=True,null=True)
+	Transaction_Hash = models.CharField(max_length=200,verbose_name='TransactionHash',blank=True,null=True,default="")
+	send_status =models.IntegerField(choices=SEND_STATUS,default=3,verbose_name='Send Status')
+	currency = models.CharField(max_length=50,verbose_name='Currency',blank=True,null=True)
+	plan_start_date=models.DateTimeField(default=timezone.now,verbose_name='plan Start Date')
+	plan_end_date=models.DateTimeField(default=timezone.now,verbose_name='plan End Date')
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+
+
+	class Meta:
+		verbose_name ='CBurntoearnHistory'
+		db_table='CBurnToEarn'

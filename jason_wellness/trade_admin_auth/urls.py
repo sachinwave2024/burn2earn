@@ -14,6 +14,7 @@ from .views import ListAttemptIPBlock,DeleteAttemptIPBlock,ListBlockIp,AddBlockI
 from .views import Admin_passwordresetconfirm
 from .views import manage_emails, delete_email
 from django.views.decorators.csrf import csrf_exempt
+from .views import get_promobonus_details, PROMOBONUS,update_promobonus_status ,encrypt_private_key_api,get_Swap_details,SWAP,Approve_swap,BURNWITHDRAW,get_Burn_details
 
 app_name = 'trade_admin_auth'
 
@@ -206,8 +207,11 @@ urlpatterns = [
     path('wallet_edit_address/<int:id>/',csrf_exempt(views.wallet_edit_address),name='wallet_edit_address'),
     
 	path('wallet_address_users_listing/',login_required(views.Wallet_Address_Users_List),name='wallet_address_users_listing'),
+	path('delete_wallet_address/<int:id>/', login_required(views.delete_wallet_address),name = "delete_wallet_address"),
 
 	re_path(r'^uplineuser_referal_history_table/(?P<pk>[-\w]+)/$', login_required(views.UplineReferalHistoryTable.as_view(),login_url=loginurl), name='upline_user_referal_history_table'),
+	re_path(r'^mpuplineuser_referal_history_table/(?P<pk>[-\w]+)/$', login_required(views.mpUplineReferalHistoryTable.as_view(),login_url=loginurl), name='mpupline_user_referal_history_table'),
+	re_path(r'^burnuplineuser_referal_history_table/(?P<pk>[-\w]+)/$', login_required(views.burnUplineReferalHistoryTable.as_view(),login_url=loginurl), name='burnuplineuser_referal_history_table'),
 	path('hash_users_listing/',login_required(views.transcation_hash_List),name='hash_users_listing'),
     path('wallet_address_block_list/',login_required(views.wallet_address_block_list),name='wallet_address_block_list'),
     path('unblock_address/<int:id>/',csrf_exempt(views.unblock_address),name='unblock_address'),
@@ -227,16 +231,33 @@ urlpatterns = [
 	path('Edit_withdraw_history/<int:id>/', login_required(views.Edit_withdraw_history),name = "Edit_withdraw_history"), 
 	path('reward_update_api/<int:id>/', login_required(views.reward_update_api),name = "reward_update_api"), 
 	path('delete_referral/<int:id>/', login_required(views.delete_referral),name = "delete_referral"),
+	path('botdelete_referral/<int:id>/', login_required(views.botdelete_referral),name = "botdelete_referral"),
+	path('mpdelete_referral/<int:id>/', login_required(views.mpdelete_referral),name = "mpdelete_referral"),
 	path('settings_price/', login_required(views.settings_price),name = "settings_price"),
     path('user_plan_edit/<int:id>/', login_required(views.user_plan_edit),name = "user_plan_edit"),
     path('Admin_approve_withdraw/<int:id>/', login_required(views.Admin_approve_withdraw),name = "Admin_approve_withdraw"), 
-    path('Admin_approve_withdraw1/<int:id>/', login_required(views.Admin_approve_withdraw123),name = "Admin_approve_withdraw1"), 
+    path('Admin_approve_withdraw1/<int:id>/', login_required(views.Admin_approve_withdraw123),name = "Admin_approve_withdraw1"),
+    path('Admin_approve_withdrawusdt/<int:id>/', login_required(views.Admin_approve_withdrawusdt),name = "Admin_approve_withdrawusdt"),  
 	path('manual_Withdraw_Request/<int:id>/', login_required(views.manual_Withdraw_Request),name = "manual_Withdraw_Request"),
     path('getmultiplewithdrawUsers/', csrf_exempt(views.getmultiplewithdrawUsers),name = "getmultiplewithdrawUsers"),
 	path('manual_Withdraw/', login_required(views.manual_Withdraw),name = "manual_Withdraw"),
     path('user_hold_payment/<int:id>/', login_required(views.user_hold_payment),name = "user_hold_payment"),
 	path('hold_manual_withdraw/', login_required(views.hold_manual_withdraw),name = "hold_manual_withdraw"),
 	path('getmultiplewithdrawholdUsers/', csrf_exempt(views.getmultiplewithdrawholdUsers),name = "getmultiplewithdrawholdUsers"),
+	path('manual_withdraw_USDT/', login_required(views.manual_withdraw_USDT),name = "manual_withdraw_USDT"),
+	path('getmultiplewithdrawUsersusdt/', csrf_exempt(views.getmultiplewithdrawUsersusdt),name = "getmultiplewithdrawUsersusdt"),
+	path('manual_withdraw_INR/', login_required(views.manual_withdraw_INR),name = "manual_withdraw_INR"),
+	path('getmultiplewithdrawUsersinr/', csrf_exempt(views.getmultiplewithdrawUsersinr),name = "getmultiplewithdrawUsersinr"),
+	path('Admin_approve_withdrawinr/<int:id>/', login_required(views.Admin_approve_withdrawinr),name = "Admin_approve_withdrawinr"), 
+ 
+	path('getmultiplewithdrawUsersburntoearn/', csrf_exempt(views.getmultiplewithdrawUsersburntoearn),name = "getmultiplewithdrawUsersburntoearn"),
+	path('manual_withdrawburntoearn/', login_required(views.manual_withdrawburntoearn),name = "manual_withdrawburntoearn"),
+	path('Admin_approve_withdraw1234/<int:id>/', login_required(views.Admin_approve_withdraw1234),name = "Admin_approve_withdraw1234"), 
+	path('burnmanual_Withdraw_Request/<int:id>/', login_required(views.burnmanual_Withdraw_Request),name = "burnmanual_Withdraw_Request"),
+ 
+	
+	path('get_user_pwdetails/', views.get_user_pwdetails, name='get_user_pwdetails'),
+    path('USERPW/', views.USERPW, name='USERPW'),
     
     
     
@@ -251,6 +272,36 @@ urlpatterns = [
 	path('getstakemultiplewithdrawholdUsers/', csrf_exempt(views.getstakemultiplewithdrawholdUsers),name = "getstakemultiplewithdrawholdUsers"),
 	path('premium_wallet_manage/1/', login_required(views.premium_wallet_manage),name = "premium_wallet_manage"),
 	path('user_premium_deposit/<int:id>/', login_required(views.user_premium_deposit),name = "user_premium_deposit"),
+	path('user_trade_deposit/<int:id>/', login_required(views.user_trade_deposit),name = "user_trade_deposit"),
+	path('user_stake_deposit/<int:id>/', login_required(views.user_stake_deposit),name = "user_stake_deposit"),
+	path('user_burn_deposit/<int:id>/', login_required(views.user_burn_deposit),name = "user_burn_deposit"),
+	path('classicuser_burn_deposit/<int:id>/', login_required(views.classicuser_burn_deposit),name = "classicuser_burn_deposit"),
+	path('user_monthly_deposit/<int:id>/', login_required(views.user_monthly_deposit),name = "user_monthly_deposit"),
+	path('user_monthlyfee_deposit/<int:id>/', login_required(views.user_monthlyfee_deposit),name = "user_monthlyfee_deposit"),
+	path('purchase_bot/<int:id>/', login_required(views.purchase_bot),name = "purchase_bot"),
+	re_path(r'^trade_history_table/(?P<pk>[-\w]+)/$', login_required(views.TradeHistoryManagementTable.as_view(),login_url=loginurl), name='trade_history_table'),
+	re_path(r'^stake_history_table/(?P<pk>[-\w]+)/$', login_required(views.StakeHistoryManagementTable.as_view(),login_url=loginurl), name='stake_history_table'),
+	re_path(r'^mp_history_table/(?P<pk>[-\w]+)/$', login_required(views.MPlanHistoryManagementTable.as_view(),login_url=loginurl), name='mp_history_table'),
+	re_path(r'^burn_history_table/(?P<pk>[-\w]+)/$', login_required(views.BurnHistoryManagementTable.as_view(),login_url=loginurl), name='burn_history_table'),
+	re_path(r'^burnjwc_history_table/(?P<pk>[-\w]+)/$', login_required(views.BurnjwcHistoryManagementTable.as_view(),login_url=loginurl), name='burnjwc_history_table'),
+	path('burndelete_referral/<int:id>/', login_required(views.burndelete_referral),name = "burndelete_referral"),
+	path('purchase_bot/<int:id>/', login_required(views.purchase_bot),name = "purchase_bot"),
+ 
+ 
+	path('get_promobonus_details/', get_promobonus_details, name="get_promobonus_details"),
+	path("update_promobonus_status/", update_promobonus_status, name="update_promobonus_status"),
+    path('promobonus/', PROMOBONUS, name="PROMOBONUS"),
+    path("encrypt-private-key/", encrypt_private_key_api, name="encrypt-private-key"),
+    
+    
+    path('get_Swap_details/', get_Swap_details, name="get_Swap_details"),
+	path("Approve_swap/", Approve_swap, name="Approve_swap"),
+    path('SWAP/', SWAP, name="SWAP"),
+    
+    
+    path('get_Burn_details/', get_Burn_details, name="get_Burn_details"),
+    path('BURNWITHDRAW/', BURNWITHDRAW, name="BURNWITHDRAW"),
+    
     
     
     

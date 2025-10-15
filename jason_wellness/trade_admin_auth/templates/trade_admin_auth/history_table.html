@@ -1,5 +1,5 @@
 {% extends 'default_theme/base/__base.html' %}
-{% load staticfiles %} 
+{% load static %} 
 
 {% load form_custom %}
 
@@ -566,6 +566,11 @@
                                 <th>Referral Min</th>
                                 <th>Referral Max</th>
                                 <th>Price</th>
+                                <th>USDT/JW</th>
+                                 <th>Plan_BWA</th>
+                                <th>BOT_STATUS</th>
+                                <th>TRADE_STATUS</th>
+                                <th>Withdraw_X</th>
                                 <th>Actions</th>
                                 <th>Purchased By</th>
                                 <th>Upline Referral</th>
@@ -1122,6 +1127,7 @@
                               <th>Username</th>
                               <th>From Wallet</th>
                               <th>Amount(USDT)</th>
+                              <th>hash</th>
                               <th>Created_on</th>
                             </tr>
                             </thead>
@@ -1726,7 +1732,7 @@
        $("#pre_req_user_table_id").empty();
      k = 1
      for (var i = 0; i < len; i++) {
-       table = ("<td>"+obj[i+1].sno+"</td><td>"+obj[i+1].username+"</td><td>"+obj[i+1].steps+"</td><td>"+obj[i+1].Reward+"</td><td>"+obj[i+1].date+"</td>");
+       table = ("<td>"+obj[i+1].sno+"</td><td>"+obj[i+1].username+"</td><td>"+obj[i+1].steps+"</td><td>"+obj[i+1].Reward+"</td><td>"+obj[i+1].Hash+"</td><td>"+obj[i+1].date+"</td>");
          $("#pre_req_user_table_id").append("<tr>"+table+"</tr>")
          k++;  
      }
@@ -1762,45 +1768,76 @@
 </script>
 
 <script>
-  function search_table_3(){
-    
-    var user = $("#plan_hist_id").val();
-    var curr_date = $("#currenct_date_plan").val();
-    var user_obj_id = $("#user_id").val();
-    var obj = JSON.parse(user)
-    var len = Object.keys(obj).length
-    if (len != 0) {
-      
-      $("#plan_hist_user_table_id").empty();
-    k = 1
+
+  function search_table_3() {
+  var user = $("#plan_hist_id").val();
+  var curr_date = $("#currenct_date_plan").val();
+  var user_obj_id = $("#user_id").val();
+
+  try {
+    var obj = JSON.parse(user);
+  } catch (e) {
+    console.error("Invalid JSON:", e);
+    return;
+  }
+
+  var keys = Object.keys(obj);
+  var len = keys.length;
+
+  $("#plan_hist_user_table_id").empty();
+
+  if (len > 0) {
     for (var i = 0; i < len; i++) {
-     if (i == 0) {
-      table = ("<td>"+obj[i+1].sno+"</td><td>"+obj[i+1].username+"</td><td>"+obj[i+1].plan+"</td><td>"+obj[i+1].plan_amt+"</td><td>"+obj[i+1].wallet_type+"</td>");
-       if (obj[i+1].wallet_type == "Trust Wallet"){
-         $("#plan_hist_user_table_id").append("<tr>"+table+"<td><a class='btn' href='https://bscscan.com/tx/"+obj[i+1].hash+"/' title='Hash' target='_blank'><i class='fa fa-external-link'></i></a></td><td>"+obj[i+1].start_date+"</td><td>"+obj[i+1].end_date+"</td><td>"+obj[i+1].health_min+"</td><td>"+obj[i+1].health_max+"</td><td>"+obj[i+1].referral_min+"</td><td>"+obj[i+1].referral_max+"</td><td>"+obj[i+1].price+"</td><td><a href='/tradeadmin/plan_date_edit/"+obj[i+1].id+"/' title='Edit'><i class='fa fa-edit'></i></a></td><td>"+obj[i+1].buy_type+"</td><td><a href='/tradeadmin/uplineuser_referal_history_table/"+obj[i+1].id+"/'><i class='fa fa-exchange'></i></a></td><td><a href='/tradeadmin/Edit_User_Plan/"+obj[i+1].id+"/'><i class='fa fa-play'></i></a></td><td><a href='/tradeadmin/user_plan_edit/"+obj[i+1].id+"/'><i class='fa fa-edit'></i></a></td></tr>");
-       }else{
-         
-         $("#plan_hist_user_table_id").append("<tr>"+table+"<td>"+'-'+"</td><td>"+obj[i+1].start_date+"</td><td>"+obj[i+1].end_date+"</td><td>"+obj[i+1].health_min+"</td>><td>"+obj[i+1].health_max+"</td>><td>"+obj[i+1].referral_min+"</td>><td>"+obj[i+1].referral_max+"</td><td>"+obj[i+1].price+"</td><td><a href='/tradeadmin/plan_date_edit/"+obj[i+1].id+"/' title='Edit'><i class='fa fa-edit'></i></a></td><td>"+obj[i+1].buy_type+"</td><td><a href='/tradeadmin/uplineuser_referal_history_table/"+obj[i+1].id+"/'><i class='fa fa-exchange'></i></a></td><td><a href='/tradeadmin/Edit_User_Plan/"+obj[i+1].id+"/'><i class='fa fa-play'></i></a></td><td><a href='/tradeadmin/user_plan_edit/"+obj[i+1].id+"/'><i class='fa fa-edit'></i></a></td></tr>")
-       }
-     } else {
-       
-       table = ("<td>"+obj[i+1].sno+"</td><td>"+obj[i+1].username+"</td><td>"+obj[i+1].plan+"</td><td>"+obj[i+1].plan_amt+"</td><td>"+obj[i+1].wallet_type+"</td>");
-       
-       if (obj[i+1].wallet_type == "Trust Wallet"){
-         
-         $("#plan_hist_user_table_id").append("<tr>"+table+"<td><a class='btn' href='https://bscscan.com/tx/"+obj[i+1].hash+"/' title='Hash' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>");
-       }else{
-         
-         $("#plan_hist_user_table_id").append("<tr>"+table+"<td>"+'-'+"</td></tr>")
-       }
-     }  
-        
+      var data = obj[keys[i]];
+      var valueToDisplay = data.USDT_JW == 0 ? "JW" : (data.USDT_JW == 1 ? "USDT" : "OtherValue");
+      var BOTSTATUS = data.Bot_status == 0 ? "Active" : (data.Bot_status == 1 ? "Inactive" : "OtherValue");
+      var TRADESTATUS = data.Trade_status == 0 ? "Active" : (data.Trade_status == 1 ? "Inactive" : "OtherValue");
+
+      var baseTable = "<td>" + data.sno + "</td>" +
+                      "<td>" + data.username + "</td>" +
+                      "<td>" + data.plan + "</td>" +
+                      "<td>" + data.plan_amt + "</td>" +
+                      "<td>" + data.wallet_type + "</td>";
+
+      var walletLink = data.wallet_type === "Trust Wallet" ?
+        "<td><a class='btn' href='https://bscscan.com/tx/" + data.hash + "/' title='Hash' target='_blank'><i class='fa fa-external-link'></i></a></td>" :
+        "<td>-</td>";
+
+      if (i === 0) {
+        var extraFields = "<td>" + data.start_date + "</td>" +
+                          "<td>" + data.end_date + "</td>" +
+                          "<td>" + data.health_min + "</td>" +
+                          "<td>" + data.health_max + "</td>" +
+                          "<td>" + data.referral_min + "</td>" +
+                          "<td>" + data.referral_max + "</td>" +
+                          "<td>" + data.price + "</td>" +
+                          "<td>" + valueToDisplay + "</td>" +
+                          "<td>" + data.PlanBwa + "</td>" +
+                          "<td>" + BOTSTATUS + "</td>" +
+                          "<td>" + TRADESTATUS + "</td>" +
+                          "<td>" + data.xvalue + "</td>" +
+                          "<td><a href='/tradeadmin/plan_date_edit/" + data.id + "/' title='Edit'><i class='fa fa-edit'></i></a></td>" +
+                          "<td>" + data.buy_type + "</td>" +
+                          "<td><a href='/tradeadmin/uplineuser_referal_history_table/" + data.id + "/'><i class='fa fa-exchange'></i></a></td>" +
+                          "<td><a href='/tradeadmin/Edit_User_Plan/" + data.id + "/'><i class='fa fa-play'></i></a></td>" +
+                          "<td><a href='/tradeadmin/user_plan_edit/" + data.id + "/'><i class='fa fa-edit'></i></a></td>";
+
+        $("#plan_hist_user_table_id").append("<tr>" + baseTable + walletLink + extraFields + "</tr>");
+      } else {
+        $("#plan_hist_user_table_id").append("<tr>" + baseTable + walletLink + "</tr>");
+      }
     }
-    } else {
-     $("#plan_hist_user_table_id").append("<tr><td colspan='8'><h5>"+"Free Plan"+"</h5></td><td><a href='/tradeadmin/plan_date_edit/"+user_obj_id+"/' title='Edit'><i class='fa fa-edit'></i></a></td></tr>");
-    }
-    
- }
+  } else {
+    $("#plan_hist_user_table_id").append(
+      "<tr><td colspan='8'><h5>Free Plan</h5></td>" +
+      "<td><a href='/tradeadmin/plan_date_edit/" + user_obj_id + "/' title='Edit'><i class='fa fa-edit'></i></a></td>" +
+      "<td><a href='/tradeadmin/uplineuser_referal_history_table/" + user_obj_id + "/'><i class='fa fa-exchange'></i></a></td>" +
+      "<td><a href='/tradeadmin/Edit_User_Plan/" + user_obj_id + "/'><i class='fa fa-play'></i></a></td>" +
+      "<td><a href='/tradeadmin/user_plan_edit/" + user_obj_id + "/'><i class='fa fa-edit'></i></a></td></tr>"
+    );
+  }
+}
+
  search_table_3()
 </script>
 

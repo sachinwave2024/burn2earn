@@ -15,6 +15,9 @@ class stake_wallet_management(models.Model):
     stake_credit_withdraw_Wallet = models.CharField(max_length=50,verbose_name="Stake Credit Withdraw Wallet",blank=True,null=True)
     created_on = models.DateTimeField(verbose_name="Created On",default=timezone.now)
     modified_on = models.DateTimeField(verbose_name="Modified On",default=timezone.now)
+    newstakewallet = models.CharField(max_length=50,verbose_name="newstakewallet",blank=True,null=True)
+    newstakereff = models.CharField(max_length=50,verbose_name="Stake newstakereff ",blank=True,null=True)
+    newstakewithdraw = models.CharField(max_length=50,verbose_name="newstakewithdraw",blank=True,null=True)
     
     class Meta:
         verbose_name='Staking_Wallet_Management'
@@ -504,3 +507,80 @@ class stake_credit_claim_history(models.Model):
     class Meta:
         verbose_name = "Stake Credit Claim History"
         db_table = 'STCRCLAXhUkKRlwLkw'
+        
+        
+        
+#########################
+#######################    new stake
+
+
+class new_stake_deposit_management(models.Model):
+    user = models.CharField(max_length=50,verbose_name="User",blank=True,null=True)
+    email = models.CharField(max_length=50,verbose_name="Email",blank=True,null=True)
+    Amount_USDT = models.CharField(max_length=50,verbose_name="Amount USDT",blank=True,null=True)
+    Amount_JW = models.CharField(max_length=50,verbose_name="Amount JW",blank=True,null=True)
+    type = models.CharField(max_length=50,verbose_name="Type",blank=True,null=True)
+    Hash = models.CharField(max_length=500,verbose_name="Hash",blank=True,null=True)
+    General_Status = (
+        (0,'Pending'),
+        (1,'Success'),		
+	)
+    status=models.IntegerField(choices=General_Status,default=0,verbose_name='Status')
+    created_on = models.DateTimeField(verbose_name="Created On",default=timezone.now)
+    modified_on = models.DateTimeField(verbose_name="Modified On",default=timezone.now)
+    paytype = models.CharField(verbose_name="Pay Type",default="",max_length=45)
+    
+
+    class Meta:
+        verbose_name = 'New_Stake_Deposit_Management'
+        db_table = 'StakeDeposite'
+        indexes = [
+			models.Index(fields=['user'])
+		]
+        
+        
+        
+class stake_purchase_history(models.Model):
+	user_id = models.IntegerField(default=0, verbose_name="user_id")
+	purchase_amount = models.DecimalField(default = 0,max_digits=16,decimal_places=8,verbose_name='plan_purchase_amount')
+	user_wallet_type = models.CharField(verbose_name="user_wallet_type",default="",max_length = 200)
+	buy_type = models.CharField(verbose_name="Buy Type",default="",max_length=200)
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+	status=models.IntegerField(default=0,verbose_name='status')
+
+	class Meta:
+		verbose_name = "Stake Purchase History"
+		db_table = "newstake"
+
+
+
+class newstake_Referral_reward_History(models.Model):
+	user = models.ForeignKey(User_Management,on_delete=models.CASCADE,verbose_name='User',default="")
+	referral_id = models.CharField(max_length=50,verbose_name="Referral ID",blank=True,null=True)
+	reward = models.CharField(max_length=50,verbose_name="Reward",blank=True,null=True)
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = "stake_referral_reward History"
+		db_table = 'stake_referral_reward'
+		indexes = [
+			models.Index(fields=['user'])
+		]
+
+
+  
+class newstakeclaim_History(models.Model):
+	user = models.ForeignKey(User_Management,related_name ='newstakeclaim_History',on_delete=models.CASCADE,verbose_name='User',default="")
+	referral_id = models.CharField(max_length=50,verbose_name="Referral ID",blank=True,null=True)
+	reward = models.CharField(max_length=50,verbose_name="Reward",blank=True,null=True)
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = "newstake claim_History "
+		db_table = 'stakeclaimreward'
+		indexes = [
+			models.Index(fields=['user'])
+		]

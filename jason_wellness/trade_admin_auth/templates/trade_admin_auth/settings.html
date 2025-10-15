@@ -57,6 +57,66 @@
                   {% endif %}
                    
                 </div>
+
+
+
+
+                <div class="form-group">
+                  <label >Facebook Promo
+                    {% if form.form1.facebookpromo|req_label  %} <span class="text-danger"> * </span>{% endif %}
+                  </label>
+                    {%render_field form.form1.facebookpromo class+="form-control" placeholder=form.form1.facebookpromo.label %}
+                    {% if form.form1.facebookpromo.errors %}
+                    {% for error in form.form1.facebookpromo.errors %}
+                      <span class="text-danger">* {{ error|escape }} </span>
+                    {% endfor %}
+                  {% endif %}
+                    
+                </div>
+
+
+                <div class="form-group">
+                  <label >Instagram Promo
+                    {% if form.form1.instapromo|req_label  %} <span class="text-danger"> * </span>{% endif %}
+                  </label>
+                    {%render_field form.form1.instapromo class+="form-control" placeholder=form.form1.instapromo.label %}
+                    {% if form.form1.instapromo.errors %}
+                    {% for error in form.form1.instapromo.errors %}
+                      <span class="text-danger">* {{ error|escape }} </span>
+                    {% endfor %}
+                  {% endif %}
+                    
+                </div>
+
+                <div class="form-group">
+                  <label >Twitter Promo
+                    {% if form.form1.twitterpromo|req_label  %} <span class="text-danger"> * </span>{% endif %}
+                  </label>
+                    {%render_field form.form1.twitterpromo class+="form-control" placeholder=form.form1.twitterpromo.label %}
+                    {% if form.form1.twitterpromo.errors %}
+                    {% for error in form.form1.twitterpromo.errors %}
+                      <span class="text-danger">* {{ error|escape }} </span>
+                    {% endfor %}
+                  {% endif %}
+                    
+                </div>
+
+
+                <div class="form-group">
+                  <label >CMC Promo
+                    {% if form.form1.cmcpromo|req_label  %} <span class="text-danger"> * </span>{% endif %}
+                  </label>
+                    {%render_field form.form1.cmcpromo class+="form-control" placeholder=form.form1.cmcpromo.label %}
+                    {% if form.form1.cmcpromo.errors %}
+                    {% for error in form.form1.cmcpromo.errors %}
+                      <span class="text-danger">* {{ error|escape }} </span>
+                    {% endfor %}
+                  {% endif %}
+                    
+                </div>
+
+
+                
                 
                 <div class="form-group">
                   <label >App version
@@ -70,6 +130,137 @@
                   {% endif %}
                    
                 </div>
+
+
+                <div class="form-group">      
+                  <label>Trade Withdraw
+                    {% if form.form1.IOS_version|req_label %} 
+                      <span class="text-danger"> * </span>
+                    {% endif %}
+                  </label>
+
+                  {% render_field form.form1.IOS_version class+="form-control" placeholder=form.form1.IOS_version.label %}
+
+                  {% if form.form1.IOS_version.errors %}
+                    {% for error in form.form1.IOS_version.errors %}
+                      <span class="text-danger">* {{ error|escape }} </span>
+                    {% endfor %}
+                  {% endif %}
+
+                  {% if form.form1.IOS_version.value %}
+                    <p class="mt-2"><strong>Trade Withdraw Day:</strong>
+                      {% if form.form1.IOS_version.value == '0' %}Monday{% endif %}
+                      {% if form.form1.IOS_version.value == '1' %}Tuesday{% endif %}
+                      {% if form.form1.IOS_version.value == '2' %}Wednesday{% endif %}
+                      {% if form.form1.IOS_version.value == '3' %}Thursday{% endif %}
+                      {% if form.form1.IOS_version.value == '4' %}Friday{% endif %}
+                      {% if form.form1.IOS_version.value == '5' %}Saturday{% endif %}
+                      {% if form.form1.IOS_version.value == '6' %}Sunday{% endif %}
+                    </p>
+                  {% endif %}
+                </div>
+
+
+
+
+                 <div class="form-group">
+                  <label>ENCRYPTED PRIVATE KEY
+                      {% if form.form1.privatekey|req_label %} <span class="text-danger"> * </span>{% endif %}
+                  </label>
+                  {% render_field form.form1.privatekey class+="form-control" placeholder=form.form1.privatekey.label readonly="readonly" %}
+                  
+                  {% if form.form1.privatekey.errors %}
+                      {% for error in form.form1.privatekey.errors %}
+                          <span class="text-danger">* {{ error|escape }} </span>
+                      {% endfor %}
+                  {% endif %}
+              </div>
+
+
+
+            <form id="encryptForm">
+                {% csrf_token %}  <!-- Ensure Django CSRF token is present -->
+                <div class="form-group">
+                    <label>ADMIN PRIVATE KEY <span class="text-danger">*</span></label>
+                    <input type="text" id="private_key" name="private_key" class="form-control" placeholder="Enter Private Key" required>
+                    <span class="text-danger" id="error_message"></span>
+                </div>
+
+                <button type="button" id="encryptButton" class="btn btn-primary encrypt-btn">Encrypt & Save</button>
+            </form>
+
+            <!-- jQuery (Ensure it's loaded before the script runs) -->
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+            <script>
+                $(document).ready(function () {
+                    $("#encryptButton").click(function () {  // Attach event handler to button
+                        var privateKey = $("#private_key").val();
+                        var csrfToken = $("input[name='csrfmiddlewaretoken']").val();  // Get CSRF token from form
+
+                        // Validate Private Key (must be exactly 64 hex characters)
+                        var hexRegex = /^[0-9a-fA-F]{64}$/;
+                        if (!hexRegex.test(privateKey)) {
+                            $("#error_message").text("Private key must be exactly 64 hexadecimal characters.");
+                            return;
+                        }
+
+                        $.ajax({
+                            url: "/tradeadmin/encrypt-private-key/",  // Adjust this if necessary
+                            type: "POST",
+                            contentType: "application/json",
+                            data: JSON.stringify({ private_key: privateKey }),  // Send JSON data
+                            headers: { "X-CSRFToken": csrfToken },  // Include CSRF token
+                            success: function (response) {
+                                alert(response.message);  // Show success message
+                                $("#error_message").text("");  // Clear errors
+                            },
+                            error: function (xhr) {
+                                console.log("❌ AJAX error:", xhr.responseText);  // Debugging
+                                var errorMessage = "An error occurred. Please try again.";
+                                if (xhr.responseJSON && xhr.responseJSON.error) {
+                                    errorMessage = xhr.responseJSON.error;
+                                }
+                                $("#error_message").text(errorMessage);
+                            }
+                        });
+                    });
+                });
+            </script>
+
+
+
+
+
+
+                <div class="form-group">
+                  <label >ADMIN ADDRESS
+                    {% if form.form1.withaddress|req_label  %} <span class="text-danger"> * </span>{% endif %}
+                  </label>
+                    {%render_field form.form1.withaddress class+="form-control" placeholder=form.form1.withaddress.label %}
+                    {% if form.form1.withaddress.errors %}
+                    {% for error in form.form1.withaddress.errors %}
+                     <span class="text-danger">* {{ error|escape }} </span>
+                    {% endfor %}
+                  {% endif %}
+                   
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                 <div class="form-group">
                  <label >{{form.form1.email.label}}
                     {% if form.form1.email|req_label  %} <span class="text-danger"> * </span>{% endif %}

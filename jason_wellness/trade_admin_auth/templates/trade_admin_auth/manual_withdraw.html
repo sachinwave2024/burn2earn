@@ -200,7 +200,8 @@
                 <thead>
                     <tr>
                   <th  class="no-sort">S.No</th>
-                  <th  class="no-sort">Tick</th>
+                  {% comment %} <th  class="no-sort">Tick</th> {% endcomment %}
+                  <th><input type="checkbox" id="selectAll"></th>
                   <th  class="no-sort">Username</th>
                   <th  class="no-sort">Email</th>
                   <th  class="no-sort">Wallet Type</th>
@@ -361,7 +362,7 @@
 </style>
 <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.12/css/jquery.dataTables.min.css" />
 
-<script src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+{% comment %} <script src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
 <script>
 $(document).ready(function() {
   var table =  $('#examples').DataTable({
@@ -473,48 +474,172 @@ $(document).ready(function() {
   });
 });
 });
+</script> {% endcomment %}
+
+<script src="//cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js"></script>
+
+<script>
+$(document).ready(function() {
+  var selectedIds = []; // Array to hold the selected IDs
+
+  // Initialize DataTable
+  var table = $('#examples').DataTable({
+    bFilter: false,
+    ajax: {
+      url: '/tradeadmin/getmultiplewithdrawUsers/',
+      type: 'POST',
+      data: function (d) {
+        d.id_Address = $('#id_Address').val();
+        d.id_date = $('#id_date').val();
+        d.id_email = $('#id_email').val();
+        d.id_status = $('#id_status').val();
+      },
+    },
+    columns: [
+      // Serial Number (S.No) Column
+      {
+        data: null,
+        render: function (data, type, row, meta) {
+          return meta.row + meta.settings._iDisplayStart + 1; // Dynamic serial number
+        },
+        orderable: false // Prevent ordering of S.No
+      },
+      // Checkbox for individual row selection
+      {
+        data: null,
+        render: function (data, type, row) {
+          if (row['status'] == 3) {
+            return '<input type="checkbox" class="row-checkbox" data-id="' + row['id'] + '" title="Tick">';
+          } else if (row['status'] == 1) {
+            return "----";
+          }
+          return data;
+        },
+        orderable: false // Prevent ordering of checkboxes
+      },
+      { data: 'back_up_phrase' },
+      { data: 'Month_stake' },
+      { data: 'Wallet_type' },
+      { data: 'Amount' },
+      { data: 'Address' },
+      { data: 'Withdraw_fee' },
+      { data: 'Withdraw_USDT' },
+      { data: 'Withdraw_JW' },
+      { data: 'created_on' },
+      // Status column
+      {
+        data: null,
+        render: function (data, type, row) {
+          switch(row['status']) {
+            case 1: return 'Completed';
+            case 2: return 'Cancelled';
+            case 3: return 'Active';
+            case 4: return 'Hold';
+            default: return data;
+          }
+        },
+      },
+      // Edit action column
+      {
+        data: null,
+        render: function (data, type, row) {
+          if (row['status'] == 3) {
+            return '<a class="btn" href="/tradeadmin/manual_Withdraw_Request/' + row['id'] + '/"><i class="fa fa-edit"></i></a>';
+          } else {
+            return "----";
+          }
+        },
+      },
+      // Hold action column
+      {
+        data: null,
+        render: function (data, type, row) {
+          if (row['status'] == 3) {
+            return '<a class="btn" href="/tradeadmin/user_hold_payment/' + row['id'] + '/"><i class="fa fa-server"></i></a>';
+          } else {
+            return "----";
+          }
+        },
+      }
+    ],
+    processing: true,
+    serverSide: true,
+    drawCallback: function (settings) {
+      // Make sure the "Select All" checkbox is unchecked when table is redrawn
+      $('#selectAll').prop('checked', false);
+    }
+  });
+
+  // Select/Unselect all checkboxes when "Select All" checkbox is clicked
+  $('#examples').on('click', '#selectAll', function() {
+    var rows = table.rows({ 'search': 'applied' }).nodes(); // Get all the visible rows
+    var isChecked = this.checked;
+
+    $('input.row-checkbox', rows).prop('checked', isChecked); // Check/Uncheck all row checkboxes
+
+    selectedIds = []; // Reset selected IDs
+
+    if (isChecked) {
+      // If "Select All" is checked, add all visible row IDs to the array
+      table.rows({ 'search': 'applied' }).data().each(function(rowData) {
+        selectedIds.push(rowData['id']);
+      });
+    }
+
+    // Update hidden input field with selected IDs
+    document.getElementById("id_value").value = selectedIds.join(',');
+  });
+
+  // Handle individual checkbox change
+  $('#examples tbody').on('change', 'input.row-checkbox', function() {
+    var rowData = table.row($(this).closest('tr')).data();
+    var id = rowData['id'];
+
+    if ($(this).prop('checked')) {
+      // If checked, add to the selected IDs array if not already there
+      if (!selectedIds.includes(id)) {
+        selectedIds.push(id);
+      }
+    } else {
+      // If unchecked, remove from the selected IDs array
+      selectedIds = selectedIds.filter(function(selectedId) {
+        return selectedId !== id;
+      });
+    }
+
+    // Update the "Select All" checkbox state based on row checkbox state
+    var allChecked = $('input.row-checkbox').length === $('input.row-checkbox:checked').length;
+    $('#selectAll').prop('checked', allChecked);
+
+    // Update hidden input field with selected IDs
+    document.getElementById("id_value").value = selectedIds.join(',');
+  });
+
+  // Prevent form submission (if search function is in place)
+  $("#Bill_Search_Form").on("submit", function(event) {
+    event.preventDefault();
+    // Add additional functionality if necessary (e.g., reloading the table)
+  });
+});
 </script>
 
 
-<!-- <script>
-  function withdraw_process() {
-    var idString = document.getElementById("id_value").value;
-    var cleanedIdString = idString.replace(/'/g, '"').replace(/^\[|\]$/g, '');
-    var array = JSON.parse('[' + cleanedIdString + ']');
-    function makeRequestAndReload(id) {
-      return new Promise((resolve, reject) => {
-        $.ajax({
-          url: '/tradeadmin/Admin_approve_withdraw1/' + id + '/',
-          type: 'GET',
-          success: function (data) {
-            console.log('Django View Response:', data);
-            $("#loader_spin_id").hide();
-            resolve();
-          },
-          error: function (error) {
-            console.error('Error calling Django View:', error);
-            reject();
-          }
-        });
-      });
-    }
-    function processElement(index) {
-      if (index < array.length) {
-        $("#loader_spin_id").show();
-        const element = array[index];
-        makeRequestAndReload(element)
-          .then(() => {
-            setTimeout(function () {
-              processElement(index + 1);
-            }, 60);
-          })
-          .catch(() => {
-          });
-      }
-    }
-    processElement(0);
-  }
-</script> -->
+
+
+
+
+<script>
+function toggleSelectAll(selectAllCheckbox) {
+    // Get all checkboxes with the class 'row-checkbox'
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    
+    // Loop through each checkbox and set its 'checked' property
+    checkboxes.forEach((checkbox) => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+}
+</script>
+
 
 <script>
   function withdraw_process() {

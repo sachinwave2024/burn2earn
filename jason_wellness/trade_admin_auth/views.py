@@ -44,9 +44,9 @@ from django.http.response import HttpResponseRedirect
 
 from django_tables2 import RequestConfig
 from crispy_forms.layout import Submit,Reset
-from API.models import Admin_Profit, Contract_address,company_bot,purchange_company_bot, Delete_Account_Management, Delete_Account_Reason_Management, Plan_purchase_wallet, Referral_code, Referral_reward, Referral_reward_History, Reward_History, UserCashWallet, Withdraw, Withdraw_history, admin_notification_message, admin_referral_code, market_price, plan, premium_wallet_deposit, premium_wallet_management, referral_level, referral_table, user_address_trust_wallet, wallet_flush_history, withdraw_values,User_2x_Boost,plan_purchase_history
+from API.models import Admin_Profit, Contract_address,company_bot,purchange_company_bot, Delete_Account_Management, Delete_Account_Reason_Management, Plan_purchase_wallet, Referral_code, Referral_reward, Referral_reward_History, Reward_History, UserCashWallet, Withdraw, Withdraw_history, admin_notification_message, admin_referral_code, market_price, plan, premium_wallet_deposit, premium_wallet_management, referral_level, referral_table, user_address_trust_wallet, wallet_flush_history, withdraw_values,User_2x_Boost,plan_purchase_history, Boat_wallet,boat_purchase_history,boat_trade_purchase_history,Roi_Reward_History,Boat_Referral_reward_History,boatroi_percentage,Boat_Referral_income_History,BurnWithdraw,MPRewardHistory,MPPlanlist,MPDailyRewardHistory,promobonus_history,BurnRewardHistory,swap_sendhistory,CBurnRewardHistory
 
-from API.serializers import  User_device_see, User_see, User_stake_withdraw_see, User_withdraw_see, user_DeatailSerializers, user_ref_upline
+from API.serializers import  User_device_see, User_see, User_stake_withdraw_see, User_withdraw_see, user_DeatailSerializers, user_ref_upline,User_BurnWithdraw_see
 
 from trade_auth.models import Market_place
 
@@ -57,7 +57,7 @@ from trade_admin_auth.mixins import ManageUserAdminRequiredMixin,BlockIpaddressA
 
 
 from company.models import Company
-from trade_admin_auth.models import AdminUser_Profile,AdminUser_Activity,AccessAttempt, Steps_Management, Steps_history, Two_x_boost, User_Management,PlanDateUpdateHistory, User_two_fa, WithdrawSendHistory, WithdrawSendUSDTHistory, front_page_management
+from trade_admin_auth.models import AdminUser_Profile,AdminUser_Activity,AccessAttempt, Steps_Management, Steps_history, Two_x_boost, User_Management,PlanDateUpdateHistory, User_two_fa, WithdrawSendHistory, WithdrawSendUSDTHistory, front_page_management,WithdrawSendUSDTHistoryboat,BurntoearnHistory,MPPLanHistory,MPfeeHistory,CBurntoearnHistory
 
 from trade_admin_auth.tables import Admin_Profit_Table, AdminActivityTable,DeactivateUserTable, Delete_Account_Reason_Management_Table, Delete_Account_Request_Management_Table, List_admin_notification_message_Table, List_front_page_management_Table, List_market_internal_Table, List_withdraw_Value_Table, Plan_Table, Referral_level_Table, Referral_reward_Table, Step_Management_Table, Steps_history_Table, Two_x_boost_Table, User_Management_Table, User_Referral_Table, Wallet_Table
 from trade_admin_auth.tables import AdminActivityTableFilter,AdminActivitySearch_Form,UserManagementFilter,UserManagementSearch_Form,AdminProfitFilter,AdminProfitSearch_Form
@@ -65,7 +65,7 @@ from trade_admin_auth.tables import DashboardAdminActivityTable,BlockIPTable
 from django.contrib.auth.forms import PasswordChangeForm
 
 from trade_master.models import Blockip,EmailTemplate, LoginHistory,Faq,MenuModule,MenuPermission,IconMenuModule, Stake_Credit_History,SubMenuPermission,IconMenuPermission,SubMenuModule,Jw_plan_purchase_history, plan_purchase_history_edited
-from Staking .models import  Stake_market_price, stake_wallet_management,stake_claim_reward_history
+from Staking .models import  Stake_market_price, stake_wallet_management,stake_claim_reward_history,new_stake_deposit_management,new_stake_deposit_management,stake_purchase_history,newstake_Referral_reward_History,newstakeclaim_History
 
 from trade_admin_auth.forms import Delete_aAccount_Reason_Form,EditCompanyMultiForm, List_Wallet_Form, Market_Internal_Form, Plan_Form, Referral_Level_Form, Referral_Reward_Form, Steps_Management_Form, Two_x_boost_Form, User_Management_Form, User_Referral_Level_Form, admin_notification_message_Form, front_page_management_Form, withdraw_values_Form
 from trade_admin_auth.forms import AdminUserAddMultiForm
@@ -99,7 +99,7 @@ import secrets
 
 from rest_framework.authtoken.models import Token
 
-from Staking.models import Stake_history_management,stake_deposit_management,internal_transfer_history,stake_claim_table
+from Staking.models import Stake_history_management,stake_deposit_management,internal_transfer_history,stake_claim_table,new_stake_deposit_management
 
 # def allow_by_ip(view_func):
 #     def authorize(request, *args, **kwargs):
@@ -420,7 +420,7 @@ def tradeadmin_attempt_history(request,get_email,typelogin):
           )
     return  True
 
-
+from datetime import datetime
 def admintwofa(request,uid):
     context={}
     context = {
@@ -492,7 +492,7 @@ def user_date_charts(request):
     return json_result
 
 
-
+import datetime
 def admin_activity_history(request,user_id,typelogin):
     get_user = User.objects.get(id=user_id)
     if get_user:
@@ -503,7 +503,7 @@ def admin_activity_history(request,user_id,typelogin):
             browsername=get_browser_type(request),
             os=get_browser_os_type(request),
             devices=get_browser_device_type(request),
-            created_on=datetime.datetime.now(),
+            created_on=datetime.now(),
             created_by_id = get_user.id,
             modified_by_id = get_user.id
 
@@ -511,7 +511,7 @@ def admin_activity_history(request,user_id,typelogin):
 
     return  True
 
-
+import datetime
 # @allow_by_ip
 @check_adminip('checkadminip')
 def dashboard(request):
@@ -541,7 +541,7 @@ def dashboard(request):
         support_count=1
         context['support_count']=support_count
         
-        today = datetime.datetime.today()
+        today = datetime.today()
         yesterday = today - timedelta(days = 1)
         checkfromdate = yesterday.strftime('%Y-%m-%d')
 
@@ -1205,7 +1205,7 @@ class CreateSubadminUser(CreateView):
         messages.add_message(self.request, messages.SUCCESS, 'Subadmin  created Successfully.')
         return HttpResponseRedirect('/tradeadmin/subadmin_sub_menu_add/'+str(user_id)+'/')
     
-
+import datetime
 @check_group("Manage Sub Admin")
 def CreateSubAdmin_SubMenu_User(request,id):
   context = {}
@@ -1242,7 +1242,7 @@ def CreateSubAdmin_SubMenu_User(request,id):
           sub_menu_name = menu_sub_obj,
           access_permissions=0,
           access_status = 0,
-          created_on=datetime.datetime.now(),
+          created_on=datetime.now(),
           created_by_id = request.user.id,
           modified_by_id = request.user.id
         )  
@@ -1257,7 +1257,7 @@ def CreateSubAdmin_SubMenu_User(request,id):
           sub_menu_name = menu_sub_obj,
           access_permissions=0,
           access_status = 1,
-          created_on=datetime.datetime.now(),
+          created_on=datetime.now(),
           created_by_id = request.user.id,
           modified_by_id = request.user.id
         ) 
@@ -1293,7 +1293,7 @@ def Subadmin_SubMenu_EditPermission(request,user_id):
     
   return render(request,'trade_admin_auth/subadmin_submenu_edit_permission.html', context)
 
-
+import datetime
 @check_group("Manage Sub Admin")
 def CreateSubAdmin_IconMenu_User(request,id):
   context = {}
@@ -1330,7 +1330,7 @@ def CreateSubAdmin_IconMenu_User(request,id):
           icon_menu_name = menu_icon_obj,
           access_permissions=0,
           access_status = 0,
-          created_on=datetime.datetime.now(),
+          created_on=datetime.now(),
           created_by_id = request.user.id,
           modified_by_id = request.user.id
         )  
@@ -1348,7 +1348,7 @@ def CreateSubAdmin_IconMenu_User(request,id):
           icon_menu_name = menu_icon_obj,
           access_permissions=0,
           access_status = 1,
-          created_on=datetime.datetime.now(),
+          created_on=datetime.now(),
           created_by_id = request.user.id,
           modified_by_id = request.user.id
         ) 
@@ -1528,7 +1528,7 @@ def SubadminEditPermission(request,user_id):
   return render(request,'trade_admin_auth/subadmin_permissions.html', context)
  
 
-
+import datetime
 def create_menu_permissions(request,user_id,list_val,access_status):
     menu_perm_val = list_val
     create_menu = MenuPermission.objects.create(
@@ -1536,7 +1536,7 @@ def create_menu_permissions(request,user_id,list_val,access_status):
       access_modules_id=menu_perm_val,
       access_permissions=0,
       access_status = access_status,
-      created_on=datetime.datetime.now(),
+      created_on=datetime.now(),
       created_by_id = request.user.id,
       modified_by_id = request.user.id
 
@@ -2002,7 +2002,7 @@ def getUsers(request):
 
   if search_value !='':
     if int(search_type) == 1:
-      obj_username = User_Management.objects.raw('SELECT U.id , U.Name,U.Email, U2.Email as User_Verification_Status , U.Direct_referral_id ,U.phone_number, U.user_profile_pic,U.request_device_id, U.status, U.created_on, U.User_type FROM USPzTPzfNdmGTlER as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.user_id FROM REFFITHkpbdREL R where R.referal_code = U.referal_code) WHERE U.Name LIKE %s ORDER BY U.id DESC LIMIT %s , %s', ["%" + search_value + "%",start,length])
+      obj_username = User_Management.objects.raw('SELECT U.id , U.Name,U.Email, U2.Email as User_Verification_Status , U.Direct_referral_id ,U.phone_number, U.user_profile_pic,U.request_device_id,U.USER_INRID, U.status, U.created_on, U.User_type FROM USPzTPzfNdmGTlER as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.user_id FROM REFFITHkpbdREL R where R.referal_code = U.referal_code) WHERE U.Name LIKE %s ORDER BY U.id DESC LIMIT %s , %s', ["%" + search_value + "%",start,length])
 
       serializer = User_see(obj_username,many=True)
 
@@ -2017,7 +2017,7 @@ def getUsers(request):
         tt.sort(reverse=False)
       
     elif int(search_type) == 2:
-      obj_username = User_Management.objects.raw('SELECT U.id , U.Name,U.Email, U2.Email as User_Verification_Status , U.Direct_referral_id ,U.phone_number, U.user_profile_pic,U.request_device_id, U.status, U.created_on, U.User_type FROM USPzTPzfNdmGTlER as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.user_id FROM REFFITHkpbdREL R where R.referal_code = U.referal_code) WHERE U.Email LIKE %s ORDER BY U.id DESC LIMIT %s , %s', ["%" + search_value + "%", start,length])
+      obj_username = User_Management.objects.raw('SELECT U.id , U.Name,U.Email, U2.Email as User_Verification_Status , U.Direct_referral_id ,U.phone_number, U.user_profile_pic,U.request_device_id,U.USER_INRID, U.status, U.created_on, U.User_type FROM USPzTPzfNdmGTlER as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.user_id FROM REFFITHkpbdREL R where R.referal_code = U.referal_code) WHERE U.Email LIKE %s ORDER BY U.id DESC LIMIT %s , %s', ["%" + search_value + "%", start,length])
 
       serializer = User_see(obj_username,many=True)
 
@@ -2033,7 +2033,7 @@ def getUsers(request):
 
 
     elif int(search_type) == 3:
-        obj_username = User_Management.objects.raw('SELECT U.id , U.Name,U.Email, U2.Email as User_Verification_Status , U.Direct_referral_id ,U.phone_number, U.user_profile_pic,U.request_device_id, U.status, U.created_on, U.User_type FROM USPzTPzfNdmGTlER as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.user_id FROM REFFITHkpbdREL R where R.referal_code = U.referal_code) WHERE U.device_unique_id LIKE %s ORDER BY U.id DESC LIMIT %s , %s', ["%" + search_value + "%", start,length])
+        obj_username = User_Management.objects.raw('SELECT U.id , U.Name,U.Email, U2.Email as User_Verification_Status , U.Direct_referral_id ,U.phone_number, U.user_profile_pic,U.request_device_id,U.USER_INRID, U.status, U.created_on, U.User_type FROM USPzTPzfNdmGTlER as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.user_id FROM REFFITHkpbdREL R where R.referal_code = U.referal_code) WHERE U.device_unique_id LIKE %s ORDER BY U.id DESC LIMIT %s , %s', ["%" + search_value + "%", start,length])
 
         serializer = User_see(obj_username,many=True)
 
@@ -2052,7 +2052,7 @@ def getUsers(request):
 
       for ref_code in User_Management.objects.raw('SELECT U.id , R.referal_code as ref_codes FROM USPzTPzfNdmGTlER as U JOIN REFFITHkpbdREL AS R ON R.user_id = U.id AND U.Email = %s',[search_value]):
 
-        obj_username = User_Management.objects.raw('SELECT U.id , U.Name,U.Email, U2.Email as User_Verification_Status , U.Direct_referral_id ,U.phone_number, U.user_profile_pic,U.request_device_id, U.status, U.created_on, U.User_type FROM USPzTPzfNdmGTlER as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.user_id FROM REFFITHkpbdREL R where R.referal_code = U.referal_code) WHERE U.referal_code = %s ORDER BY U.id DESC LIMIT %s , %s', [ref_code.ref_codes, start,length])
+        obj_username = User_Management.objects.raw('SELECT U.id , U.Name,U.Email, U2.Email as User_Verification_Status , U.Direct_referral_id ,U.phone_number, U.user_profile_pic,U.request_device_id, U.USER_INRID,U.status, U.created_on, U.User_type FROM USPzTPzfNdmGTlER as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.user_id FROM REFFITHkpbdREL R where R.referal_code = U.referal_code) WHERE U.referal_code = %s ORDER BY U.id DESC LIMIT %s , %s', [ref_code.ref_codes, start,length])
 
         serializer = User_see(obj_username,many=True)
 
@@ -2066,7 +2066,7 @@ def getUsers(request):
 
           tt.sort(reverse=False)
   else:
-    obj_username = User_Management.objects.raw('SELECT U.id , U.Name,U.Email, U2.Email as User_Verification_Status , U.Direct_referral_id ,U.phone_number, U.user_profile_pic,U.request_device_id, U.status, U.created_on, U.User_type FROM USPzTPzfNdmGTlER as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.user_id FROM REFFITHkpbdREL R where R.referal_code = U.referal_code) ORDER BY U.id DESC LIMIT %s , %s', [start,length])
+    obj_username = User_Management.objects.raw('SELECT U.id , U.Name,U.Email, U2.Email as User_Verification_Status , U.Direct_referral_id ,U.phone_number, U.user_profile_pic,U.request_device_id,U.USER_INRID, U.status, U.created_on, U.User_type FROM USPzTPzfNdmGTlER as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.user_id FROM REFFITHkpbdREL R where R.referal_code = U.referal_code) ORDER BY U.id DESC LIMIT %s , %s', [start,length])
 
     serializer = User_see(obj_username,many=True)
     
@@ -2105,6 +2105,7 @@ class Edit_User_Management(UpdateView):
        form.instance.modified_by_id = self.request.user.id
        form_email = form.instance.Email
        form_device_id=form.instance.device_unique_id
+       form_USER_INRID=form.instance.USER_INRID
        obj_device_id = User_Management.objects.filter(device_unique_id = form_device_id).exclude(id = form.instance.id)
        decvice_cout= User_Management.objects.filter(device_unique_id = form_device_id).count()
        if decvice_cout == 1 :
@@ -3904,6 +3905,7 @@ class HistoryManagementTable(TemplateView):
         r_list_usr["username"] = str(user_obj.Name)
         r_list_usr["steps"] = (i.type)
         r_list_usr["Reward"] = str(i.Amount_USDT)
+        r_list_usr["Hash"] = (i.Hash)
         r_list_usr["date"] = (str(i.created_on))
         r_list_usr["pageno"] = pre_r_start_page
         r_list_usr["sno"] = pre_r_usr
@@ -4002,6 +4004,12 @@ class HistoryManagementTable(TemplateView):
     plan_start_page = self.request.GET.get('pageno3', 1)
     plan_end_value = int(plan_start_page) * 5
     plan_start_value = int(plan_end_value) - 4
+    Comp_User = boat_trade_purchase_history.objects.filter(user_id=p_key).last()
+    # Handle case where no trade purchase history exists
+    if Comp_User is None:
+        trade_status = "1"
+    else: 
+        trade_status = str(Comp_User.status)
     if buy_plan_name:
       obj_plan_hist = plan_purchase_history.objects.filter(user_id = p_key).filter(plan_id__plan_name = buy_plan_name).order_by('-id')
       for i in obj_plan_hist:
@@ -4014,6 +4022,11 @@ class HistoryManagementTable(TemplateView):
           plan_list_usr["plan"] = (i.plan_id.plan_name)
           plan_list_usr["plan_amt"] = int(i.purchase_amount)
           plan_list_usr["price"] = str(user_obj.fixed_status)
+          plan_list_usr["USDT_JW"] = str(user_obj.USDT_status)
+          plan_list_usr["PlanBwa"] = str(user_obj.PlanBwa)
+          plan_list_usr["Bot_status"] = str(user_obj.boat_status)
+          plan_list_usr["xvalue"] = str(user_obj.xvalue)
+          plan_list_usr["Trade_status"] = trade_status
           plan_list_usr["start_date"] = (str(user_obj.plan_start_date))
           plan_list_usr["end_date"] = (str(user_obj.plan_end_date))
           plan_list_usr["wallet_type"] = (i.user_wallet_type)
@@ -4038,6 +4051,11 @@ class HistoryManagementTable(TemplateView):
           plan_list_usr["plan"] = (i.plan_id.plan_name)
           plan_list_usr["plan_amt"] = int(i.purchase_amount)
           plan_list_usr["price"] = str(user_obj.fixed_status)
+          plan_list_usr["USDT_JW"] = str(user_obj.USDT_status)
+          plan_list_usr["PlanBwa"] = str(user_obj.PlanBwa)
+          plan_list_usr["Bot_status"] = str(user_obj.boat_status)
+          plan_list_usr["xvalue"] = str(user_obj.xvalue)
+          plan_list_usr["Trade_status"] = trade_status
           plan_list_usr["start_date"] = (str(user_obj.plan_start_date))
           plan_list_usr["end_date"] = (str(user_obj.plan_end_date))
           plan_list_usr["wallet_type"] = (i.user_wallet_type)
@@ -5105,6 +5123,7 @@ from Staking.models import  stake_wallet_management,stake_claim_reward_history
 #   return render(request,"trade_admin_auth/add_user_plan.html",context)
 
 from Staking.models import  stake_wallet_management,stake_claim_reward_history
+from datetime import datetime, timedelta, time
 @check_group_icon_menu("Add Plan")
 def Add_User_Plan(request,id):
   context = {}
@@ -5175,10 +5194,10 @@ def Add_User_Plan(request,id):
       else:
           pass
       obj_user.plan = plan_id.id
-      obj_user.plan_start_date = datetime.datetime.now()
-      today = datetime.datetime.now()
-      desired_time = datetime.time(23, 55)
-      today_with_desired_time = datetime.datetime.combine(today.date(), desired_time)
+      obj_user.plan_start_date = datetime.now()
+      today = datetime.now()
+      desired_time = time(23, 55)
+      today_with_desired_time = datetime.combine(today.date(), desired_time)
       end_date = today_with_desired_time + timedelta(plan_days)
       obj_user.plan_end_date = end_date
       obj_user.user_referral_eligible_level = plan_id.referral_level_eligible
@@ -5305,7 +5324,7 @@ def Add_User_Plan(request,id):
           admin_profit = plan_amount - l
           adminprofit = Admin_Profit.objects.create(user = obj_user,admin_profit = admin_profit,Profit_type = "Plan Purchase")   
           #user_Detail = User_Management.objects.get(user_name=obj_user.user)
-          premium_wallet_deposit.objects.create(user=obj_user.id, email=obj_user.Email, Amount_USDT=plan_amount, Amount_JW=0, Hash='0x1468a5baaaca8d5e927ce129fd3c', status=1, type="User Create", withdraw_amount=0, create_type="Recharge Deposit")
+          # premium_wallet_deposit.objects.create(user=obj_user.id, email=obj_user.Email, Amount_USDT=plan_amount, Amount_JW=0, Hash='0x1468a5baaaca8d5e927ce129fd3c', status=1, type="User Create", withdraw_amount=0, create_type="Recharge Deposit")
         messages.add_message(request, messages.SUCCESS, 'Plan was added to '+str(obj_user.Name)+' successfully.')
       else:   
         pass
@@ -5313,7 +5332,7 @@ def Add_User_Plan(request,id):
       usr_mail = obj_plan_purchase_history.user.Email
       messages.add_message(request, messages.ERROR, 'Transaction hash already applied for this user: '+str(usr_mail))
   context["obj_plan"] = obj_plan
-  context["Title"] = "Add User Plan"
+  context["Title"] = "Add User Plan :-" + str(obj_user.Email)
   context["obj_user"] = obj_user  
   context["market"]=companyqs.market_api_price 
   context["fixed"]=Market_Price.market_price
@@ -6030,13 +6049,107 @@ class Edit_wallet(UpdateView):
 
 
       
+# # Missing reward update function
+# @check_group_icon_menu("Missing reward update")
+# def missing_reward_update_admin(request,id):
+#   context = {}
+#   if request.method == "POST":
+#     Date =  request.POST['Date']
+#     date_obj = datetime.datetime.strptime(Date, '%Y-%m-%d %H:%M:%S')
+#     user_details=User_Management.objects.get(id = id) 
+#     try:
+#         chk_data = Reward_History.objects.get(created_on__date = (date_obj.date()),user_id = user_details.id,reward_status = "step_reward")
+#         if chk_data:
+#           messages.add_message(request, messages.SUCCESS, 'Reward already updated')
+#           return HttpResponseRedirect('/tradeadmin/List_User_Management')
+#     except:
+#         try:
+#             chk_data = Steps_history.objects.get(created_on__date = (date_obj.date()),user_id = user_details.id)
+#             if chk_data:
+#                 Plan = user_details.plan
+#                 user_wallet = UserCashWallet.objects.get(userid_id = user_details.id)
+#                 chk_data.status = 1
+#                 chk_data.modified_on = datetime.datetime.now()
+#                 chk_data.save()
+#                 if Plan == 0:
+#                     try:
+#                         actual_plan = plan.objects.get(plan_type = 0)
+#                         value = Decimal(int(user_details.over_all_stepcount)/int(user_details.reward_steps))
+#                         reward = Decimal(value*user_details.reward_step_amount)
+#                         user_wallet.balanceone = Decimal(user_wallet.balanceone)+Decimal(round(reward,2))
+#                         user_wallet.save()
+#                         chk_data.steps = int(user_details.over_all_stepcount)
+#                         chk_data.save()
+#                         if(str(date_obj.date()) == "2022-12-23") :
+#                             table = Reward_History.objects.create(user = user_details,steps = int(user_details.over_all_stepcount),Reward = Decimal((reward)),created_on = str(date_obj.date())+" 00:00:45.270177")
+#                         else:
+#                             table = Reward_History.objects.create(user = user_details,steps = int(user_details.over_all_stepcount),Reward = Decimal((reward)),created_on = str(date_obj.date())+" 18:45:22.270177")
+#                     except:
+#                         pass
+#                 else:
+#                     actual_plan = plan_purchase_history.objects.filter(user = user_details.id).last()
+#                     value = Decimal(actual_plan.Plan_maximum_step/int(actual_plan.plan_reward_step_val))
+#                     # reward = Decimal(value*actual_plan.plan_per_reward_amount)
+#                     reward = Decimal(actual_plan.Plan_maximum_reward)
+#                     user_wallet.balanceone = Decimal(user_wallet.balanceone)+Decimal((reward))
+#                     user_wallet.save()
+#                     chk_data.steps = int(actual_plan.Plan_maximum_step)
+#                     chk_data.save()
+#                     if(str(date_obj.date()) == "2022-12-23") :
+#                         table = Reward_History.objects.create(user = user_details,steps = int(actual_plan.Plan_maximum_step),Reward = Decimal((reward)),created_on = str(date_obj.date())+" 00:00:45.270177")
+#                     else:
+#                         table = Reward_History.objects.create(user = user_details,steps = int(actual_plan.Plan_maximum_step),Reward = Decimal((reward)),created_on = str(date_obj.date())+" 18:45:22.270177")
+#             messages.add_message(request, messages.SUCCESS, 'Reward updated')
+#             return HttpResponseRedirect('/tradeadmin/List_User_Management')
+#         except:
+#             chk_data = Steps_history.objects.create(created_on = str(date_obj)+".000000",user_id = user_details.id)
+#             if chk_data:
+#                 Plan = user_details.plan
+#                 user_wallet = UserCashWallet.objects.get(userid_id = user_details.id)
+#                 chk_data.status = 1
+#                 chk_data.modified_on = datetime.datetime.now()
+#                 chk_data.save()
+#                 if Plan == 0:
+#                     try:
+#                         actual_plan = plan.objects.get(plan_type = 0)
+#                         value = Decimal(int(user_details.over_all_stepcount)/int(user_details.reward_steps))
+#                         reward = Decimal(value*user_details.reward_step_amount)
+#                         user_wallet.balanceone = Decimal(user_wallet.balanceone)+Decimal(round(reward,2))
+#                         user_wallet.save()
+#                         chk_data.steps = int(user_details.over_all_stepcount)
+#                         chk_data.save()
+#                         if(str(date_obj.date()) == "2022-12-23") :
+#                             table = Reward_History.objects.create(user = user_details,steps = int(user_details.over_all_stepcount),Reward = Decimal((reward)),created_on = str(date_obj.date())+" 00:00:45.270177")
+#                         else:
+#                             table = Reward_History.objects.create(user = user_details,steps = int(user_details.over_all_stepcount),Reward = Decimal((reward)),created_on = str(date_obj.date())+" 18:45:22.270177")
+#                     except:
+#                         pass
+#                 else:
+#                     actual_plan = plan_purchase_history.objects.filter(user = user_details.id).last()
+#                     value = Decimal(actual_plan.Plan_maximum_step/int(actual_plan.plan_reward_step_val))
+#                     # reward = Decimal(value*actual_plan.plan_per_reward_amount)
+#                     reward = Decimal(actual_plan.Plan_maximum_reward)
+#                     user_wallet.balanceone = Decimal(user_wallet.balanceone)+Decimal((reward))
+#                     user_wallet.save()
+#                     chk_data.steps = int(actual_plan.Plan_maximum_step)
+#                     chk_data.save()
+#                     if(str(date_obj.date()) == "2022-12-23") :
+#                         table = Reward_History.objects.create(user = user_details,steps = int(actual_plan.Plan_maximum_step),Reward = Decimal((reward)),created_on = str(date_obj.date())+" 00:00:45.270177")
+#                     else:
+#                         table = Reward_History.objects.create(user = user_details,steps = int(actual_plan.Plan_maximum_step),Reward = Decimal((reward)),created_on = str(date_obj.date())+" 18:45:22.270177")
+#             messages.add_message(request, messages.SUCCESS, 'Reward updated')
+#             return HttpResponseRedirect('/tradeadmin/List_User_Management')
+#   context["Title"] = "Missing Reward Update"
+#   return render(request,'trade_admin_auth/missing_reward_update.html',context)
+
+import datetime
 # Missing reward update function
 @check_group_icon_menu("Missing reward update")
 def missing_reward_update_admin(request,id):
   context = {}
   if request.method == "POST":
     Date =  request.POST['Date']
-    date_obj = datetime.datetime.strptime(Date, '%Y-%m-%d %H:%M:%S')
+    date_obj = datetime.strptime(Date, '%Y-%m-%d %H:%M:%S')
     user_details=User_Management.objects.get(id = id) 
     try:
         chk_data = Reward_History.objects.get(created_on__date = (date_obj.date()),user_id = user_details.id,reward_status = "step_reward")
@@ -6050,7 +6163,7 @@ def missing_reward_update_admin(request,id):
                 Plan = user_details.plan
                 user_wallet = UserCashWallet.objects.get(userid_id = user_details.id)
                 chk_data.status = 1
-                chk_data.modified_on = datetime.datetime.now()
+                chk_data.modified_on = datetime.now()
                 chk_data.save()
                 if Plan == 0:
                     try:
@@ -6088,7 +6201,7 @@ def missing_reward_update_admin(request,id):
                 Plan = user_details.plan
                 user_wallet = UserCashWallet.objects.get(userid_id = user_details.id)
                 chk_data.status = 1
-                chk_data.modified_on = datetime.datetime.now()
+                chk_data.modified_on = datetime.now()
                 chk_data.save()
                 if Plan == 0:
                     try:
@@ -6124,8 +6237,6 @@ def missing_reward_update_admin(request,id):
   return render(request,'trade_admin_auth/missing_reward_update.html',context)
 
 
-
-
 # Download CSV for all users file function
 
 def download_CSV(request):
@@ -6139,7 +6250,7 @@ def download_CSV(request):
       end_date = ""
 
     try:
-      obj_withdraw = Withdraw.objects.values('userid__Name','userid__Email','Amount','Withdraw_USDT','Withdraw_JW','Address','Transaction_Hash','created_on').filter(created_on__date__gte = str_date , created_on__date__lte = end_date).order_by('created_on')
+      obj_withdraw = Withdraw.objects.values('userid__Name','userid__Email','Wallet_type','Amount','Withdraw_USDT','Withdraw_JW','Address','Transaction_Hash','created_on').filter(created_on__date__gte = str_date , created_on__date__lte = end_date).order_by('created_on')
     except:
       obj_withdraw = ""
 
@@ -6936,6 +7047,7 @@ def Wallet_Address_Users_List(request):
         list_usr["address"] = (i.Address)
         list_usr["wallet_type"] = i.wallet_type
         list_usr["date"] = str(i.created_on)
+        list_usr["id"] = str(i.id)
         list_usr["pageno"] = start_page
         list_usr["sno"] = usr
         dict_address[count] = list_usr
@@ -6950,6 +7062,7 @@ def Wallet_Address_Users_List(request):
         list_usr["address"] = (i.Address)
         list_usr["wallet_type"] = i.wallet_type
         list_usr["date"] = str(i.created_on)
+        list_usr["id"] = str(i.id)
         list_usr["pageno"] = start_page
         list_usr["sno"] = usr
         dict_address[count] = list_usr
@@ -6964,6 +7077,7 @@ def Wallet_Address_Users_List(request):
         list_usr["address"] = (i.Address)
         list_usr["wallet_type"] = i.wallet_type
         list_usr["date"] = str(i.created_on)
+        list_usr["id"] = str(i.id)
         list_usr["pageno"] = start_page
         list_usr["sno"] = usr
         dict_address[count] = list_usr
@@ -6992,6 +7106,15 @@ def Wallet_Address_Users_List(request):
   return render(request, 'trade_admin_auth/wallet_address_users_list.html',context)
 
 
+@check_group_sub_menu("Wallet Address List")
+def delete_wallet_address(request, id):
+    wallet = get_object_or_404(user_address_trust_wallet, id=id)
+    wallet.delete()
+    messages.success(request, "Wallet address deleted successfully.")
+    return redirect('trade_admin_auth:wallet_address_users_listing')
+
+
+from django.utils import timezone
 class UplineReferalHistoryTable(TemplateView):
   template_name = "trade_admin_auth/upline_refferal_table.html"
 
@@ -7012,7 +7135,11 @@ class UplineReferalHistoryTable(TemplateView):
     ref_dict_uplineusers={}
     user_plam = plan_purchase_history.objects.filter(user=p_key).last()
     level_com=plan_purchase_history.objects.filter(user=p_key).count()
-    user_ref = Referral_reward_History.objects.filter(referral_id = user_obj.Name,created_on__date=user_plam.created_on.date())
+    # Use the created_on date from user_plam if it exists, otherwise use today's date
+    created_on_date = user_plam.created_on.date() if user_plam else timezone.now().date()
+
+    user_ref = Referral_reward_History.objects.filter(referral_id=user_obj.Name, created_on__date=created_on_date)
+    # user_ref = Referral_reward_History.objects.filter(referral_id = user_obj.Name,created_on__date=user_plam.created_on.date())
     for i in user_ref:
       ref_usr = ref_usr + 1
       ref_list_usr={}
@@ -7050,6 +7177,139 @@ class UplineReferalHistoryTable(TemplateView):
     context['user_name'] = (user_obj.Name).upper()
     context['Title'] = 'Upline Referral Table'
     context["Btn_url"] = "trade_admin_auth: Upline_Referral_History"
+    return context
+
+
+
+ 
+from django.utils import timezone
+class mpUplineReferalHistoryTable(TemplateView):
+  template_name = "trade_admin_auth/mpupline_refferal_table.html"
+
+  def get_context_data(self, **kwargs):
+    context = super(mpUplineReferalHistoryTable, self).get_context_data(**kwargs)
+    p_key = self.kwargs['pk']
+    user_obj = User_Management.objects.get(id = p_key) 
+
+    obj_username = User_Management.objects.raw('SELECT T2.id, T2.Name,T2.Email,T2.referal_code,T1.lvl - 1 as user, T2.plan_start_date , T2.plan_end_date , ( CASE WHEN T2.plan = 0 THEN "FREE" ELSE ( SELECT plan_name FROM pUDmgt5FK2 WHERE id = T2.plan ) END ) as user_name FROM ( SELECT @r AS _id,(SELECT @r := reff_id FROM USPzTPzfNdmGTlER WHERE id = _id) AS referal_code, @l := @l + 1 AS lvl FROM (SELECT @r := %s, @l := 0) vars, USPzTPzfNdmGTlER m WHERE @r <> 0) T1 JOIN USPzTPzfNdmGTlER T2 ON T1._id = T2.id ', [p_key])
+    serializer = user_ref_upline(obj_username,many=True)  
+
+
+    ref_usr = 0
+    ref_count = 0
+    ref_start_page = self.request.GET.get('pageno', 1)
+    ref_end_value = int(ref_start_page) * 5
+    ref_start_value = int(ref_end_value) - 4
+    ref_dict_uplineusers={}
+    user_plam = MPPLanHistory.objects.filter(email_id=user_obj.id).last()
+    level_com=MPPLanHistory.objects.filter(email_id=user_obj.id).count()
+    created_on_date = user_plam.created_on.date() if user_plam else timezone.now().date()
+    user_ref = MPRewardHistory.objects.filter(referral_id="MP " + user_obj.Name, created_on__date=created_on_date)
+    for i in user_ref:
+      ref_usr = ref_usr + 1
+      ref_list_usr={}
+      ref_count = ref_count + 1
+      ref_list_usr["username"]= i.user.Name
+      ref_list_usr["Reward"]=i.reward
+      ref_list_usr["marekt_api"]=i.user.fixed_status
+      ref_list_usr["level"]="First Commission"
+      ref_list_usr["created_on"]=(str(i.created_on))
+      ref_list_usr["sno"] = ref_usr
+      ref_list_usr["id"] = i.id
+      ref_dict_uplineusers[ref_count] = ref_list_usr
+    try:
+      tot_ref_user_qs = user_ref
+    except:
+      tot_ref_user_qs = ""
+    w_page = self.request.GET.get('pageno', 1)
+    w_paginator = Paginator(user_ref.order_by('-created_on'), 5)
+
+    
+    try:
+        ref_hist_qs = w_paginator.page(w_page)
+    except PageNotAnInteger:
+        ref_hist_qs =w_paginator.page(1)
+    except EmptyPage:
+        ref_hist_qs = w_paginator.page(w_paginator.num_pages)
+
+    context['ref_hist_qs'] = ref_hist_qs
+    context["ref_endpage"] = ref_hist_qs.number+1
+    context["ref_startpage"] = ref_hist_qs.number-1
+    context['ref_start_value'] = ref_hist_qs.start_index()
+    context['ref_end_value'] = ref_hist_qs.end_index()
+    context['ref_usr_count'] = user_ref.count()
+    context['ref_dict_uplineusers']=json.dumps(ref_dict_uplineusers)
+    context['upline_referral']=serializer.data
+    context['user_name'] = (user_obj.Name).upper()
+    context['Title'] = 'mpUpline Referral Table'
+    context["Btn_url"] = "trade_admin_auth: mpUpline_Referral_History"
+    return context
+
+
+
+
+  
+from django.utils import timezone
+class burnUplineReferalHistoryTable(TemplateView):
+  template_name = "trade_admin_auth/burnupline_refferal_table.html"
+
+  def get_context_data(self, **kwargs):
+    context = super(burnUplineReferalHistoryTable, self).get_context_data(**kwargs)
+    p_key = self.kwargs['pk']
+    user_obj = User_Management.objects.get(id = p_key) 
+
+    obj_username = User_Management.objects.raw('SELECT T2.id, T2.Name,T2.Email,T2.referal_code,T1.lvl - 1 as user, T2.plan_start_date , T2.plan_end_date , ( CASE WHEN T2.plan = 0 THEN "FREE" ELSE ( SELECT plan_name FROM pUDmgt5FK2 WHERE id = T2.plan ) END ) as user_name FROM ( SELECT @r AS _id,(SELECT @r := reff_id FROM USPzTPzfNdmGTlER WHERE id = _id) AS referal_code, @l := @l + 1 AS lvl FROM (SELECT @r := %s, @l := 0) vars, USPzTPzfNdmGTlER m WHERE @r <> 0) T1 JOIN USPzTPzfNdmGTlER T2 ON T1._id = T2.id ', [p_key])
+    serializer = user_ref_upline(obj_username,many=True)  
+
+
+    ref_usr = 0
+    ref_count = 0
+    ref_start_page = self.request.GET.get('pageno', 1)
+    ref_end_value = int(ref_start_page) * 5
+    ref_start_value = int(ref_end_value) - 4
+    ref_dict_uplineusers={}
+    user_plam = BurntoearnHistory.objects.filter(email_id=user_obj.id).last()
+    level_com=BurntoearnHistory.objects.filter(email_id=user_obj.id).count()
+    created_on_date = user_plam.created_on.date() if user_plam else timezone.now().date()
+    user_ref = BurnRewardHistory.objects.filter(referral_id="BURN " + user_obj.Name, created_on__date=created_on_date)
+    for i in user_ref:
+      ref_usr = ref_usr + 1
+      ref_list_usr={}
+      ref_count = ref_count + 1
+      ref_list_usr["username"]= i.user.Name
+      ref_list_usr["Reward"]=i.reward
+      ref_list_usr["marekt_api"]=i.user.fixed_status
+      ref_list_usr["level"]="First Commission"
+      ref_list_usr["created_on"]=(str(i.created_on))
+      ref_list_usr["sno"] = ref_usr
+      ref_list_usr["id"] = i.id
+      ref_dict_uplineusers[ref_count] = ref_list_usr
+    try:
+      tot_ref_user_qs = user_ref
+    except:
+      tot_ref_user_qs = ""
+    w_page = self.request.GET.get('pageno', 1)
+    w_paginator = Paginator(user_ref.order_by('-created_on'), 5)
+
+    
+    try:
+        ref_hist_qs = w_paginator.page(w_page)
+    except PageNotAnInteger:
+        ref_hist_qs =w_paginator.page(1)
+    except EmptyPage:
+        ref_hist_qs = w_paginator.page(w_paginator.num_pages)
+
+    context['ref_hist_qs'] = ref_hist_qs
+    context["ref_endpage"] = ref_hist_qs.number+1
+    context["ref_startpage"] = ref_hist_qs.number-1
+    context['ref_start_value'] = ref_hist_qs.start_index()
+    context['ref_end_value'] = ref_hist_qs.end_index()
+    context['ref_usr_count'] = user_ref.count()
+    context['ref_dict_uplineusers']=json.dumps(ref_dict_uplineusers)
+    context['upline_referral']=serializer.data
+    context['user_name'] = (user_obj.Name).upper()
+    context['Title'] = 'BurnUpline Referral Table'
+    context["Btn_url"] = "trade_admin_auth: burnUpline_Referral_History"
     return context
 
 
@@ -7687,7 +7947,7 @@ def user_add_usdt(request, id):
         else:
               messages.add_message(request, messages.ERROR, 'Amount Required!!!')
 
-    context['Title'] = 'Add USDT History'
+    context['Title'] = 'Add USDT History :-' + str(obj_user.Email)
     return render(request, "trade_admin_auth/add_user_usdt.html", context)
 
 
@@ -7702,7 +7962,7 @@ def download_CSV_deposit_user(request,id):
       end_date = ""
 
     try:
-      obj_withdraw = stake_deposit_management.objects.using('second_db').values('user','email','Amount_USDT','type','Amount_JW','Hash','created_on').filter(created_on__date__gte = str_date , created_on__date__lte = end_date).order_by('-id')
+      obj_withdraw = stake_deposit_management.objects.using('second_db').values('user','email','Wallet_type','Amount_USDT','type','Amount_JW','Hash','created_on').filter(created_on__date__gte = str_date , created_on__date__lte = end_date).order_by('-id')
     except:
       obj_withdraw = ""
     if obj_withdraw:
@@ -7957,7 +8217,7 @@ def Edit_withdraw_history(request,id):
       if withdraw_hash == 0:          
         marketprice= market_price.objects.get(id = 1)
         user_plan_history = plan_purchase_history.objects.filter(user_id = withdraw.userid_id).last()
-        stake_wall_per  = user_plan_history.stake_wallet_monthly_split_percentage
+        stake_wall_per  = 0 #user_plan_history.stake_wallet_monthly_split_percentage
         currency = TradeCurrency.objects.get(symbol = 'JW')
         stake_credit_amount=Decimal(withdraw.Amount)*stake_wall_per/100
         if str(obj_user.created_on) >= str("2023-11-11 12:00:00.000000"):
@@ -8189,6 +8449,25 @@ def delete_referral(request,id):
   return HttpResponseRedirect('/tradeadmin/List_User_Management/')
 
 
+def botdelete_referral(request,id):
+  ref_reward=Boat_Referral_reward_History.objects.get(id=id)
+  ref_reward.delete()
+  messages.add_message(request, messages.SUCCESS, 'Reward Delete Successfully')
+  return HttpResponseRedirect('/tradeadmin/List_User_Management/')
+
+def mpdelete_referral(request,id):
+  ref_reward=MPRewardHistory.objects.get(id=id)
+  ref_reward.delete()
+  messages.add_message(request, messages.SUCCESS, 'Reward Delete Successfully')
+  return HttpResponseRedirect('/tradeadmin/List_User_Management/')
+
+def burndelete_referral(request,id):
+  ref_reward=BurnRewardHistory.objects.get(id=id)
+  ref_reward.delete()
+  messages.add_message(request, messages.SUCCESS, 'Reward Delete Successfully')
+  return HttpResponseRedirect('/tradeadmin/List_User_Management/')
+
+
 def settings_price(request):
   if request.method == "POST":
     market_price_details = request.POST['market_price']
@@ -8204,328 +8483,110 @@ def settings_price(request):
 
 
   
-def user_plan_edit(request,id):
-  context={}
-  context['Title'] = 'User Plan Edit'
-  user_details=User_Management.objects.get(id=id)
-  if request.method == "POST": 
-    health_max = request.POST.get('health_max')
-    health_min = request.POST.get('health_min')
-    referral_max = request.POST.get('referral_max')
-    referral_min = request.POST.get('referral_min')
-    if all(val.isdigit() for val in [health_max, health_min, referral_max, referral_min]):
-        user_details.Health_Withdraw_min_value = health_min
-        user_details.Health_Withdraw_max_value = health_max
-        user_details.Referral_Withdraw_min_value = referral_min
-        user_details.Referral_Withdraw_max_value = referral_max
-        user_details.save()
-        messages.success(request, 'Successfully Updated!')
-        return HttpResponseRedirect('/tradeadmin/user_history_table/'+str(user_details.id)+'/')
-    else:
-      messages.add_message(request, messages.ERROR, 'Field Required!!!!!')
-  return render(request,'trade_admin_auth/user_plan_edit.html',context)
-
-
-
-# def manual_Withdraw(request):
+# def user_plan_edit(request,id):
 #   context={}
-#   context['Title'] = 'Pending Withdraw'
-#   return render(request,'trade_admin_auth/manual_withdraw.html',context)
+#   context['Title'] = 'User Plan Edit'
+#   user_details=User_Management.objects.get(id=id)
+#   if request.method == "POST": 
+#     health_max = request.POST.get('health_max')
+#     health_min = request.POST.get('health_min')
+#     referral_max = request.POST.get('referral_max')
+#     referral_min = request.POST.get('referral_min')
+#     USDT_JW = request.POST.get('USDT_JW')
+#     if all(val.isdigit() for val in [health_max, health_min, referral_max, referral_min]):
+#         user_details.Health_Withdraw_min_value = health_min
+#         user_details.Health_Withdraw_max_value = health_max
+#         user_details.Referral_Withdraw_min_value = referral_min
+#         user_details.Referral_Withdraw_max_value = referral_max
+#         user_details.USDT_status = USDT_JW
+#         user_details.save()
+#         messages.success(request, 'Successfully Updated!')
+#         return HttpResponseRedirect('/tradeadmin/user_history_table/'+str(user_details.id)+'/')
+#     else:
+#       messages.add_message(request, messages.ERROR, 'Field Required!!!!!')
+#   return render(request,'trade_admin_auth/user_plan_edit.html',context)
 
-# def manual_Withdraw_Request(request,id):
-#   context={}
-#   context['Title'] = 'Pending Withdraw'
-#   withdraw = Withdraw.objects.get(id = id)
-#   user_details=User_Management.objects.get(id=withdraw.userid_id)
-#   context['withdraw']=withdraw
-#   context['user_details']=user_details
-#   context['id']=id
-#   return render(request,'trade_admin_auth/manual_withdraw_request.html',context)
-   
+def user_plan_edit(request, id):
+    context = {}
+    context['Title'] = 'User Plan Edit'
+    user_details = User_Management.objects.get(id=id)
 
+    if request.method == "POST": 
+        health_max = request.POST.get('health_max')
+        health_min = request.POST.get('health_min')
+        referral_max = request.POST.get('referral_max')
+        referral_min = request.POST.get('referral_min')
+        USDT_JW = request.POST.get('USDT_JW')
+        Withdraw_X = request.POST.get('Withdraw_X')
+        bnbstatus = request.POST.get('bnbstatus')
 
-# def getmultiplewithdrawUsers(request):
+        try:
+            # Update only the provided fields
+            if health_min and health_min.isdigit():
+                user_details.Health_Withdraw_min_value = int(health_min)
 
-#   start = int(request.POST['start'])
-#   draw = int(request.POST['draw'])
-#   length = int(request.POST['length'])
-#   id_Address = (request.POST['id_Address'])
-#   email = (request.POST['id_email'])
-#   status = (request.POST['id_status'])
-#   date = (request.POST['id_date'])
- 
+            if health_max and health_max.isdigit():
+                user_details.Health_Withdraw_max_value = int(health_max)
 
-#   if id_Address !='' or date != "" or email !="" or status !=""   :
-#     if id_Address and date and email  :
-#       obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.Amount LIKE %s AND U.status = 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%","%" + date + "%","%" + email + "%", start,length])
-#       serializer = User_withdraw_see(obj_username,many=True)
-#       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address  LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.email LIKE %s', ["%" + id_Address +"%","%" + date + "%","%" + email + "%"]):
-#         totalRecords = total_count.counts
-#         set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
-#         tt = (list(set_object))
-#         tt.sort(reverse=False)
-#     elif id_Address and date  :
-#       obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.status = 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%","%" + date + "%", start,length])
-#       serializer = User_withdraw_see(obj_username,many=True)
-#       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address  LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s', ["%" + id_Address +"%","%" + date + "%"]):
-#         totalRecords = total_count.counts
-#         set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
-#         tt = (list(set_object))
-#         tt.sort(reverse=False)
-#     elif id_Address:
-#       obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND U.status = 3 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%", start,length])
-#       serializer = User_withdraw_see(obj_username,many=True)
-#       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s', ["%" + id_Address + "%"]):
-#         totalRecords = total_count.counts
-#         set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
-#         tt = (list(set_object))
-#         tt.sort(reverse=False)
-#     elif (date):
-#       obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.status = 3 ORDER BY U.id DESC LIMIT %s , %s', ["%" + date + "%", start,length])
-#       serializer = User_withdraw_see(obj_username,many=True)
-#       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s', ["%" + date + "%"]):
-#         totalRecords = total_count.counts
-#         set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
-#         tt = (list(set_object))
-#         tt.sort(reverse=False)
-#     elif email:
-#       obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.status ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U2.Email LIKE %s AND U.status = 3 ORDER BY U.id DESC LIMIT %s , %s', ["%" + email + "%", start,length])
-#       serializer = User_withdraw_see(obj_username,many=True)
-#       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U2.Email LIKE %s', ["%" + email + "%"]):
-#         totalRecords = total_count.counts
-#         set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
-#         tt = (list(set_object))
-#         tt.sort(reverse=False)
-#     elif status:
-#       obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.status ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.status LIKE %s AND U.status = 3 ORDER BY U.id DESC LIMIT %s , %s', ["%" + status + "%", start,length])
-#       serializer = User_withdraw_see(obj_username,many=True)
-#       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.status LIKE %s', ["%" + status + "%"]):
-#         totalRecords = total_count.counts
-#         set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
-#         tt = (list(set_object))
-#         tt.sort(reverse=False)
-#   else:
-#     obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase, U.Wallet_type, U2.Email as Month_stake,U.Amount, U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW, U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = (SELECT R.id FROM USPzTPzfNdmGTlER R WHERE R.id = U.userid_id)WHERE U.Address LIKE %s AND U.status = 3 ORDER BY U.id DESC LIMIT %s, %s''', ["%" + id_Address + "%", start, length]) 
-#     serializer = User_withdraw_see(obj_username,many=True)
-#     for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U WHERE U.status = 3'):
-#       totalRecords = total_count.counts
-#       set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
-#       tt = (list(set_object))
-#       tt.sort(reverse=False)
-       
-#   return JsonResponse({'data':serializer.data,"draw": draw,"recordsTotal": totalRecords,"recordsFiltered": totalRecords,"tt":tt})
+            if referral_min and referral_min.isdigit():
+                user_details.Referral_Withdraw_min_value = int(referral_min)
 
-# from web3 import Web3, HTTPProvider
+            if referral_max and referral_max.isdigit():
+                user_details.Referral_Withdraw_max_value = int(referral_max)
 
-# def Admin_approve_withdraw(request,id):   
-#     context={}
-#     context['Title'] = 'Pending Withdraw'
-#     withdraw = Withdraw.objects.get(id = id)
-#     user_Deatail=User_Management.objects.get(id=withdraw.userid_id)
-#     stake_cred=Stake_Credit_History.objects.filter(user_id=user_Deatail.id).last()
-#     preimum=premium_wallet_deposit.objects.filter(user=user_Deatail.id).exclude(type='User Create').last()
-#     amount = float(withdraw.Withdraw_JW)
-#     max_amount = int(amount*10 ** 8)
-#     address=Web3.toChecksumAddress(str(withdraw.Address))
-#     table = Withdraw_history.objects.get(withdraw_id =withdraw.id)
-#     try:
-#       url = "https://apinode.jasanwellness.fit/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl"
-#       data = {
-#               "userAddress":address,
-#               "claimAmount":max_amount,
-#               "skey" : withdraw.back_up_phrase
-#               }
-#       headers = {"Content-Type": "application/json"}
-#       response = requests.post(url, json=data, headers=headers)
-#       if response.status_code == 200:
-#           data = response.json()
-#           json_data = data['data']
-#           transaction_hash = json_data['result']
-#           withdraw.status = 1
-#           withdraw.Transaction_Hash = transaction_hash
-#           withdraw.back_up_phrase=""
-#           withdraw.save()
-#           table.Transaction_Hash = transaction_hash
-#           table.status = "Success"
-#           table.save()
-#           preimum.status= 1
-#           preimum.save()
-#           messages.add_message(request, messages.SUCCESS, 'Withdraw Successful!!!!' ) 
-#           return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
-#       else:
-#         end_date = user_Deatail.plan_end_date + timedelta(1)
-#         table.delete()
-#         withdraw.delete()
-#         if stake_cred != None:
-#           stake_cred.delete()
-#         if preimum != None:
-#           preimum.delete()
-#         messages.add_message(request, messages.ERROR, 'Contract Call Failed with Response'+str(response.status_code)) 
-#     except Exception as e:
-#       end_date = user_Deatail.plan_end_date + timedelta(1)
-#       table.delete()
-#       withdraw.delete()
-#       if stake_cred != None:
-#         stake_cred.delete()
-#       if preimum != None:
-#         preimum.delete()
-#       messages.add_message(request, messages.ERROR, 'Failed with error'+str(e))
-#     return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
+            if USDT_JW:  # Assuming this is a string field
+                user_details.USDT_status = USDT_JW
+
+            if Withdraw_X and Withdraw_X.strip():  # Check if Withdraw_X is not empty or whitespace
+                user_details.xvalue = int(Withdraw_X)
+                
+            if bnbstatus and bnbstatus.strip():  # Check if Withdraw_X is not empty or whitespace
+                user_details.BNBStatus = int(bnbstatus)
+            # Save the updated user details
+            user_details.save()
+            messages.success(request, 'Successfully Updated!')
+            return HttpResponseRedirect('/tradeadmin/user_history_table/' + str(user_details.id) + '/')
+
+        except ValueError as e:
+            # Handle cases where an invalid value is provided
+            messages.add_message(request, messages.ERROR, f"Invalid input: {e}")
+
+    return render(request, 'trade_admin_auth/user_plan_edit.html', context)
 
 
 
 
-
-# def Admin_approve_withdraw123(request, id):
-#     context = {}
-#     context['Title'] = 'Pending Withdraw'
-#     withdraw = Withdraw.objects.get(id=id)
-#     user_Deatail=User_Management.objects.get(id=withdraw.userid_id)
-#     stake_cred=Stake_Credit_History.objects.filter(user_id=user_Deatail.id).last()
-#     preimum=premium_wallet_deposit.objects.filter(user=user_Deatail.id).exclude(type='User Create').last()
-#     amount = float(withdraw.Withdraw_JW)
-#     max_amount = int(amount*10 ** 8)
-#     address = Web3.toChecksumAddress(str(withdraw.Address))
-#     table = Withdraw_history.objects.get(withdraw_id=withdraw.id)
-#     try:
-#       url = "https://apinode.jasanwellness.fit/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl"
-#       data = {
-#           "userAddress": address,
-#           "claimAmount": max_amount,
-#           "skey": withdraw.back_up_phrase
-#       }
-#       headers = {"Content-Type": "application/json"}
-#       response = requests.post(url, json=data, headers=headers)
-#       if response.status_code == 200:
-#           data = response.json()
-#           json_data = data['data']
-#           transaction_hash = json_data['result']
-#           withdraw.status = 1
-#           withdraw.Transaction_Hash = transaction_hash
-#           withdraw.back_up_phrase=""
-#           withdraw.save()
-#           table.Transaction_Hash = transaction_hash
-#           table.status = "Success"
-#           table.save()
-#           preimum.status= 1
-#           preimum.save()
-#           return JsonResponse({"status": "success", "message": "Transaction successfully approved."})
-#       else:
-#           end_date = user_Deatail.plan_end_date + timedelta(1)
-#           table.delete()
-#           withdraw.delete()
-#           if stake_cred != None:
-#             stake_cred.delete()
-#           if preimum != None:
-#             preimum.delete()
-#             return JsonResponse({"status": "error", "message": "Contract Call Failed with Response: {}".format(response.status_code)})
-#     except Exception as e:
-#       end_date = user_Deatail.plan_end_date + timedelta(1)
-#       table.delete()
-#       withdraw.delete()
-#       if stake_cred != None:
-#         stake_cred.delete()
-#       if preimum != None:
-#         preimum.delete()
-#       return JsonResponse({"status": "error", "message": "Failed with error: {}".format(str(e))})
-
-
-# def user_hold_payment(request,id):
-#   withdraw = Withdraw.objects.get(id=id)
-#   if int(withdraw.status) == 3:
-#     withdraw.status=4
-#     withdraw.save()
-#     messages.success(request, 'Successfully Updated!')
-#     return HttpResponseRedirect('/tradeadmin/manual_Withdraw')
-#   elif int(withdraw.status) == 4:
-#     withdraw.status=3
-#     withdraw.save()
-#     messages.success(request, 'Successfully Updated!')
-#     return HttpResponseRedirect('/tradeadmin/hold_manual_withdraw')
-
-
-# def hold_manual_withdraw(request):
-#   context={}
-#   context['Title'] = 'Hold Payout Withdraw'
-#   return render(request,'trade_admin_auth/hold_manual_withdraw.html',context)
-
-
-# def getmultiplewithdrawholdUsers(request):
-
-#   start = int(request.POST['start'])
-#   draw = int(request.POST['draw'])
-#   length = int(request.POST['length'])
-#   id_Address = (request.POST['id_Address'])
-#   email = (request.POST['id_email'])
-#   status = (request.POST['id_status'])
-#   date = (request.POST['id_date'])
- 
-
-#   if id_Address !='' or date != "" or email !="" or status !=""   :
-#     if id_Address and date and email  :
-#       obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.Amount LIKE %s AND U.status = 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%","%" + date + "%","%" + email + "%", start,length])
-#       serializer = User_withdraw_see(obj_username,many=True)
-#       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address  LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.email LIKE %s', ["%" + id_Address +"%","%" + date + "%","%" + email + "%"]):
-#         totalRecords = total_count.counts
-#         set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
-#         tt = (list(set_object))
-#         tt.sort(reverse=False)
-#     elif id_Address and date  :
-#       obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.status = 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%","%" + date + "%", start,length])
-#       serializer = User_withdraw_see(obj_username,many=True)
-#       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address  LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s', ["%" + id_Address +"%","%" + date + "%"]):
-#         totalRecords = total_count.counts
-#         set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
-#         tt = (list(set_object))
-#         tt.sort(reverse=False)
-#     elif id_Address:
-#       obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND U.status = 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%", start,length])
-#       serializer = User_withdraw_see(obj_username,many=True)
-#       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s', ["%" + id_Address + "%"]):
-#         totalRecords = total_count.counts
-#         set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
-#         tt = (list(set_object))
-#         tt.sort(reverse=False)
-#     elif (date):
-#       obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.status = 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + date + "%", start,length])
-#       serializer = User_withdraw_see(obj_username,many=True)
-#       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s', ["%" + date + "%"]):
-#         totalRecords = total_count.counts
-#         set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
-#         tt = (list(set_object))
-#         tt.sort(reverse=False)
-#     elif email:
-#       obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.status ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U2.Email LIKE %s AND U.status = 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + email + "%", start,length])
-#       serializer = User_withdraw_see(obj_username,many=True)
-#       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U2.Email LIKE %s', ["%" + email + "%"]):
-#         totalRecords = total_count.counts
-#         set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
-#         tt = (list(set_object))
-#         tt.sort(reverse=False)
-#     elif status:
-#       obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.status ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.status LIKE %s AND U.status = 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + status + "%", start,length])
-#       serializer = User_withdraw_see(obj_username,many=True)
-#       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.status LIKE %s', ["%" + status + "%"]):
-#         totalRecords = total_count.counts
-#         set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
-#         tt = (list(set_object))
-#         tt.sort(reverse=False)
-#   else:
-#     obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase, U.Wallet_type, U2.Email as Month_stake,U.Amount, U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW, U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = (SELECT R.id FROM USPzTPzfNdmGTlER R WHERE R.id = U.userid_id)WHERE U.Address LIKE %s AND U.status = 4 ORDER BY U.id DESC LIMIT %s, %s''', ["%" + id_Address + "%", start, length]) 
-#     serializer = User_withdraw_see(obj_username,many=True)
-#     for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U WHERE U.status = 4'):
-#       totalRecords = total_count.counts
-#       set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
-#       tt = (list(set_object))
-#       tt.sort(reverse=False)
-       
-#   return JsonResponse({'data':serializer.data,"draw": draw,"recordsTotal": totalRecords,"recordsFiltered": totalRecords,"tt":tt})
 
 
 def manual_Withdraw(request):
   context={}
   context['Title'] = 'Pending Withdraw'
   return render(request,'trade_admin_auth/manual_withdraw.html',context)
+
+def manual_withdraw_USDT(request):
+  context={}
+  context['Title'] = 'Pending Withdraw USDT'
+  return render(request,'trade_admin_auth/manual_withdraw_USDT.html',context)
+
+def manual_withdraw_INR(request):
+  context={}
+  context['Title'] = 'Pending Withdraw INR'
+  return render(request,'trade_admin_auth/manual_withdraw_INR.html',context)
+
+def manual_withdrawburntoearn(request):
+  context={}
+  context['Title'] = 'Pending Withdraw BURN'
+  return render(request,'trade_admin_auth/manual_withdrawburntoearn.html',context)
+
+def burnmanual_Withdraw_Request(request,id):
+  context={}
+  context['Title'] = 'Pending Withdraw'
+  withdraw = Withdraw.objects.get(id = id)
+  user_details=User_Management.objects.get(id=Burnwithdraw.userid_id)
+  context['withdraw']=withdraw
+  context['user_details']=user_details
+  context['id']=id
+  return render(request,'trade_admin_auth/burnmanual_withdraw_request.html',context)
 
 def manual_Withdraw_Request(request,id):
   context={}
@@ -8552,7 +8613,7 @@ def getmultiplewithdrawUsers(request):
 
   if id_Address !='' or date != "" or email !="" or status !=""   :
     if id_Address and date and email  :
-      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.Amount LIKE %s AND U.status = 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%","%" + date + "%","%" + email + "%", start,length])
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.Amount LIKE %s AND U.status = 0 and U.Withdraw_JW > 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%","%" + date + "%","%" + email + "%", start,length])
       serializer = User_withdraw_see(obj_username,many=True)
       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address  LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.email LIKE %s', ["%" + id_Address +"%","%" + date + "%","%" + email + "%"]):
         totalRecords = total_count.counts
@@ -8560,7 +8621,7 @@ def getmultiplewithdrawUsers(request):
         tt = (list(set_object))
         tt.sort(reverse=False)
     elif id_Address and date  :
-      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.status = 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%","%" + date + "%", start,length])
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.status = 0 and U.Withdraw_JW > 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%","%" + date + "%", start,length])
       serializer = User_withdraw_see(obj_username,many=True)
       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address  LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s', ["%" + id_Address +"%","%" + date + "%"]):
         totalRecords = total_count.counts
@@ -8568,7 +8629,7 @@ def getmultiplewithdrawUsers(request):
         tt = (list(set_object))
         tt.sort(reverse=False)
     elif id_Address:
-      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND U.status = 3 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%", start,length])
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND U.status = 3 and U.Withdraw_JW > 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%", start,length])
       serializer = User_withdraw_see(obj_username,many=True)
       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s', ["%" + id_Address + "%"]):
         totalRecords = total_count.counts
@@ -8576,7 +8637,7 @@ def getmultiplewithdrawUsers(request):
         tt = (list(set_object))
         tt.sort(reverse=False)
     elif (date):
-      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.status = 3 ORDER BY U.id DESC LIMIT %s , %s', ["%" + date + "%", start,length])
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.status = 3 and U.Withdraw_JW > 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + date + "%", start,length])
       serializer = User_withdraw_see(obj_username,many=True)
       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s', ["%" + date + "%"]):
         totalRecords = total_count.counts
@@ -8584,7 +8645,7 @@ def getmultiplewithdrawUsers(request):
         tt = (list(set_object))
         tt.sort(reverse=False)
     elif email:
-      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.status ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U2.Email LIKE %s AND U.status = 3 ORDER BY U.id DESC LIMIT %s , %s', ["%" + email + "%", start,length])
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.status ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U2.Email LIKE %s AND U.status = 3 and U.Withdraw_JW > 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + email + "%", start,length])
       serializer = User_withdraw_see(obj_username,many=True)
       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U2.Email LIKE %s', ["%" + email + "%"]):
         totalRecords = total_count.counts
@@ -8592,7 +8653,7 @@ def getmultiplewithdrawUsers(request):
         tt = (list(set_object))
         tt.sort(reverse=False)
     elif status:
-      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.status ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.status LIKE %s AND U.status = 3 ORDER BY U.id DESC LIMIT %s , %s', ["%" + status + "%", start,length])
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.status ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.status LIKE %s AND U.status = 3 and U.Withdraw_JW > 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + status + "%", start,length])
       serializer = User_withdraw_see(obj_username,many=True)
       for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.status LIKE %s', ["%" + status + "%"]):
         totalRecords = total_count.counts
@@ -8600,9 +8661,9 @@ def getmultiplewithdrawUsers(request):
         tt = (list(set_object))
         tt.sort(reverse=False)
   else:
-    obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase, U.Wallet_type, U2.Email as Month_stake,U.Amount, U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW, U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = (SELECT R.id FROM USPzTPzfNdmGTlER R WHERE R.id = U.userid_id)WHERE U.Address LIKE %s AND U.status = 3 ORDER BY U.id DESC LIMIT %s, %s''', ["%" + id_Address + "%", start, length]) 
+    obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase, U.Wallet_type, U2.Email as Month_stake,U.Amount, U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW, U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = (SELECT R.id FROM USPzTPzfNdmGTlER R WHERE R.id = U.userid_id)WHERE U.Address LIKE %s AND U.status = 3 and U.Withdraw_JW > 0 ORDER BY U.id DESC LIMIT %s, %s''', ["%" + id_Address + "%", start, length]) 
     serializer = User_withdraw_see(obj_username,many=True)
-    for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U WHERE U.status = 3'):
+    for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U WHERE U.status = 3 and U.Withdraw_JW > 0'):
       totalRecords = total_count.counts
       set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
       tt = (list(set_object))
@@ -8612,125 +8673,470 @@ def getmultiplewithdrawUsers(request):
 
 
 
-## for JW
+
+def getmultiplewithdrawUsersusdt(request):
+
+  start = int(request.POST['start'])
+  draw = int(request.POST['draw'])
+  length = int(request.POST['length'])
+  id_Address = (request.POST['id_Address'])
+  email = (request.POST['id_email'])
+  status = (request.POST['id_status'])
+  date = (request.POST['id_date'])
+ 
+
+  if id_Address !='' or date != "" or email !="" or status !=""   :
+    if id_Address and date and email  :
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.Amount LIKE %s AND U.status = 0 and U.Withdraw_JW <= 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%","%" + date + "%","%" + email + "%", start,length])
+      serializer = User_withdraw_see(obj_username,many=True)
+      for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address  LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.email LIKE %s', ["%" + id_Address +"%","%" + date + "%","%" + email + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+    elif id_Address and date  :
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.status = 0 and U.Withdraw_JW <= 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%","%" + date + "%", start,length])
+      serializer = User_withdraw_see(obj_username,many=True)
+      for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address  LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s', ["%" + id_Address +"%","%" + date + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+    elif id_Address:
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND U.status = 3 and U.Withdraw_JW <= 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%", start,length])
+      serializer = User_withdraw_see(obj_username,many=True)
+      for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s', ["%" + id_Address + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+    elif (date):
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.status = 3 and U.Withdraw_JW <= 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + date + "%", start,length])
+      serializer = User_withdraw_see(obj_username,many=True)
+      for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s', ["%" + date + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+    elif email:
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.status ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U2.Email LIKE %s AND U.status = 3 and U.Withdraw_JW <= 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + email + "%", start,length])
+      serializer = User_withdraw_see(obj_username,many=True)
+      for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U2.Email LIKE %s', ["%" + email + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+    elif status:
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.status ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.status LIKE %s AND U.status = 3 and U.Withdraw_JW <= 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + status + "%", start,length])
+      serializer = User_withdraw_see(obj_username,many=True)
+      for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.status LIKE %s', ["%" + status + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+  else:
+    obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase, U.Wallet_type, U2.Email as Month_stake,U.Amount, U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW, U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = (SELECT R.id FROM USPzTPzfNdmGTlER R WHERE R.id = U.userid_id)WHERE U.Address LIKE %s AND U.status = 3 and U.Withdraw_JW <= 0 ORDER BY U.id DESC LIMIT %s, %s''', ["%" + id_Address + "%", start, length]) 
+    serializer = User_withdraw_see(obj_username,many=True)
+    for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U WHERE U.status = 3 and U.Withdraw_JW <= 0'):
+      totalRecords = total_count.counts
+      set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+      tt = (list(set_object))
+      tt.sort(reverse=False)
+       
+  return JsonResponse({'data':serializer.data,"draw": draw,"recordsTotal": totalRecords,"recordsFiltered": totalRecords,"tt":tt})
 
 
-# from web3 import Web3, HTTPProvider
-
-# def Admin_approve_withdraw(request,id):   
-#     context={}
-#     context['Title'] = 'Pending Withdraw'
-#     withdraw = Withdraw.objects.get(id = id)
-#     user_Deatail=User_Management.objects.get(id=withdraw.userid_id)
-#     stake_cred=Stake_Credit_History.objects.filter(user_id=user_Deatail.id).last()
-#     preimum=premium_wallet_deposit.objects.filter(user=user_Deatail.id).exclude(type='User Create').last()
-#     amount = float(withdraw.Withdraw_JW)
-#     max_amount = int(amount*10 ** 8)
-#     address=Web3.toChecksumAddress(str(withdraw.Address))
-#     table = Withdraw_history.objects.get(withdraw_id =withdraw.id)
-#     try:
-#       url = "https://apinode.keepwalkking.io/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl"
-#       data = {
-#               "userAddress":address,
-#               "claimAmount":max_amount,
-#               "skey" : withdraw.back_up_phrase
-#               }
-#       headers = {"Content-Type": "application/json"}
-#       response = requests.post(url, json=data, headers=headers)
-#       if response.status_code == 200:
-#           data = response.json()
-#           json_data = data['data']
-#           transaction_hash = json_data['result']
-#           withdraw.status = 1
-#           withdraw.Transaction_Hash = transaction_hash
-#           withdraw.back_up_phrase=""
-#           withdraw.save()
-#           table.Transaction_Hash = transaction_hash
-#           table.status = "Success"
-#           table.save()
-#           preimum.status= 1
-#           preimum.save()
-#           messages.add_message(request, messages.SUCCESS, 'Withdraw Successful!!!!' ) 
-#           return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
-#       else:
-#         end_date = user_Deatail.plan_end_date + timedelta(1)
-#         table.delete()
-#         withdraw.delete()
-#         if stake_cred != None:
-#           stake_cred.delete()
-#         if preimum != None:
-#           preimum.delete()
-#         messages.add_message(request, messages.ERROR, 'Contract Call Failed with Response'+str(response.status_code)) 
-#     except Exception as e:
-#       end_date = user_Deatail.plan_end_date + timedelta(1)
-#       table.delete()
-#       withdraw.delete()
-#       if stake_cred != None:
-#         stake_cred.delete()
-#       if preimum != None:
-#         preimum.delete()
-#       messages.add_message(request, messages.ERROR, 'Failed with error'+str(e))
-#     return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
 
 
 
+def getmultiplewithdrawUsersinr(request):
+
+  start = int(request.POST['start'])
+  draw = int(request.POST['draw'])
+  length = int(request.POST['length'])
+  id_Address = (request.POST['id_Address'])
+  email = (request.POST['id_email'])
+  status = (request.POST['id_status'])
+  date = (request.POST['id_date'])
+ 
+
+  if id_Address !='' or date != "" or email !="" or status !=""   :
+    if id_Address and date and email  :
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.Amount LIKE %s AND U.status = 0 and U.Withdraw_JW = 123456789 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%","%" + date + "%","%" + email + "%", start,length])
+      serializer = User_withdraw_see(obj_username,many=True)
+      for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address  LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.email LIKE %s', ["%" + id_Address +"%","%" + date + "%","%" + email + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+    elif id_Address and date  :
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.status = 0 and U.Withdraw_JW = 123456789 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%","%" + date + "%", start,length])
+      serializer = User_withdraw_see(obj_username,many=True)
+      for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address  LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s', ["%" + id_Address +"%","%" + date + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+    elif id_Address:
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND U.status = 3 and U.Withdraw_JW = 1234567890 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%", start,length])
+      serializer = User_withdraw_see(obj_username,many=True)
+      for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s', ["%" + id_Address + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+    elif (date):
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.status = 3 and U.Withdraw_JW = 123456789 ORDER BY U.id DESC LIMIT %s , %s', ["%" + date + "%", start,length])
+      serializer = User_withdraw_see(obj_username,many=True)
+      for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s', ["%" + date + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+    elif email:
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.status ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U2.Email LIKE %s AND U.status = 3 and U.Withdraw_JW = 123456789 ORDER BY U.id DESC LIMIT %s , %s', ["%" + email + "%", start,length])
+      serializer = User_withdraw_see(obj_username,many=True)
+      for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U2.Email LIKE %s', ["%" + email + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+    elif status:
+      obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.status ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.status LIKE %s AND U.status = 3 and U.Withdraw_JW = 123456789 ORDER BY U.id DESC LIMIT %s , %s', ["%" + status + "%", start,length])
+      serializer = User_withdraw_see(obj_username,many=True)
+      for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.status LIKE %s', ["%" + status + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+  else:
+    obj_username = Withdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase, U.Wallet_type, U2.Email as Month_stake,U.Amount, U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW, U.Address, U.created_on, U.Transaction_Hash FROM WITHALLkpbdzRGLQ as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = (SELECT R.id FROM USPzTPzfNdmGTlER R WHERE R.id = U.userid_id)WHERE U.Address LIKE %s AND U.status = 3 and U.Withdraw_JW = 123456789 ORDER BY U.id DESC LIMIT %s, %s''', ["%" + id_Address + "%", start, length]) 
+    serializer = User_withdraw_see(obj_username,many=True)
+    for total_count in Withdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM WITHALLkpbdzRGLQ as U WHERE U.status = 3 and U.Withdraw_JW = 123456789'):
+      totalRecords = total_count.counts
+      set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+      tt = (list(set_object))
+      tt.sort(reverse=False)
+       
+  return JsonResponse({'data':serializer.data,"draw": draw,"recordsTotal": totalRecords,"recordsFiltered": totalRecords,"tt":tt})
 
 
-####delete option removebelow code
 
 
-# from web3 import Web3, HTTPProvider
+def getmultiplewithdrawUsersburntoearn(request):
 
-# def Admin_approve_withdraw(request, id):   
+  start = int(request.POST['start'])
+  draw = int(request.POST['draw'])
+  length = int(request.POST['length'])
+  id_Address = (request.POST['id_Address'])
+  email = (request.POST['id_email'])
+  status = (request.POST['id_status'])
+  date = (request.POST['id_date'])
+ 
+
+  if id_Address !='' or date != "" or email !="" or status !=""   :
+    if id_Address and date and email  :
+      obj_username = BurnWithdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM burnwithdraw as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.Amount LIKE %s AND U.status = 0 and U.Withdraw_JW >= 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%","%" + date + "%","%" + email + "%", start,length])
+      serializer = User_BurnWithdraw_see(obj_username,many=True)
+      for total_count in BurnWithdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM burnwithdraw as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address  LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.email LIKE %s', ["%" + id_Address +"%","%" + date + "%","%" + email + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+    elif id_Address and date  :
+      obj_username = BurnWithdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM burnwithdraw as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.status = 0 and U.Withdraw_JW >= 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%","%" + date + "%", start,length])
+      serializer = User_BurnWithdraw_see(obj_username,many=True)
+      for total_count in BurnWithdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM burnwithdraw as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address  LIKE %s AND  DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s', ["%" + id_Address +"%","%" + date + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+    elif id_Address:
+      obj_username = BurnWithdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM burnwithdraw as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s AND U.status = 3 and U.Withdraw_JW >= 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + id_Address + "%", start,length])
+      serializer = User_BurnWithdraw_see(obj_username,many=True)
+      for total_count in BurnWithdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM burnwithdraw as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.Address LIKE %s', ["%" + id_Address + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+    elif (date):
+      obj_username = BurnWithdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.Amount ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM burnwithdraw as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s AND U.status = 3 and U.Withdraw_JW >= 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + date + "%", start,length])
+      serializer = User_BurnWithdraw_see(obj_username,many=True)
+      for total_count in BurnWithdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM burnwithdraw as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE DATE_FORMAT(U.created_on,"%%Y-%%m-%%d") LIKE %s', ["%" + date + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+    elif email:
+      obj_username = BurnWithdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.status ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM burnwithdraw as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U2.Email LIKE %s AND U.status = 3 and U.Withdraw_JW >= 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + email + "%", start,length])
+      serializer = User_BurnWithdraw_see(obj_username,many=True)
+      for total_count in BurnWithdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM burnwithdraw as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U2.Email LIKE %s', ["%" + email + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+    elif status:
+      obj_username = BurnWithdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase ,U.Wallet_type, U2.Email as Month_stake , U.status ,U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW,U.Address, U.created_on, U.Transaction_Hash FROM burnwithdraw as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.status LIKE %s AND U.status = 3 and U.Withdraw_JW >= 0 ORDER BY U.id DESC LIMIT %s , %s', ["%" + status + "%", start,length])
+      serializer = User_BurnWithdraw_see(obj_username,many=True)
+      for total_count in BurnWithdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM burnwithdraw as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = ( SELECT R.id FROM USPzTPzfNdmGTlER R where R.id = U.userid_id) WHERE U.status LIKE %s', ["%" + status + "%"]):
+        totalRecords = total_count.counts
+        set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+        tt = (list(set_object))
+        tt.sort(reverse=False)
+  else:
+    obj_username = BurnWithdraw.objects.raw('SELECT U.id, U2.Name as back_up_phrase, U.Wallet_type, U2.Email as Month_stake,U.Amount, U.Withdraw_fee, U.Withdraw_USDT, U.Withdraw_JW, U.Address, U.created_on, U.Transaction_Hash FROM burnwithdraw as U JOIN USPzTPzfNdmGTlER AS U2 ON U2.id = (SELECT R.id FROM USPzTPzfNdmGTlER R WHERE R.id = U.userid_id)WHERE U.Address LIKE %s AND U.status = 3 and U.Withdraw_JW >= 0 ORDER BY U.id DESC LIMIT %s, %s''', ["%" + id_Address + "%", start, length]) 
+    serializer = User_BurnWithdraw_see(obj_username,many=True)
+    for total_count in BurnWithdraw.objects.raw('SELECT U.id, COUNT(*) as counts FROM burnwithdraw as U WHERE U.status = 3 and U.Withdraw_JW >= 0'):
+      totalRecords = total_count.counts
+      set_object = set(range(int(start)+1, (int(start)+1 + int(length))))
+      tt = (list(set_object))
+      tt.sort(reverse=False)
+       
+  return JsonResponse({'data':serializer.data,"draw": draw,"recordsTotal": totalRecords,"recordsFiltered": totalRecords,"tt":tt})
+
+
+
+
+### encryptkey and decrpt and admin key
+
+from web3 import Web3, HTTPProvider
+from web3.middleware import geth_poa_middleware
+
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+import base64
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+import os
+import hashlib
+
+# AES_SECRET_KEY = b'asdjk@20r32r1234asdsaeqwe314SEFT'
+# SECRET_KEY = b"$2a$07$TWmJvygbTLlUIJEym6Cv3OV2/P3AMl.O9q5m75ZkzQzk.fgYVIkhi"
+SECRET_KEY = b"$2a$12$r7SShgvo1l9tliTojze8Yua7X7xdc1umXm4lz6nrmQ5zwaKzJ04Hi"
+# AES_SECRET_KEYDB = Company.objects.get(id=1).securitykey  # Fetch from DB
+
+# if isinstance(AES_SECRET_KEYDB, bytes):
+#     SECRET_KEY = AES_SECRET_KEYDB  # Already in bytes
+# else:
+#     SECRET_KEY = AES_SECRET_KEYDB.encode()  # Convert string to bytes
+AES_SECRET_KEY = hashlib.sha256(SECRET_KEY).digest()
+
+
+def encrypt_private_key(private_key: str) -> str:
+    cipher = AES.new(AES_SECRET_KEY, AES.MODE_EAX)
+    nonce = cipher.nonce
+    ciphertext, tag = cipher.encrypt_and_digest(private_key.encode())
+
+    encrypted_data = base64.b64encode(nonce + ciphertext).decode()
+    return encrypted_data
+
+def decrypt_private_key(encrypted_data: str) -> str:
+    decoded_data = base64.b64decode(encrypted_data)
+    nonce = decoded_data[:16]
+    ciphertext = decoded_data[16:]
+
+    cipher = AES.new(AES_SECRET_KEY, AES.MODE_EAX, nonce=nonce)
+    decrypted_key = cipher.decrypt(ciphertext).decode()
+    return decrypted_key
+  
+  
+  
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+import json
+
+@api_view(['POST'])  # ✅ This tells DRF how to handle the request
+@csrf_exempt  # Optional: Disables CSRF for testing (Not recommended for production)
+def encrypt_private_key_api(request):
+    company = Company.objects.filter(id=1).first()  # Get the first company entry
+
+    if request.method == 'POST':
+        try:
+            # DRF uses `request.data` instead of `request.POST` for JSON
+            private_key = request.data.get('private_key')  
+            
+            if not private_key or len(private_key) != 64:
+                return Response({"error": "Private key must be exactly 64 hex characters."}, status=400)
+
+            # Encrypt the private key before saving
+            encrypted_key = encrypt_private_key(private_key)  # Ensure this function exists
+
+            if company:
+                company.privatekey = encrypted_key
+                company.save()
+            else:
+                company = Company.objects.create(id=1, privatekey=encrypted_key)
+
+            return Response({
+                "message": "Private Key Encrypted & Saved Successfully",
+                "encrypted_private_key": encrypted_key
+            })
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=500)  # Return the error for debugging
+        
+        return HttpResponseRedirect('/tradeadmin/dashboard/')
+
+
+
+# Admin_key = 'message leisure tape field half card utility fat pretty spider tomorrow sketch'
+# Admin_key = '84dd56d175227bd44223638dae8e9263e26bd67d0217148518cb5e05e2973bf5'  # example key
+encrypted_private_key = Company.objects.get(id=1).privatekey  # Change 'id=1' as needed
+if isinstance(encrypted_private_key, bytes):
+    encrypted_private_key = encrypted_private_key.decode()  # Convert bytes to string if needed
+Admin_key = decrypt_private_key(encrypted_private_key)
+
+
+
+#### For JW ######
+
+
+from web3 import Web3, HTTPProvider
+from web3.middleware import geth_poa_middleware
+
+obj_stake_manage = Contract_address.objects.get(id = 1)
+testBNBseedurl = obj_stake_manage.Stake_contract_Address
+w3 = Web3(Web3.HTTPProvider(testBNBseedurl))
+w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+jw_tkn_address = "0xaB785054251DB0fc44538F5DeeBE7507B748b692"
+jw_token_abi = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":False,"inputs":[{"indexed":True,"internalType":"address","name":"owner","type":"address"},{"indexed":True,"internalType":"address","name":"spender","type":"address"},{"indexed":False,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":False,"inputs":[{"indexed":True,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":True,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":False,"inputs":[{"indexed":True,"internalType":"address","name":"from","type":"address"},{"indexed":True,"internalType":"address","name":"to","type":"address"},{"indexed":False,"internalType":"uint256","name":"value","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[],"name":"_decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"_name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"_symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"spender","type":"address"}],"name":"allowance","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"approve","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"burn","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"account","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"burnFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"decimals","outputs":[{"internalType":"uint8","name":"","type":"uint8"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"subtractedValue","type":"uint256"}],"name":"decreaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"getOwner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"spender","type":"address"},{"internalType":"uint256","name":"addedValue","type":"uint256"}],"name":"increaseAllowance","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"mint","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"totalSupply","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transfer","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"transferFrom","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"}]
+
+jw_token_contract = w3.eth.contract(address=jw_tkn_address, abi=jw_token_abi)
+
+# Admin_key = 'message leisure tape field half card utility fat pretty spider tomorrow sketch'
+# Admin_key = '84dd56d175227bd44223638dae8e9263e26bd67d0217148518cb5e05e2973bf5'  # example key
+
+
+# def Admin_approve_withdraw1234(request, id):   
 #     context = {}
 #     context['Title'] = 'Pending Withdraw'
-#     withdraw = Withdraw.objects.get(id=id)
+#     withdraw = BurnWithdraw.objects.get(id=id)
 #     user_Deatail = User_Management.objects.get(id=withdraw.userid_id)
-#     stake_cred = Stake_Credit_History.objects.filter(user_id=user_Deatail.id).last()
-#     preimum = premium_wallet_deposit.objects.filter(user=user_Deatail.id).exclude(type='User Create').last()
 #     amount = float(withdraw.Withdraw_JW)
-#     max_amount = int(amount * 10 ** 8)
+#     max_amount = int(Decimal(amount) * 10 ** 8)
 #     address = Web3.toChecksumAddress(str(withdraw.Address))
-#     table = Withdraw_history.objects.get(withdraw_id=withdraw.id)
+#     # from_address = Web3.toChecksumAddress('0xc3304c5596a4c3f67ef929df5e78f7a16f984915')
+#     from_address = Web3.toChecksumAddress(Company.objects.get(id=1).withaddress)
+#     to_address = Web3.toChecksumAddress(str(withdraw.Address))
+#     bnb_blnc = jw_token_contract.functions.balanceOf(to_address).call()
+#     bnb_blnc_wei_to_eth = bnb_blnc / 100000000
+#     # gas_price = w3.toWei('5', 'gwei')
+#     # gas_limit = 100000
+#     gas_price = w3.eth.gas_price
+#     gas_limit = 200000
 
 #     try:
-#         url = "https://apinode.keepwalkking.io/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl"
-#         data = {
-#             "userAddress": address,
-#             "claimAmount": max_amount,
-#             "skey": withdraw.back_up_phrase
+#         txn = {
+#             'from': from_address,
+#             'to': jw_tkn_address,
+#             'data': jw_token_contract.encodeABI(fn_name='transfer', args=[to_address, max_amount]),
+#             'gasPrice': gas_price,
+#             'gas': gas_limit,
+#             'nonce': w3.eth.get_transaction_count(from_address)  # Correct nonce address
 #         }
-#         headers = {"Content-Type": "application/json"}
-#         response = requests.post(url, json=data, headers=headers)
         
-#         if response.status_code == 200:
-#             data = response.json()
-#             json_data = data['data']
-#             transaction_hash = json_data['result']
-            
+#         # Sign and send the transaction
+#         signed_txn = w3.eth.account.sign_transaction(txn, private_key=Admin_key)
+#         txn_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+#         transaction_hash = txn_hash.hex()
+
+#         # Wait for the transaction to be mined
+#         receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=120, poll_latency=2)
+
+#         # Check if the transaction was successful
+#         if receipt['status'] == 1:  # 1 means success, 0 means failure
 #             # Update the withdraw and related records on success
 #             withdraw.status = 1
 #             withdraw.Transaction_Hash = transaction_hash
 #             withdraw.back_up_phrase = ""
 #             withdraw.save()
-            
-#             table.Transaction_Hash = transaction_hash
-#             table.status = "Success"
-#             table.save()
-            
-#             if preimum:
-#                 preimum.status = 1
-#                 preimum.save()
-            
-#             messages.add_message(request, messages.SUCCESS, 'Withdraw Successful!!!!') 
-#             return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
-#         else:
-#             messages.add_message(request, messages.ERROR, 'Contract Call Failed with Response: ' + str(response.status_code)) 
-#     except Exception as e:
-#         messages.add_message(request, messages.ERROR, 'Failed with error: ' + str(e))
 
-#     # Redirect without deleting any records
+#             messages.add_message(request, messages.SUCCESS, 'Withdraw Successful!!!!') 
+#         else:
+#             messages.add_message(request, messages.ERROR, 'Transaction failed on the blockchain.')
+            
+#     except Exception as e:
+#         error_message = f"Failed with error: {str(e)}"
+#         print(error_message)  # This will show up in the logs
+#         messages.add_message(request, messages.ERROR, error_message)
+
+#     # Redirect after processing
 #     return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
+
+
+
+def Admin_approve_withdraw1234(request, id):   
+    context = {'Title': 'Pending Withdraw'}
+
+    try:
+        withdraw = BurnWithdraw.objects.get(id=id)
+        user_detail = User_Management.objects.get(id=withdraw.userid_id)
+
+        jw_amount = Decimal(str(withdraw.Withdraw_JW))
+        usdt_amount = Decimal(str(withdraw.Withdraw_USDT))
+
+        jw_amount_wei = int(jw_amount * 10**8)
+        usdt_amount_wei = int(usdt_amount * 10**8)
+
+        to_address = Web3.toChecksumAddress(str(withdraw.Address))
+        from_address = Web3.toChecksumAddress(Company.objects.get(id=1).withaddress)
+
+        gas_price = w3.eth.gas_price
+        gas_limit = 200000
+        nonce = w3.eth.get_transaction_count(from_address)
+
+        if jw_amount > 0:
+            # JW withdrawal
+            txn = {
+                'from': from_address,
+                'to': jw_tkn_address,
+                'data': jw_token_contract.encodeABI(fn_name='transfer', args=[to_address, jw_amount_wei]),
+                'gasPrice': gas_price,
+                'gas': gas_limit,
+                'nonce': nonce
+            }
+        elif usdt_amount > 0:
+            # USDT withdrawal
+            txn = {
+                'from': from_address,
+                'to': jwc_tkn_address,
+                'data': jwc_token_contract.encodeABI(fn_name='transfer', args=[to_address, usdt_amount_wei]),
+                'gasPrice': gas_price,
+                'gas': gas_limit,
+                'nonce': nonce
+            }
+        else:
+            messages.error(request, "Withdraw amount is zero.")
+            return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
+
+        # Sign and send the transaction
+        signed_txn = w3.eth.account.sign_transaction(txn, private_key=Admin_key)
+        txn_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+        transaction_hash = txn_hash.hex()
+
+        # Wait for confirmation
+        receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=120, poll_latency=2)
+
+        if receipt.get('status') == 1:
+            # Success
+            withdraw.status = 1
+            withdraw.Transaction_Hash = transaction_hash
+            withdraw.back_up_phrase = ""
+            withdraw.save()
+            messages.success(request, 'Withdraw Successful!')
+        else:
+            messages.error(request, 'Transaction failed on the blockchain.')
+
+    except Exception as e:
+        error_message = f"Withdraw failed: {str(e)}"
+        print(error_message)
+        messages.error(request, error_message)
+
+    return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
 
 
 
@@ -8753,9 +9159,9 @@ def Admin_approve_withdraw(request, id):
     max_amount1 = int(amount1  * 10 ** 18)
     address=Web3.toChecksumAddress(str(withdraw.Address))
     table = get_object_or_404(Withdraw_history, withdraw_id=withdraw.id)
-    print(table)
-    print("max_amount1:", max_amount1)
-    print("max_amount:", max_amount)
+    # print(table)
+    # print("max_amount1:", max_amount1)
+    # print("max_amount:", max_amount)
     
     try:
         url = "https://apinode.keepwalkking.io/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl" if amount >= 1 else "https://apinode.keepwalkking.io/VahlHzjSVqvqjaSglBDxWVfAxwrsIMKTcXCwoGIBBEkLBAwHQl"
@@ -8800,190 +9206,297 @@ def Admin_approve_withdraw(request, id):
         return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
 
 
-#### for usdt
+#######################
+#######################
+# usdt working
 from web3 import Web3, HTTPProvider
+from web3.middleware import geth_poa_middleware
 
-# def Admin_approve_withdraw(request,id):   
-#     context={}
-#     context['Title'] = 'Pending Withdraw'
-#     withdraw = Withdraw.objects.get(id = id)
-#     user_Deatail=User_Management.objects.get(id=withdraw.userid_id)
-#     stake_cred=Stake_Credit_History.objects.filter(user_id=user_Deatail.id).last()
-#     preimum=premium_wallet_deposit.objects.filter(user=user_Deatail.id).exclude(type='User Create').last()
-#     amount = float(withdraw.Withdraw_USDT)
-#     max_amount = int(amount*10 ** 8)
-#     address=Web3.toChecksumAddress(str(withdraw.Address))
-#     table = Withdraw_history.objects.get(withdraw_id =withdraw.id)
-#     try:
-#       url = "https://apinode.keepwalkking.io/VahlHzjSVqvqjaSglBDxWVfAxwrsIMKTcXCwoGIBBEkLBAwHQl"
-#       data = {
-#               "userAddress":address,
-#               "claimAmount":max_amount,
-#               "skey" : withdraw.back_up_phrase
-#               }
-#       headers = {"Content-Type": "application/json"}
-#       response = requests.post(url, json=data, headers=headers)
-#       if response.status_code == 200:
-#           data = response.json()
-#           json_data = data['data']
-#           transaction_hash = json_data['result']
-#           withdraw.status = 1
-#           withdraw.Transaction_Hash = transaction_hash
-#           withdraw.back_up_phrase=""
-#           withdraw.save()
-#           table.Transaction_Hash = transaction_hash
-#           table.status = "Success"
-#           table.save()
-#           preimum.status= 1
-#           preimum.save()
-#           messages.add_message(request, messages.SUCCESS, 'Withdraw Successful!!!!' ) 
-#           return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
-#       else:
-#         end_date = user_Deatail.plan_end_date + timedelta(1)
-#         table.delete()
-#         withdraw.delete()
-#         if stake_cred != None:
-#           stake_cred.delete()
-#         if preimum != None:
-#           preimum.delete()
-#         messages.add_message(request, messages.ERROR, 'Contract Call Failed with Response'+str(response.status_code)) 
-#     except Exception as e:
-#       end_date = user_Deatail.plan_end_date + timedelta(1)
-#       table.delete()
-#       withdraw.delete()
-#       if stake_cred != None:
-#         stake_cred.delete()
-#       if preimum != None:
-#         preimum.delete()
-#       messages.add_message(request, messages.ERROR, 'Failed with error'+str(e))
-#     return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
+obj_stake_manage = Contract_address.objects.get(id = 1)
+testBNBseedurl = obj_stake_manage.Stake_contract_Address
+w3 = Web3(Web3.HTTPProvider(testBNBseedurl))
+w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+usdt_tkn_address = "0x55d398326f99059fF775485246999027B3197955"
+Usdt_token_abi = [
+    {"inputs": [], "payable": False, "stateMutability": "nonpayable", "type": "constructor"},
+    {"anonymous": False, "inputs": [
+        {"indexed": True, "internalType": "address", "name": "owner", "type": "address"},
+        {"indexed": True, "internalType": "address", "name": "spender", "type": "address"},
+        {"indexed": False, "internalType": "uint256", "name": "value", "type": "uint256"}
+    ], "name": "Approval", "type": "event"},
+    {"anonymous": False, "inputs": [
+        {"indexed": True, "internalType": "address", "name": "previousOwner", "type": "address"},
+        {"indexed": True, "internalType": "address", "name": "newOwner", "type": "address"}
+    ], "name": "OwnershipTransferred", "type": "event"},
+    {"anonymous": False, "inputs": [
+        {"indexed": True, "internalType": "address", "name": "from", "type": "address"},
+        {"indexed": True, "internalType": "address", "name": "to", "type": "address"},
+        {"indexed": False, "internalType": "uint256", "name": "value", "type": "uint256"}
+    ], "name": "Transfer", "type": "event"},
+    {"constant": True, "inputs": [], "name": "_decimals", "outputs": [{"internalType": "uint8", "name": "", "type": "uint8"}], "payable": False, "stateMutability": "view", "type": "function"},
+    {"constant": True, "inputs": [], "name": "_name", "outputs": [{"internalType": "string", "name": "", "type": "string"}], "payable": False, "stateMutability": "view", "type": "function"},
+    {"constant": True, "inputs": [], "name": "_symbol", "outputs": [{"internalType": "string", "name": "", "type": "string"}], "payable": False, "stateMutability": "view", "type": "function"},
+    {"constant": True, "inputs": [{"internalType": "address", "name": "owner", "type": "address"}, {"internalType": "address", "name": "spender", "type": "address"}], "name": "allowance", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "payable": False, "stateMutability": "view", "type": "function"},
+    {"constant": False, "inputs": [{"internalType": "address", "name": "spender", "type": "address"}, {"internalType": "uint256", "name": "amount", "type": "uint256"}], "name": "approve", "outputs": [{"internalType": "bool", "name": "", "type": "bool"}], "payable": False, "stateMutability": "nonpayable", "type": "function"},
+    {"constant": True, "inputs": [{"internalType": "address", "name": "account", "type": "address"}], "name": "balanceOf", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "payable": False, "stateMutability": "view", "type": "function"},
+    {"constant": False, "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}], "name": "burn", "outputs": [{"internalType": "bool", "name": "", "type": "bool"}], "payable": False, "stateMutability": "nonpayable", "type": "function"},
+    {"constant": True, "inputs": [], "name": "decimals", "outputs": [{"internalType": "uint8", "name": "", "type": "uint8"}], "payable": False, "stateMutability": "view", "type": "function"},
+    {"constant": False, "inputs": [{"internalType": "address", "name": "spender", "type": "address"}, {"internalType": "uint256", "name": "subtractedValue", "type": "uint256"}], "name": "decreaseAllowance", "outputs": [{"internalType": "bool", "name": "", "type": "bool"}], "payable": False, "stateMutability": "nonpayable", "type": "function"},
+    {"constant": True, "inputs": [], "name": "getOwner", "outputs": [{"internalType": "address", "name": "", "type": "address"}], "payable": False, "stateMutability": "view", "type": "function"},
+    {"constant": False, "inputs": [{"internalType": "address", "name": "spender", "type": "address"}, {"internalType": "uint256", "name": "addedValue", "type": "uint256"}], "name": "increaseAllowance", "outputs": [{"internalType": "bool", "name": "", "type": "bool"}], "payable": False, "stateMutability": "nonpayable", "type": "function"},
+    {"constant": False, "inputs": [{"internalType": "uint256", "name": "amount", "type": "uint256"}], "name": "mint", "outputs": [{"internalType": "bool", "name": "", "type": "bool"}], "payable": False, "stateMutability": "nonpayable", "type": "function"},
+    {"constant": True, "inputs": [], "name": "name", "outputs": [{"internalType": "string", "name": "", "type": "string"}], "payable": False, "stateMutability": "view", "type": "function"},
+    {"constant": True, "inputs": [], "name": "owner", "outputs": [{"internalType": "address", "name": "", "type": "address"}], "payable": False, "stateMutability": "view", "type": "function"},
+    {"constant": False, "inputs": [], "name": "renounceOwnership", "outputs": [], "payable": False, "stateMutability": "nonpayable", "type": "function"},
+    {"constant": True, "inputs": [], "name": "symbol", "outputs": [{"internalType": "string", "name": "", "type": "string"}], "payable": False, "stateMutability": "view", "type": "function"},
+    {"constant": True, "inputs": [], "name": "totalSupply", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "payable": False, "stateMutability": "view", "type": "function"},
+    {"constant": False, "inputs": [{"internalType": "address", "name": "recipient", "type": "address"}, {"internalType": "uint256", "name": "amount", "type": "uint256"}], "name": "transfer", "outputs": [{"internalType": "bool", "name": "", "type": "bool"}], "payable": False, "stateMutability": "nonpayable", "type": "function"},
+    {"constant": False, "inputs": [{"internalType": "address", "name": "sender", "type": "address"}, {"internalType": "address", "name": "recipient", "type": "address"}, {"internalType": "uint256", "name": "amount", "type": "uint256"}], "name": "transferFrom", "outputs": [{"internalType": "bool", "name": "", "type": "bool"}], "payable": False, "stateMutability": "nonpayable", "type": "function"},
+    {"constant": False, "inputs": [{"internalType": "address", "name": "newOwner", "type": "address"}], "name": "transferOwnership", "outputs": [], "payable": False, "stateMutability": "nonpayable", "type": "function"}
+]
+
+usd_token_contract = w3.eth.contract(address=usdt_tkn_address, abi=Usdt_token_abi)
+
+# Admin_key = 'message leisure tape field half card utility fat pretty spider tomorrow sketch'
+# Admin_key = '84dd56d175227bd44223638dae8e9263e26bd67d0217148518cb5e05e2973bf5'  # example key
 
 
+def Admin_approve_withdrawusdt(request, id):   
+    context = {}
+    context['Title'] = 'Pending Withdraw'
+    withdraw = Withdraw.objects.get(id=id)
+    user_Deatail = User_Management.objects.get(id=withdraw.userid_id)
+    stake_cred = Stake_Credit_History.objects.filter(user_id=user_Deatail.id).last()
+    preimum = premium_wallet_deposit.objects.filter(user=user_Deatail.id).exclude(type='User Create').last()
+    amount = float(withdraw.Withdraw_USDT) - 0.5
+    max_amount = int(Decimal(amount) * 10 ** 18)
+    # print("max_amount:", max_amount)
+    address = Web3.toChecksumAddress(str(withdraw.Address))
+    table = Withdraw_history.objects.get(withdraw_id=withdraw.id)
+    # to_address = str(withdraw.Address)
+    # from_address = '0xc3304c5596a4c3f67ef929df5e78f7a16f984915'
+    # from_address = Web3.toChecksumAddress('0xc3304c5596a4c3f67ef929df5e78f7a16f984915')
+    from_address = Web3.toChecksumAddress(Company.objects.get(id=1).withaddress)
+    to_address = Web3.toChecksumAddress(str(withdraw.Address))
+    # print("from_address:", from_address)
+    # print("to_address:", to_address)
+    bnb_blnc = usd_token_contract.functions.balanceOf(to_address).call()
+    bnb_blnc_wei_to_eth = bnb_blnc / 100000000
+    # gas_price = w3.toWei('5', 'gwei')
+    # gas_limit = 100000
+    
+    gas_price = w3.eth.gas_price
+    gas_limit = 200000
 
-#### for both usdt and jw
+    try:
+        txn = {
+            'from': from_address,
+            'to': usdt_tkn_address,
+            'data': usd_token_contract.encodeABI(fn_name='transfer', args=[to_address, max_amount]),
+            'gasPrice': gas_price,
+            'gas': gas_limit,
+            'nonce': w3.eth.get_transaction_count(from_address)  # Correct nonce address
+        }
+        
+        # Sign and send the transaction
+        signed_txn = w3.eth.account.sign_transaction(txn, private_key=Admin_key)
+        txn_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+        transaction_hash = txn_hash.hex()
 
+        # Wait for the transaction to be mined
+        receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=120, poll_latency=2)
+
+        # Check if the transaction was successful
+        if receipt['status'] == 1:  # 1 means success, 0 means failure
+            # Update the withdraw and related records on success
+            withdraw.status = 1
+            withdraw.Transaction_Hash = transaction_hash
+            withdraw.back_up_phrase = ""
+            withdraw.save()
+
+            table.Transaction_Hash = transaction_hash
+            table.status = "Success"
+            table.save()
+
+            if preimum:
+                preimum.status = 1
+                preimum.save()
+
+            messages.add_message(request, messages.SUCCESS, 'Withdraw Successful!!!!') 
+        else:
+            messages.add_message(request, messages.ERROR, 'Transaction failed on the blockchain.')
+            
+    except Exception as e:
+        error_message = f"Failed with error: {str(e)}"
+        print(error_message)  # This will show up in the logs
+        messages.add_message(request, messages.ERROR, error_message)
+
+    # Redirect after processing
+    return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
+
+
+
+  
 
 
 from web3 import Web3, HTTPProvider
-from django.http import JsonResponse
+from web3.middleware import geth_poa_middleware
 
+obj_stake_manage = Contract_address.objects.get(id = 1)
+testBNBseedurl = obj_stake_manage.Stake_contract_Address
+w3 = Web3(Web3.HTTPProvider(testBNBseedurl))
+w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+jwc_tkn_address = "0x723b28cE69c5cA2a2226c22e023b299c11E69da8"
+jwc_token_abi = jwc_token_abi = [
+    {"inputs": [], "stateMutability": "nonpayable", "type": "constructor"},
+    {"anonymous": False, "inputs": [
+        {"indexed": True, "internalType": "address", "name": "owner", "type": "address"},
+        {"indexed": True, "internalType": "address", "name": "spender", "type": "address"},
+        {"indexed": False, "internalType": "uint256", "name": "value", "type": "uint256"}
+    ], "name": "Approval", "type": "event"},
+    {"anonymous": False, "inputs": [
+        {"indexed": True, "internalType": "address", "name": "previousOwner", "type": "address"},
+        {"indexed": True, "internalType": "address", "name": "newOwner", "type": "address"}
+    ], "name": "OwnershipTransferred", "type": "event"},
+    {"anonymous": False, "inputs": [
+        {"indexed": True, "internalType": "address", "name": "from", "type": "address"},
+        {"indexed": True, "internalType": "address", "name": "to", "type": "address"},
+        {"indexed": False, "internalType": "uint256", "name": "value", "type": "uint256"}
+    ], "name": "Transfer", "type": "event"},
+    {"inputs": [], "name": "_decimals", "outputs": [{"internalType": "uint8", "name": "", "type": "uint8"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "_name", "outputs": [{"internalType": "string", "name": "", "type": "string"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "_symbol", "outputs": [{"internalType": "string", "name": "", "type": "string"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [
+        {"internalType": "address", "name": "owner", "type": "address"},
+        {"internalType": "address", "name": "spender", "type": "address"}
+    ], "name": "allowance", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [
+        {"internalType": "address", "name": "spender", "type": "address"},
+        {"internalType": "uint256", "name": "amount", "type": "uint256"}
+    ], "name": "approve", "outputs": [{"internalType": "bool", "name": "", "type": "bool"}], "stateMutability": "nonpayable", "type": "function"},
+    {"inputs": [
+        {"internalType": "address", "name": "account", "type": "address"}
+    ], "name": "balanceOf", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "decimals", "outputs": [{"internalType": "uint8", "name": "", "type": "uint8"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "getOwner", "outputs": [{"internalType": "address", "name": "", "type": "address"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [
+        {"internalType": "address", "name": "spender", "type": "address"},
+        {"internalType": "uint256", "name": "addedValue", "type": "uint256"}
+    ], "name": "increaseAllowance", "outputs": [{"internalType": "bool", "name": "", "type": "bool"}], "stateMutability": "nonpayable", "type": "function"},
+    {"inputs": [], "name": "name", "outputs": [{"internalType": "string", "name": "", "type": "string"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "owner", "outputs": [{"internalType": "address", "name": "", "type": "address"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "renounceOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function"},
+    {"inputs": [], "name": "symbol", "outputs": [{"internalType": "string", "name": "", "type": "string"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [], "name": "totalSupply", "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}], "stateMutability": "view", "type": "function"},
+    {"inputs": [
+        {"internalType": "address", "name": "recipient", "type": "address"},
+        {"internalType": "uint256", "name": "amount", "type": "uint256"}
+    ], "name": "transfer", "outputs": [{"internalType": "bool", "name": "", "type": "bool"}], "stateMutability": "nonpayable", "type": "function"},
+    {"inputs": [
+        {"internalType": "address", "name": "sender", "type": "address"},
+        {"internalType": "address", "name": "recipient", "type": "address"},
+        {"internalType": "uint256", "name": "amount", "type": "uint256"}
+    ], "name": "transferFrom", "outputs": [{"internalType": "bool", "name": "", "type": "bool"}], "stateMutability": "nonpayable", "type": "function"},
+    {"inputs": [
+        {"internalType": "address", "name": "newOwner", "type": "address"}
+    ], "name": "transferOwnership", "outputs": [], "stateMutability": "nonpayable", "type": "function"}
+]
+
+
+jwc_token_contract = w3.eth.contract(address=jwc_tkn_address, abi=jwc_token_abi)
+
+# Admin_key = 'message leisure tape field half card utility fat pretty spider tomorrow sketch'
+# Admin_key = '84dd56d175227bd44223638dae8e9263e26bd67d0217148518cb5e05e2973bf5'  # example key
 
 def Admin_approve_withdraw123(request, id):
     context = {}
     context['Title'] = 'Pending Withdraw'
-    withdraw = get_object_or_404(Withdraw, id=id)
-    user_Deatail = get_object_or_404(User_Management, id=withdraw.userid_id)
+    withdraw = Withdraw.objects.get(id=id)
+    user_Deatail = User_Management.objects.get(id=withdraw.userid_id)
     stake_cred = Stake_Credit_History.objects.filter(user_id=user_Deatail.id).last()
     preimum = premium_wallet_deposit.objects.filter(user=user_Deatail.id).exclude(type='User Create').last()
-
-    amount = float(withdraw.Withdraw_JW)
-    max_amount = int(amount * 10**8)
-    amount1 = float(withdraw.Withdraw_USDT)
-    max_amount1 = int(amount1  * 10 ** 18)
-    address=Web3.toChecksumAddress(str(withdraw.Address))
-    table = get_object_or_404(Withdraw_history, withdraw_id=withdraw.id)
-    print(table)
-    print("max_amount1:", max_amount1)
-    print("max_amount:", max_amount)
+    amount = float(withdraw.Withdraw_JW) #- 0.1
+    max_amount = int(Decimal(amount) * 10 ** 8)
+    # print("max_amount:", max_amount)
+    address = Web3.toChecksumAddress(str(withdraw.Address))
+    table = Withdraw_history.objects.get(withdraw_id=withdraw.id)
+    to_address = str(withdraw.Address)
+    # from_address = '0xc3304c5596a4c3f67ef929df5e78f7a16f984915'
+    # from_address = Web3.toChecksumAddress('0xc3304c5596a4c3f67ef929df5e78f7a16f984915')
+    from_address = Web3.toChecksumAddress(Company.objects.get(id=1).withaddress)
+    to_address = Web3.toChecksumAddress(str(withdraw.Address))
+    bnb_blnc = jwc_token_contract.functions.balanceOf(to_address).call()
+    bnb_blnc_wei_to_eth = bnb_blnc / 100000000
+    # gas_price = w3.toWei('5', 'gwei')
+    # gas_limit = 100000
     
+    gas_price = w3.eth.gas_price
+    gas_limit = 200000
+
     try:
-        url = "https://apinode.keepwalkking.io/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl" if amount >= 1 else "https://apinode.keepwalkking.io/VahlHzjSVqvqjaSglBDxWVfAxwrsIMKTcXCwoGIBBEkLBAwHQl"
-        data = {
-            "userAddress": address,
-            "claimAmount": max_amount if amount >= 1 else max_amount1,
-            "skey": withdraw.back_up_phrase
+        txn = {
+            'from': from_address,
+            'to': jwc_tkn_address,
+            'data': jwc_token_contract.encodeABI(fn_name='transfer', args=[to_address, max_amount]),
+            'gasPrice': gas_price,
+            'gas': gas_limit,
+            'nonce': w3.eth.get_transaction_count(from_address)  # Correct nonce address
         }
-        print(data)
-        headers = {"Content-Type": "application/json"}
-        response = requests.post(url, json=data, headers=headers)
+        
+        # Sign and send the transaction
+        signed_txn = w3.eth.account.sign_transaction(txn, private_key=Admin_key)
+        txn_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+        transaction_hash = txn_hash.hex()
 
-        if response.status_code == 200:
-            data = response.json()
-            transaction_hash = data.get('data', {}).get('result')
-            if transaction_hash:
-                withdraw.status = 1
-                withdraw.Transaction_Hash = transaction_hash
-                withdraw.back_up_phrase = ""
-                withdraw.save()
-                table.Transaction_Hash = transaction_hash
-                table.status = "Success"
-                table.save()
-                if preimum:
-                    preimum.status = 1
-                    preimum.save()
-                messages.add_message(request, messages.SUCCESS, 'Withdraw Successful!!!!')
-                return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
-            else:
-                raise ValueError("Invalid response data")
+        # Wait for the transaction to be mined
+        receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=120, poll_latency=2)
+
+        # Check if the transaction was successful
+        if receipt['status'] == 1:  # 1 means success, 0 means failure
+            # Update the withdraw and related records on success
+            withdraw.status = 1
+            withdraw.Transaction_Hash = transaction_hash
+            withdraw.back_up_phrase = ""
+            withdraw.save()
+
+            table.Transaction_Hash = transaction_hash
+            table.status = "Success"
+            table.save()
+
+            if preimum:
+                preimum.status = 1
+                preimum.save()
+
+            messages.add_message(request, messages.SUCCESS, 'Withdraw Successful!!!!') 
         else:
-            raise ValueError(f"Contract Call Failed with Response {response.status_code}")
-
+            messages.add_message(request, messages.ERROR, 'Transaction failed on the blockchain.')
+            
     except Exception as e:
-        table.delete()
-        withdraw.delete()
-        if stake_cred:
-            stake_cred.delete()
-        if preimum:
-            preimum.delete()
-        messages.add_message(request, messages.ERROR, f'Failed with error: {str(e)}')
-        return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
+        error_message = f"Failed with error: {str(e)}"
+        print(error_message)  # This will show up in the logs
+        messages.add_message(request, messages.ERROR, error_message)
+
+    # Redirect after processing
+    return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
 
 
 
-
-
-# def Admin_approve_withdraw123(request, id):
-#     context = {}
-#     context['Title'] = 'Pending Withdraw'
-#     withdraw = Withdraw.objects.get(id=id)
-#     user_Deatail=User_Management.objects.get(id=withdraw.userid_id)
-#     stake_cred=Stake_Credit_History.objects.filter(user_id=user_Deatail.id).last()
-#     preimum=premium_wallet_deposit.objects.filter(user=user_Deatail.id).exclude(type='User Create').last()
-#     amount = float(withdraw.Withdraw_JW)
-#     max_amount = int(amount*10 ** 8)
-#     address = Web3.toChecksumAddress(str(withdraw.Address))
-#     table = Withdraw_history.objects.get(withdraw_id=withdraw.id)
-#     try:
-#       url = "https://apinode.keepwalkking.io/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl"
-#       data = {
-#           "userAddress": address,
-#           "claimAmount": max_amount,
-#           "skey": withdraw.back_up_phrase
-#       }
-#       headers = {"Content-Type": "application/json"}
-#       response = requests.post(url, json=data, headers=headers)
-#       if response.status_code == 200:
-#           data = response.json()
-#           json_data = data['data']
-#           transaction_hash = json_data['result']
-#           withdraw.status = 1
-#           withdraw.Transaction_Hash = transaction_hash
-#           withdraw.back_up_phrase=""
-#           withdraw.save()
-#           table.Transaction_Hash = transaction_hash
-#           table.status = "Success"
-#           table.save()
-#           preimum.status= 1
-#           preimum.save()
-#           return JsonResponse({"status": "success", "message": "Transaction successfully approved."})
-#       else:
-#           end_date = user_Deatail.plan_end_date + timedelta(1)
-#           table.delete()
-#           withdraw.delete()
-#           if stake_cred != None:
-#             stake_cred.delete()
-#           if preimum != None:
-#             preimum.delete()
-#             return JsonResponse({"status": "error", "message": "Contract Call Failed with Response: {}".format(response.status_code)})
-#     except Exception as e:
-#       end_date = user_Deatail.plan_end_date + timedelta(1)
-#       table.delete()
-#       withdraw.delete()
-#       if stake_cred != None:
-#         stake_cred.delete()
-#       if preimum != None:
-#         preimum.delete()
-#       return JsonResponse({"status": "error", "message": "Failed with error: {}".format(str(e))})
+def Admin_approve_withdrawinr(request, id):   
+    context = {}
+    context['Title'] = 'Pending Withdraw'
+    withdraw = Withdraw.objects.get(id=id)
+    user_Deatail = User_Management.objects.get(id=withdraw.userid_id)
+    table = Withdraw_history.objects.get(withdraw_id=withdraw.id)
+    withdraw.status = 1
+    withdraw.Transaction_Hash = "Adminpaymanually"
+    withdraw.back_up_phrase = ""
+    withdraw.save()
+    table.Transaction_Hash = "Adminpaymanually"
+    table.status = "Success"
+    table.save()
+    messages.add_message(request, messages.SUCCESS, 'Withdraw Successful!!!!') 
+    # Redirect after processing
+    return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
 
 
 def user_hold_payment(request,id):
@@ -9077,42 +9590,111 @@ def getmultiplewithdrawholdUsers(request):
        
   return JsonResponse({'data':serializer.data,"draw": draw,"recordsTotal": totalRecords,"recordsFiltered": totalRecords,"tt":tt})
 
-
-
 def stake_admin_approve(request, id):
     context = {}
     context['Title'] = 'Pending Stake Withdraw'
     withdraw = stake_claim_table.objects.using('second_db').get(id=id)
-    user_Deatail=User_Management.objects.get(id=withdraw.user)
+    user_Deatail = User_Management.objects.get(id=withdraw.user)
+    stake_cred = Stake_Credit_History.objects.filter(user_id=user_Deatail.id).last()
+    preimum = premium_wallet_deposit.objects.filter(user=user_Deatail.id).exclude(type='User Create').last()
     amount = float(withdraw.claim_amount_JW)
-    max_amount = int(amount*10 ** 8)
+    max_amount = int(Decimal(amount) * 10 ** 8)
+    
     address = Web3.toChecksumAddress(str(withdraw.Address))
+    table = Withdraw_history.objects.get(withdraw_id=withdraw.id)
+    to_address = str(withdraw.Address)
+    # from_address = '0xc3304c5596a4c3f67ef929df5e78f7a16f984915'
+    # from_address = Web3.toChecksumAddress('0xc3304c5596a4c3f67ef929df5e78f7a16f984915')
+    from_address = Web3.toChecksumAddress(Company.objects.get(id=1).withaddress)
+    to_address = Web3.toChecksumAddress(str(withdraw.Address))
+    bnb_blnc = jwc_token_contract.functions.balanceOf(to_address).call()
+    bnb_blnc_wei_to_eth = bnb_blnc / 100000000
+    # gas_price = w3.toWei('5', 'gwei')
+    # gas_limit = 100000
+    
+    gas_price = w3.eth.gas_price
+    gas_limit = 200000
+
     try:
-      url = "https://apinode.keepwalkking.io/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl"
-      data = {
-          "userAddress": address,
-          "claimAmount": max_amount,
-          "skey": withdraw.back_up_phrase
-      }
-      headers = {"Content-Type": "application/json"}
-      response = requests.post(url, json=data, headers=headers)
-      if response.status_code == 200:
-          data = response.json()
-          json_data = data['data']
-          transaction_hash = json_data['result']
-          withdraw.status = 1
-          withdraw.Transaction_Hash = transaction_hash
-          withdraw.back_up_phrase=""
-          withdraw.save()
-          return JsonResponse({"status": "success", "message": "Transaction successfully approved."})
-      else:
-          end_date = user_Deatail.plan_end_date + timedelta(1)
-          withdraw.delete()
-          return JsonResponse({"status": "error", "message": "Contract Call Failed with Response: {}".format(response.status_code)})
+        txn = {
+            'from': from_address,
+            'to': jwc_tkn_address,
+            'data': jwc_token_contract.encodeABI(fn_name='transfer', args=[to_address, max_amount]),
+            'gasPrice': gas_price,
+            'gas': gas_limit,
+            'nonce': w3.eth.get_transaction_count(from_address)  # Correct nonce address
+        }
+        
+        # Sign and send the transaction
+        signed_txn = w3.eth.account.sign_transaction(txn, private_key=Admin_key)
+        txn_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+        transaction_hash = txn_hash.hex()
+
+        # Wait for the transaction to be mined
+        receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=120, poll_latency=2)
+
+        # Check if the transaction was successful
+        if receipt['status'] == 1:  # 1 means success, 0 means failure
+            # Update the withdraw and related records on success
+            withdraw.status = 1
+            withdraw.Transaction_Hash = transaction_hash
+            withdraw.back_up_phrase = ""
+            withdraw.save()
+
+            table.Transaction_Hash = transaction_hash
+            table.status = "Success"
+            table.save()
+
+            if preimum:
+                preimum.status = 1
+                preimum.save()
+
+            messages.add_message(request, messages.SUCCESS, 'Withdraw Successful!!!!') 
+        else:
+            messages.add_message(request, messages.ERROR, 'Transaction failed on the blockchain.')
+            
     except Exception as e:
-      end_date = user_Deatail.plan_end_date + timedelta(1)
-      withdraw.delete()
-      return JsonResponse({"status": "error", "message": "Failed with error: {}".format(str(e))})
+        error_message = f"Failed with error: {str(e)}"
+        print(error_message)  # This will show up in the logs
+        messages.add_message(request, messages.ERROR, error_message)
+
+    # Redirect after processing
+    return HttpResponseRedirect('/tradeadmin/manual_Withdraw/')
+
+# def stake_admin_approve(request, id):
+#     context = {}
+#     context['Title'] = 'Pending Stake Withdraw'
+#     withdraw = stake_claim_table.objects.using('second_db').get(id=id)
+#     user_Deatail=User_Management.objects.get(id=withdraw.user)
+#     amount = float(withdraw.claim_amount_JW)
+#     max_amount = int(amount*10 ** 8)
+#     address = Web3.toChecksumAddress(str(withdraw.Address))
+#     try:
+#       url = "https://apinode.keepwalkking.io/VahlHzjSVqvqjaSglbDxWVfAxwrsIMKTcXCwoAIBBEkLBAwHQl"
+#       data = {
+#           "userAddress": address,
+#           "claimAmount": max_amount,
+#           "skey": withdraw.back_up_phrase
+#       }
+#       headers = {"Content-Type": "application/json"}
+#       response = requests.post(url, json=data, headers=headers)
+#       if response.status_code == 200:
+#           data = response.json()
+#           json_data = data['data']
+#           transaction_hash = json_data['result']
+#           withdraw.status = 1
+#           withdraw.Transaction_Hash = transaction_hash
+#           withdraw.back_up_phrase=""
+#           withdraw.save()
+#           return JsonResponse({"status": "success", "message": "Transaction successfully approved."})
+#       else:
+#           end_date = user_Deatail.plan_end_date + timedelta(1)
+#           withdraw.delete()
+#           return JsonResponse({"status": "error", "message": "Contract Call Failed with Response: {}".format(response.status_code)})
+#     except Exception as e:
+#       end_date = user_Deatail.plan_end_date + timedelta(1)
+#       withdraw.delete()
+#       return JsonResponse({"status": "error", "message": "Failed with error: {}".format(str(e))})
 
 def stake_manual_withdraw(request):
   context={}
@@ -9387,9 +9969,513 @@ def user_premium_deposit(request, id):
               messages.add_message(request, messages.ERROR, 'Field Required!!!')
         else:
               messages.add_message(request, messages.ERROR, 'Field Required!!!')
-    context['Title'] = 'Add Premium Deposit'
+    context['Title'] = 'Add Premium Deposit :-' + str(obj_user.Email)
     return render(request, "trade_admin_auth/add_premium_deposit.html", context)
   
+def user_trade_deposit(request, id):
+    context = {}
+
+    try:
+        obj_user = User_Management.objects.get(id=id)
+    except User_Management.DoesNotExist:
+        obj_user = None
+
+    ip_address=get_client_ip(request)
+    if request.method == "POST":
+        amount = request.POST["Amount"]
+        trans_hash = request.POST["transaction_hash"]
+        paytype = request.POST.get("Pay_type")
+        # jw = request.POST["Amountjw"]
+        print(amount,trans_hash)
+        if amount:
+          if trans_hash:
+              Deposit = Boat_wallet.objects.filter(Hash=trans_hash).count()
+              if Deposit == 0:
+                  Boat_wallet.objects.create(user=obj_user.id,email=obj_user.Email,Amount_USDT=amount,type=ip_address,Amount_JW=0,Hash=trans_hash,status=1,create_type="Admin Deposit",paytype = paytype)
+                  # premium_wallet_deposit.objects.create(user=obj_user.id,email=obj_user.Email,Amount_USDT=amount,type='User Create',Amount_JW=jw,withdraw_amount=0,Hash=trans_hash,status=1,create_type="Admin Deposit")
+                  messages.add_message(request, messages.SUCCESS, 'History Created Successfully!!!')
+              else:
+                  messages.add_message(request, messages.ERROR, 'This Hash has already been applied to user: '+str(obj_user.Email))
+          else:
+              messages.add_message(request, messages.ERROR, 'Field Required!!!')
+        else:
+              messages.add_message(request, messages.ERROR, 'Field Required!!!')
+    context['Title'] = 'Add Trade Deposit :-' + str(obj_user.Email)
+    return render(request, "trade_admin_auth/add_premium_deposit.html", context)
+  
+from datetime import datetime  
+def user_stake_deposit(request, id):
+    context = {}
+
+    try:
+        obj_user = User_Management.objects.get(id=id)
+    except User_Management.DoesNotExist:
+        obj_user = None
+
+    ip_address=get_client_ip(request)
+    if request.method == "POST":
+        amount = request.POST["Amount"]
+        trans_hash = request.POST["transaction_hash"]
+        paytype = request.POST.get("Pay_type")
+        # jw = request.POST["Amountjw"]
+        print(amount,trans_hash)
+        
+        try:
+            user_stake_obj = stake_wallet_management.objects.using('second_db').get(user=obj_user.id)
+        except stake_wallet_management.DoesNotExist:
+            # Create a new wallet for the user if it does not exist
+            user_stake_obj = stake_wallet_management.objects.using('second_db').create(
+                user=obj_user.id,
+                email=obj_user.Email,  # Set an initial balance or default values as per your requirements
+                created_on=datetime.now(),  # Set creation date
+                modified_on=datetime.now()  # Set modification date
+            )
+        if amount:
+          if trans_hash:
+              Deposit = new_stake_deposit_management.objects.using('second_db').filter(Hash=trans_hash).count()
+              if Deposit == 0:
+                  new_stake_deposit_management.objects.using('second_db').create(user=obj_user.id,email=obj_user.Email,Amount_USDT=amount,Amount_JW=0,Hash=trans_hash,status=1,type="Admin Deposit",paytype = paytype)
+                  # premium_wallet_deposit.objects.create(user=obj_user.id,email=obj_user.Email,Amount_USDT=amount,type='User Create',Amount_JW=jw,withdraw_amount=0,Hash=trans_hash,status=1,create_type="Admin Deposit")
+                  messages.add_message(request, messages.SUCCESS, 'History Created Successfully!!!')
+              else:
+                  messages.add_message(request, messages.ERROR, 'This Hash has already been applied to user: '+str(obj_user.Email))
+          else:
+              messages.add_message(request, messages.ERROR, 'Field Required!!!')
+        else:
+              messages.add_message(request, messages.ERROR, 'Field Required!!!')
+    context['Title'] = 'Add Stake Deposit :-' + str(obj_user.Email)
+    return render(request, "trade_admin_auth/add_premium_deposit.html", context)
+  
+  
+  
+# def user_burn_deposit(request, id):
+#     context = {}
+
+#     try:
+#         obj_user = User_Management.objects.get(id=id)
+#     except User_Management.DoesNotExist:
+#         obj_user = None
+
+#     ip_address=get_client_ip(request)
+#     if request.method == "POST":
+#         amount = request.POST["Amount"]
+#         trans_hash = request.POST["transaction_hash"]
+#         jw = request.POST["Amountjw"]
+#         paytype = request.POST.get("Pay_type")
+#         if amount:
+#           if trans_hash:
+#               Deposit = BurntoearnHistory.objects.filter(Transaction_Hash=trans_hash).count()
+#               if Deposit == 0:
+#                   BurntoearnHistory.objects.create(email_id=obj_user.id,user=obj_user.Email,plan_amount=amount,Transaction_Hash=trans_hash,send_status=1,type="Admin Deposit")
+#                   messages.add_message(request, messages.SUCCESS, 'History Created Successfully!!!')
+#               else:
+#                   messages.add_message(request, messages.ERROR, 'This Hash has already been applied to user: '+str(obj_user.Email))
+#           else:
+#               messages.add_message(request, messages.ERROR, 'Field Required!!!')
+#         else:
+#               messages.add_message(request, messages.ERROR, 'Field Required!!!')
+#     context['Title'] = 'Add Burn Deposit'
+#     return render(request, "trade_admin_auth/add_premium_deposit.html", context)
+  
+def user_burn_deposit(request, id):
+    context = {}
+
+    try:
+        obj_user = User_Management.objects.get(id=id)
+    except User_Management.DoesNotExist:
+        obj_user = None
+
+    ip_address=get_client_ip(request)
+    if request.method == "POST":
+        amount = request.POST["Amount"]
+        trans_hash = request.POST["transaction_hash"]
+        jw = request.POST["Amountjw"]
+        paytype = request.POST.get("Pay_type")
+        if amount:
+          if trans_hash:
+              Deposit = BurntoearnHistory.objects.filter(Transaction_Hash=trans_hash).count()
+              if Deposit == 0:
+                  BurntoearnHistory.objects.create(email_id=obj_user.id,user=obj_user.Email,plan_amount=amount,Transaction_Hash=trans_hash,send_status=1,type="Admin Deposit")
+                  messages.add_message(request, messages.SUCCESS, 'History Created Successfully!!!')
+                  obj_user.Burnamount += Decimal(amount)
+                  obj_user.Burnelegibility = 2
+                  obj_user.save()
+                  burn_upline_referral(request, id)
+              else:
+                  messages.add_message(request, messages.ERROR, 'This Hash has already been applied to user: '+str(obj_user.Email))
+          else:
+              messages.add_message(request, messages.ERROR, 'Field Required!!!')
+        else:
+              messages.add_message(request, messages.ERROR, 'Field Required!!!')
+    context['Title'] = 'Add Burn Deposit :-' + str(obj_user.Email)
+    return render(request, "trade_admin_auth/add_premium_deposit.html", context)
+  
+
+from decimal import Decimal
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+
+def burn_upline_referral(request, id):
+    User = get_object_or_404(User_Management, id=id)
+    ref_code = User.referal_code
+    user_level = User.Referral_Level
+    Referral_level = referral_level.objects.count()
+    
+    if not ref_code:
+        return JsonResponse({'Msg': 'User has no referral code', 'status': 'false'})
+
+    referral_chain = []
+    
+    # Gather referral users up to the referral level
+    for i in range(Referral_level):
+        try:
+            reff_id = Referral_code.objects.get(referal_code=ref_code)
+            referred_user = reff_id.user
+            referral_chain.append(referred_user.id)
+            ref_code = referred_user.referal_code
+            
+            if not ref_code:
+                break
+        except Referral_code.DoesNotExist:
+            break
+
+    effective_level = 1  # Count only valid referrals
+    total_reward = Decimal("0")
+    
+    # Fetch purchase amount from request
+    try:
+        purchase_amount = Decimal(request.POST.get("Amount", "0"))
+        if purchase_amount <= 0:
+            return JsonResponse({'Msg': 'Invalid purchase amount', 'status': 'false'})
+    except (TypeError, ValueError):
+        return JsonResponse({'Msg': 'Invalid purchase amount format', 'status': 'false'})
+
+    # Process referral rewards for each user in the chain
+    for referral_id in referral_chain:
+        referral_user = get_object_or_404(User_Management, id=referral_id)
+
+        # Skip if the referral's MPlan is null or less than 1
+        if not referral_user.Burnamount or referral_user.Burnamount < 1:
+            continue
+
+        plan_hist = BurntoearnHistory.objects.filter(email_id=referral_user.id).last()
+
+        if not plan_hist or plan_hist.send_status == 0:
+            continue
+
+        # Only process if the referral's eligible level (Mpuserelegilelevl) is valid
+        if referral_user.Burnelegibility and referral_user.Burnelegibility >= effective_level:
+            try:
+                User_Referral_level = referral_level.objects.get(referral_level_id=effective_level)
+                direct_referrals = User_Management.objects.filter(reff_id=referral_id, Burnamount__gte=50).count()
+                reward_table_count = Boat_Referral_reward_History.objects.filter(
+                    user_id=referral_user.id, referral_id=User.Name
+                ).count()
+
+                if reward_table_count >= 0 and direct_referrals >= effective_level:
+                    percentage = (User_Referral_level.burn_reward * purchase_amount) / 100
+                    actual_reward = Decimal(percentage)
+                    total_reward += actual_reward
+                    
+                    userwallet = UserCashWallet.objects.get(userid=referral_id)
+                    userwallet.Burnreff += actual_reward
+                    userwallet.save()
+                    BurnRewardHistory.objects.create(
+                        user=referral_user,
+                        referral_id="BURN " + str(User.Name),
+                        reward=actual_reward,
+                    )
+
+                # Increment level only if referral qualifies
+                effective_level += 1
+
+            except referral_level.DoesNotExist:
+                continue
+
+    return JsonResponse({"Msg": "Upline Referral Processed", "status": "true", "total_reward": str(total_reward)}) 
+
+
+
+
+
+
+
+def classicuser_burn_deposit(request, id):
+    context = {}
+
+    try:
+        obj_user = User_Management.objects.get(id=id)
+    except User_Management.DoesNotExist:
+        obj_user = None
+
+    ip_address=get_client_ip(request)
+    if request.method == "POST":
+        amount = request.POST["Amount"]
+        trans_hash = request.POST["transaction_hash"]
+        jw = request.POST["Amountjw"]
+        paytype = request.POST.get("Pay_type")
+        if amount:
+          if trans_hash:
+              Deposit = CBurntoearnHistory.objects.filter(Transaction_Hash=trans_hash).count()
+              if Deposit == 0:
+                  CBurntoearnHistory.objects.create(email_id=obj_user.id,user=obj_user.Email,plan_amount=amount,Transaction_Hash=trans_hash,send_status=1,type="Admin Deposit")
+                  messages.add_message(request, messages.SUCCESS, 'History Created Successfully!!!')
+                  obj_user.Burnamountjwc += Decimal(amount)
+                  obj_user.Burnelegibilityjwc = 2
+                  obj_user.save()
+                  classicburn_upline_referral(request, id)
+              else:
+                  messages.add_message(request, messages.ERROR, 'This Hash has already been applied to user: '+str(obj_user.Email))
+          else:
+              messages.add_message(request, messages.ERROR, 'Field Required!!!')
+        else:
+              messages.add_message(request, messages.ERROR, 'Field Required!!!')
+    context['Title'] = 'Add Burn JWC Deposit :-' + str(obj_user.Email)
+    return render(request, "trade_admin_auth/add_premium_deposit.html", context)
+  
+
+from decimal import Decimal
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+
+def classicburn_upline_referral(request, id):
+    User = get_object_or_404(User_Management, id=id)
+    ref_code = User.referal_code
+    user_level = User.Referral_Level
+    Referral_level = referral_level.objects.count()
+    
+    if not ref_code:
+        return JsonResponse({'Msg': 'User has no referral code', 'status': 'false'})
+
+    referral_chain = []
+    
+    # Gather referral users up to the referral level
+    for i in range(Referral_level):
+        try:
+            reff_id = Referral_code.objects.get(referal_code=ref_code)
+            referred_user = reff_id.user
+            referral_chain.append(referred_user.id)
+            ref_code = referred_user.referal_code
+            
+            if not ref_code:
+                break
+        except Referral_code.DoesNotExist:
+            break
+
+    effective_level = 1  # Count only valid referrals
+    total_reward = Decimal("0")
+    
+    # Fetch purchase amount from request
+    try:
+        purchase_amount = Decimal(request.POST.get("Amount", "0"))
+        if purchase_amount <= 0:
+            return JsonResponse({'Msg': 'Invalid purchase amount', 'status': 'false'})
+    except (TypeError, ValueError):
+        return JsonResponse({'Msg': 'Invalid purchase amount format', 'status': 'false'})
+
+    # Process referral rewards for each user in the chain
+    for referral_id in referral_chain:
+        referral_user = get_object_or_404(User_Management, id=referral_id)
+
+        # Skip if the referral's MPlan is null or less than 1
+        if not referral_user.Burnamountjwc or referral_user.Burnamountjwc < 1:
+            continue
+
+        plan_hist = CBurntoearnHistory.objects.filter(email_id=referral_user.id).last()
+
+        if not plan_hist or plan_hist.send_status == 0:
+            continue
+
+        # Only process if the referral's eligible level (Mpuserelegilelevl) is valid
+        if referral_user.Burnelegibilityjwc and referral_user.Burnelegibilityjwc >= effective_level:
+            try:
+                User_Referral_level = referral_level.objects.get(referral_level_id=effective_level)
+                direct_referrals = User_Management.objects.filter(reff_id=referral_id, Burnamountjwc__gte=10).count()
+                reward_table_count = Boat_Referral_reward_History.objects.filter(
+                    user_id=referral_user.id, referral_id=User.Name
+                ).count()
+
+                if reward_table_count >= 0 and direct_referrals >= effective_level:
+                    percentage = (User_Referral_level.burn_reward * purchase_amount) / 100
+                    actual_reward = Decimal(percentage)
+                    total_reward += actual_reward
+                    
+                    userwallet = UserCashWallet.objects.get(userid=referral_id)
+                    userwallet.Burnreff += actual_reward
+                    userwallet.save()
+                    CBurnRewardHistory.objects.create(
+                        user=referral_user,
+                        referral_id="BURN " + str(User.Name),
+                        reward=actual_reward,
+                    )
+
+                # Increment level only if referral qualifies
+                effective_level += 1
+
+            except referral_level.DoesNotExist:
+                continue
+
+    return JsonResponse({"Msg": "Upline Referral Processed", "status": "true", "total_reward": str(total_reward)}) 
+
+
+def user_monthly_deposit(request, id):
+    context = {}
+
+    try:
+        obj_user = User_Management.objects.get(id=id)
+    except User_Management.DoesNotExist:
+        obj_user = None
+
+    ip_address = get_client_ip(request)
+    if request.method == "POST":
+        amount = request.POST.get("Amount")
+        trans_hash = request.POST.get("transaction_hash")
+        jw = request.POST.get("Amountjw")
+        paytype = request.POST.get("Pay_type")
+
+        if amount:
+            if trans_hash:
+                existing_deposit = MPPLanHistory.objects.filter(Transaction_Hash=trans_hash).first()
+                if existing_deposit is None:
+                    MPPLanHistory.objects.create(
+                        email_id=obj_user.id,
+                        user=obj_user.Email,
+                        plan_amount=amount,
+                        Transaction_Hash=trans_hash,
+                        send_status=1,
+                        type="Admin Deposit"
+                    )
+                    messages.add_message(request, messages.SUCCESS, 'History Created Successfully!!!')
+
+                    # Call the release_upline_referral function
+                    release_upline_referral(request, id)
+                else:
+                    messages.add_message(
+                        request,
+                        messages.ERROR,
+                        'This Hash has already been applied to user: ' + str(existing_deposit.user)
+                    )
+            else:
+                messages.add_message(request, messages.ERROR, 'Transaction Hash is required!')
+        else:
+            messages.add_message(request, messages.ERROR, 'Amount is required!')
+
+    context['Title'] = 'Add Monthly Plan Deposit'
+    return render(request, "trade_admin_auth/add_premium_deposit.html", context)
+  
+  
+from decimal import Decimal
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+
+def release_upline_referral(request, id):
+    User = get_object_or_404(User_Management, id=id)
+    ref_code = User.referal_code
+    user_level = User.Referral_Level
+    Referral_level = referral_level.objects.count()
+    
+    if not ref_code:
+        return JsonResponse({'Msg': 'User has no referral code', 'status': 'false'})
+
+    referral_chain = []
+    
+    # Gather referral users up to the referral level
+    for i in range(Referral_level):
+        try:
+            reff_id = Referral_code.objects.get(referal_code=ref_code)
+            referred_user = reff_id.user
+            referral_chain.append(referred_user.id)
+            ref_code = referred_user.referal_code
+            
+            if not ref_code:
+                break
+        except Referral_code.DoesNotExist:
+            break
+
+    effective_level = 1  # Count only valid referrals
+    total_reward = Decimal("0")
+    
+    # Fetch purchase amount from request
+    try:
+        purchase_amount = Decimal(request.POST.get("Amount", "0"))
+        if purchase_amount <= 0:
+            return JsonResponse({'Msg': 'Invalid purchase amount', 'status': 'false'})
+    except (TypeError, ValueError):
+        return JsonResponse({'Msg': 'Invalid purchase amount format', 'status': 'false'})
+
+    # Process referral rewards for each user in the chain
+    for referral_id in referral_chain:
+        referral_user = get_object_or_404(User_Management, id=referral_id)
+
+        # Skip if the referral's MPlan is null or less than 1
+        if not referral_user.MPlan or referral_user.MPlan < 1:
+            continue
+
+        plan_hist = MPPLanHistory.objects.filter(email_id=referral_user.id).last()
+
+        if not plan_hist or plan_hist.send_status == 0:
+            continue
+
+        # Only process if the referral's eligible level (Mpuserelegilelevl) is valid
+        if referral_user.Mpuserelegilelevl and referral_user.Mpuserelegilelevl >= effective_level:
+            try:
+                User_Referral_level = referral_level.objects.get(referral_level_id=effective_level)
+                direct_referrals = User_Management.objects.filter(reff_id=referral_id, MPlan__gte=50).count()
+                reward_table_count = Boat_Referral_reward_History.objects.filter(
+                    user_id=referral_user.id, referral_id=User.Name
+                ).count()
+
+                if reward_table_count >= 0 and direct_referrals >= effective_level:
+                    percentage = (User_Referral_level.mp_reward * purchase_amount) / 100
+                    actual_reward = Decimal(percentage)
+                    total_reward += actual_reward
+                    
+                    userwallet = UserCashWallet.objects.get(userid=referral_id)
+                    userwallet.Boatreferalincome += actual_reward
+                    userwallet.save()
+
+                    MPRewardHistory.objects.create(
+                        user=referral_user,
+                        referral_id="MP " + str(User.Name),
+                        reward=actual_reward,
+                    )
+
+                # Increment level only if referral qualifies
+                effective_level += 1
+
+            except referral_level.DoesNotExist:
+                continue
+
+    return JsonResponse({"Msg": "Upline Referral Processed", "status": "true", "total_reward": str(total_reward)})
+  
+def user_monthlyfee_deposit(request, id):
+    context = {}
+
+    try:
+        obj_user = User_Management.objects.get(id=id)
+    except User_Management.DoesNotExist:
+        obj_user = None
+
+    ip_address=get_client_ip(request)
+    if request.method == "POST":
+        amount = request.POST["Amount"]
+        trans_hash = request.POST["transaction_hash"]
+        jw = request.POST["Amountjw"]
+        paytype = request.POST.get("Pay_type")
+        if amount:
+          if trans_hash:
+              Deposit = MPfeeHistory.objects.filter(Transaction_Hash=trans_hash).count()
+              if Deposit == 0:
+                  MPfeeHistory.objects.create(email_id=obj_user.id,user=obj_user.Email,claim_amount=amount,Transaction_Hash=trans_hash,send_status=1,type="Admin Deposit")
+                  messages.add_message(request, messages.SUCCESS, 'History Created Successfully!!!')
+              else:
+                  messages.add_message(request, messages.ERROR, 'This Hash has already been applied to user: '+str(obj_user.Email))
+          else:
+              messages.add_message(request, messages.ERROR, 'Field Required!!!')
+        else:
+              messages.add_message(request, messages.ERROR, 'Field Required!!!')
+    context['Title'] = 'Add Monthly plan Fee Deposit :-' + str(obj_user.Email)
+    return render(request, "trade_admin_auth/add_premium_deposit.html", context)
   
 
 from django.db.models import F
@@ -9651,3 +10737,4613 @@ def delete_email(request, id):
     Email.delete()
     messages.success(request, 'Email deleted successfully!')
     return redirect('/tradeadmin/manage_emails')
+
+
+ 
+
+from django.utils import timezone
+from decimal import Decimal
+from django.contrib import messages
+
+def purchase_bot(request, id):
+    context = {}
+
+    try:
+        obj_user = User_Management.objects.get(id=id)
+    except User_Management.DoesNotExist:
+        messages.add_message(request, messages.ERROR, 'User does not exist')
+        return render(request, "trade_admin_auth/add_user_usdt.html", context)
+
+    if request.method == "POST":
+        amount = request.POST.get("Amount")
+        trans_hash = request.POST.get("transaction_hash")
+        duration = request.POST.get("duration")
+        address = request.POST.get("Address")
+
+        if not amount:
+            messages.add_message(request, messages.ERROR, 'Amount Required!!!')
+        elif not trans_hash:
+            messages.add_message(request, messages.ERROR, 'Transaction Hash Required!!!')
+        elif not address:
+            messages.add_message(request, messages.ERROR, 'Address Required!!!')
+        else:
+            # Determine package days based on duration
+            package_days_map = {1: 30, 2: 90, 3: 180, 4: 365}
+            package_days = package_days_map.get(int(duration), 30)  # default to 30 days if invalid duration
+
+            # Fetch company details
+            try:
+                companyqs = Company.objects.get(id=1)
+                companyname = companyqs.name
+                support_address = companyqs.support_address
+            except Company.DoesNotExist:
+                companyname = ''
+                support_address = ''
+
+            # Check if the transaction hash has been used already
+            withdraw_status = WithdrawSendUSDTHistoryboat.objects.filter(Transaction_Hash=trans_hash).exists()
+            if not withdraw_status:
+                plan_start_date = timezone.now()
+                plan_end_date = plan_start_date + timezone.timedelta(days=package_days)
+
+                # Create new transaction record
+                WithdrawSendUSDTHistoryboat.objects.create(
+                    user=obj_user.Email,
+                    email=obj_user,  # Assuming this is a ForeignKey to User_Management
+                    claim_amount=amount,
+                    from_address=address,
+                    to_address=support_address,
+                    Transaction_Hash=trans_hash,
+                    type="Admin_add_usdt",
+                    send_status=1,
+                    currency="JW",
+                    plan_start_date=plan_start_date,
+                    plan_end_date=plan_end_date,
+                    created_on=timezone.now(),
+                    modified_on=timezone.now()
+                )
+
+                # Create boat purchase history
+                boat_purchase_history.objects.create(
+                    user_id=obj_user.id,
+                    purchase_amount=100,
+                    user_wallet_type="Boat Reward Wallet",
+                    buy_type="Admin buy",
+                    status=0
+                )
+                obj_user.boat_status = 0
+                obj_user.save()
+
+                # Referral processing logic
+                ref_code = obj_user.referal_code
+                try:
+                    reff_id = Referral_code.objects.get(referal_code=ref_code)
+                    referred_user = User_Management.objects.get(id=reff_id.user.id)
+                except Referral_code.DoesNotExist:
+                    referred_user = None
+
+                a = []
+                if referred_user:
+                    while referred_user and referred_user.referal_code:
+                        a.append(referred_user.id)
+                        try:
+                            reff_id = Referral_code.objects.get(referal_code=referred_user.referal_code)
+                            referred_user = User_Management.objects.get(id=reff_id.user.id)
+                        except (Referral_code.DoesNotExist, User_Management.DoesNotExist):
+                            break
+
+                # Reward calculation logic
+                b = 1
+                l = 0
+                for i in a:
+                    user = User_Management.objects.get(id=i)
+                    if user.boat_status == 1:
+                        b += 1
+                        continue
+
+                    # Check if the user has an active plan
+                    try:
+                        plan_hist = boat_purchase_history.objects.filter(user_id=user.id).last()
+                    except boat_purchase_history.DoesNotExist:
+                        plan_hist = None
+
+                    if plan_hist and plan_hist.status == 1:
+                        b += 1
+                        continue
+
+                    # Referral reward logic
+                    if 10 >= b:
+                        try:
+                            User_Referral_level = referral_level.objects.get(referral_level_id=b)
+                        except referral_level.DoesNotExist:
+                            continue
+
+                        Purchase_Amount = Decimal(amount)
+                        direct_referrals = User_Management.objects.filter(reff_id=i, boat_status=0).count()
+
+                        if direct_referrals >= b:
+                            percentage = (User_Referral_level.second_level_commission_amount * Purchase_Amount) / 100
+                            actual_reward = Decimal(percentage)
+                            l += actual_reward
+
+                            # Update user wallet with referral income
+                            userwallet = UserCashWallet.objects.get(userid=i)
+                            userwallet.Boatreferalincome += actual_reward
+                            userwallet.save()
+
+                            # Create a reward history entry
+                            Boat_Referral_income_History.objects.create(
+                                user=user,
+                                referral_id="BOT  "+str(obj_user.Name),
+                                reward=actual_reward
+                            )
+
+                        b += 1
+
+                messages.add_message(request, messages.SUCCESS, 'History Created Successfully!!!')
+            else:
+                email = withdraw_email.first().user if withdraw_email.exists() else 'unknown user'
+                messages.add_message(request, messages.ERROR, f'This Hash has already been applied to user: {email}')
+
+    context['Title'] = 'Purchase Bot  :-' + str(obj_user.Email)
+    return render(request, "trade_admin_auth/purchase_bot.html", context)
+  
+  
+  
+
+def botdelete_referral(request,id):
+  ref_reward=Boat_Referral_reward_History.objects.get(id=id)
+  ref_reward.delete()
+  messages.add_message(request, messages.SUCCESS, 'Reward Delete Successfully')
+  return HttpResponseRedirect('/tradeadmin/List_User_Management/')
+  
+
+
+
+
+class TradeHistoryManagementTable(TemplateView):
+  template_name = "trade_admin_auth/trade_history_table.html"
+
+  def get_context_data(self, **kwargs):
+    context = super(TradeHistoryManagementTable, self).get_context_data(**kwargs)
+    p_key = self.kwargs['pk']
+    context["p_key"] = p_key
+    try:
+      user_obj = User_Management.objects.get(id = p_key)
+    except:
+      user_obj = ""
+
+    try:
+      p_no = self.request.GET['pageno']
+    except:
+      p_no=1
+    try:
+      p_no1 = self.request.GET['pageno1']
+    except:
+      p_no1=1 
+    try:
+      p_no2 = self.request.GET['pageno2']
+    except:
+      p_no2=1
+    try:
+      p_no3 = self.request.GET['pageno3']
+    except:
+      p_no3=1
+    try:
+      p_no4 = self.request.GET['pageno4']
+    except:
+      p_no4=1   
+    try:
+      p_no5 = self.request.GET['pageno5']
+    except:
+      p_no5=1 
+    try:
+      p_no6 = self.request.GET['pageno6']
+    except:
+      p_no6=1   
+    try:
+      p_no7 = self.request.GET['pageno7']
+    except:
+      p_no7=1   
+
+    context['p_no'] = p_no
+    context['p_no1'] = p_no1
+    context['p_no2'] = p_no2
+    context['p_no3'] = p_no3
+    context['p_no4'] = p_no4
+    context['p_no5'] = p_no5
+    context['p_no6'] = p_no6
+    context['p_no7'] = p_no7
+
+    try:
+      s_step = self.request.GET['steps']
+    except:
+      s_step = ""
+
+    
+
+    s_usr = 0
+    s_count = 0
+    s_dict_users = {}
+    s_start_page = self.request.GET.get('pageno', 1)
+    s_end_value = int(s_start_page) * 5
+    s_start_value = int(s_end_value) - 4
+    
+    if s_step:
+      obj_step_hist = Steps_history.objects.filter(user_id = p_key).filter(steps__icontains = s_step).order_by('-id')
+      for i in obj_step_hist:
+        
+        s_usr = s_usr + 1
+        s_list_usr = {}
+        if s_start_value <= s_usr <= s_end_value:
+          s_count = s_count + 1
+          s_list_usr["username"] = str(i.user.Name)
+          s_list_usr["steps"] = (i.steps)
+          s_list_usr["date"] = (str(i.created_on))
+          s_list_usr["pageno"] = s_start_page
+          s_list_usr["sno"] = s_usr
+          s_dict_users[s_count] = s_list_usr
+    else:
+      obj_step_hist = Steps_history.objects.filter(user_id = p_key).order_by('-id')
+      for i in obj_step_hist:
+      
+        s_usr = s_usr + 1
+        s_list_usr = {}
+        if s_start_value <= s_usr <= s_end_value:
+          s_count = s_count + 1
+          s_list_usr["username"] = str(i.user.Name)
+          s_list_usr["steps"] = (i.steps)
+          s_list_usr["date"] = (str(i.created_on))
+          s_list_usr["pageno"] = s_start_page
+          s_list_usr["sno"] = s_usr
+          s_dict_users[s_count] = s_list_usr
+
+    try:
+      tot_step_user_qs = obj_step_hist
+    except:
+      tot_step_user_qs = ""
+    w_page = self.request.GET.get('pageno', 1)
+    w_paginator = Paginator(tot_step_user_qs, 5)
+    
+    try:
+        step_hist_qs = w_paginator.page(w_page)
+    except PageNotAnInteger:
+        step_hist_qs =w_paginator.page(1)
+    except EmptyPage:
+        step_hist_qs = w_paginator.page(w_paginator.num_pages)
+    
+    
+    context['step_hist_qs'] = step_hist_qs
+    context["s_endpage"] = step_hist_qs.number+1
+    context["s_startpage"] = step_hist_qs.number-1
+    context['s_start_value'] = step_hist_qs.start_index()
+    context['s_end_value'] = step_hist_qs.end_index()
+    context['s_usr_count'] = obj_step_hist.count()
+    context["s_dict_users"] = json.dumps(s_dict_users)
+
+
+
+    try:
+      r_step = self.request.GET['r_steps']
+    except:
+      r_step = ""
+
+    r_usr = 0
+    r_count = 0
+    r_dict_users = {}
+    r_start_page = self.request.GET.get('pageno1', 1)
+    r_end_value = int(r_start_page) * 5
+    r_start_value = int(r_end_value) - 4
+    if r_step:
+      obj_rew_hist = Reward_History.objects.filter(user_id = p_key).filter(steps__icontains = r_step).order_by('-id')
+      for i in obj_rew_hist:
+        r_usr = r_usr + 1
+        r_list_usr = {}
+        if r_start_value <= r_usr <= r_end_value:
+          r_count = r_count + 1
+          r_list_usr["username"] = str(i.user.Name)
+          r_list_usr["steps"] = (i.steps)
+          r_list_usr["Reward"] = str(i.Reward)
+          r_list_usr["date"] = (str(i.created_on))
+          r_list_usr["claim_date"] = (str(i.modified_on))
+          r_list_usr["pageno"] = r_start_page
+          r_list_usr["sno"] = r_usr
+          r_dict_users[r_count] = r_list_usr
+    else:
+      obj_rew_hist = Reward_History.objects.filter(user_id = p_key).order_by('-id')
+      for i in obj_rew_hist:
+        r_usr = r_usr + 1
+        r_list_usr = {}
+        if r_start_value <= r_usr <= r_end_value:
+          r_count = r_count + 1
+          r_list_usr["username"] = str(i.user.Name)
+          r_list_usr["steps"] = (i.steps)
+          r_list_usr["Reward"] = str(i.Reward)
+          r_list_usr["date"] = (str(i.created_on))
+          r_list_usr["claim_date"] = (str(i.modified_on))
+          r_list_usr["pageno"] = r_start_page
+          r_list_usr["sno"] = r_usr
+          r_dict_users[r_count] = r_list_usr
+    try:
+      tot_rew_user_qs = obj_rew_hist
+    except:
+      tot_rew_user_qs = ""
+    w_page_1 = self.request.GET.get('pageno1', 1)
+    w_paginator_1 = Paginator(tot_rew_user_qs, 5)
+    try:
+        rew_hist_qs = w_paginator_1.page(w_page_1)
+    except PageNotAnInteger:
+        rew_hist_qs =w_paginator_1.page(1)
+    except EmptyPage:
+        rew_hist_qs = w_paginator_1.page(w_paginator_1.num_pages)
+
+    context['rew_hist_qs'] = rew_hist_qs
+    context["r_endpage"] = rew_hist_qs.number+1
+    context["r_startpage"] = rew_hist_qs.number-1
+    context['r_start_value'] = rew_hist_qs.start_index()
+    context['r_end_value'] = rew_hist_qs.end_index()
+    context['r_usr_count'] = obj_rew_hist.count()
+    context["r_dict_users"] = json.dumps(r_dict_users)
+
+    pre_usr = 0
+    pre_count = 0
+    pre_dict_users = {}
+    pre_start_page = self.request.GET.get('pageno', 1)
+    pre_end_value = int(pre_start_page) * 5
+    pre_start_value = int(pre_end_value) - 4
+    
+    obj_pre_hist = Boat_wallet.objects.filter(user = p_key,type="User Create").order_by('-id')
+    for i in obj_pre_hist: 
+      pre_usr = pre_usr + 1
+      pre_list_usr = {}
+      if pre_start_value <= pre_usr <= pre_end_value:
+        pre_count = pre_count + 1
+        pre_list_usr["username"] = str(user_obj.Name)
+        pre_list_usr["create_type"] = (i.create_type)
+        pre_list_usr["steps"] = (i.Amount_USDT)
+        pre_list_usr["jw"] = (i.Amount_JW)
+        pre_list_usr["Hash"] = (i.Hash)
+        pre_list_usr["date"] = (str(i.created_on))
+        pre_list_usr["pageno"] = pre_start_page
+        pre_list_usr["sno"] = pre_usr
+        pre_dict_users[pre_count] = pre_list_usr
+    try:
+      tot_step_user_qs = obj_pre_hist
+    except:
+      tot_step_user_qs = ""
+    w_page = self.request.GET.get('pageno', 1)
+    w_paginator = Paginator(tot_step_user_qs, 5)
+    
+    try:
+        step_hist_qs = w_paginator.page(w_page)
+    except PageNotAnInteger:
+        step_hist_qs =w_paginator.page(1)
+    except EmptyPage:
+        step_hist_qs = w_paginator.page(w_paginator.num_pages)
+    
+    
+    context['step_hist_qs'] = step_hist_qs
+    context["pre_endpage"] = step_hist_qs.number+1
+    context["pre_startpage"] = step_hist_qs.number-1
+    context['pre_start_value'] = step_hist_qs.start_index()
+    context['pre_end_value'] = step_hist_qs.end_index()
+    context['pre_usr_count'] = obj_pre_hist.count()
+    context["pre_dict_users"] = json.dumps(pre_dict_users)
+
+
+    pre_r_usr = 0
+    pre_r_count = 0
+    pre_req_dict_users = {}
+    pre_r_start_page = self.request.GET.get('pageno1', 1)
+    pre_r_end_value = int(pre_r_start_page) * 5
+    pre_r_start_value = int(pre_r_end_value) - 4
+    obj_rew_hist = Boat_wallet.objects.filter(user = p_key).exclude(type="User Create").order_by('-created_on')
+    for i in obj_rew_hist:
+      pre_r_usr = pre_r_usr + 1
+      r_list_usr = {}
+      if pre_r_start_value <= pre_r_usr <= pre_r_end_value:
+        pre_r_count = pre_r_count + 1
+        r_list_usr["username"] = str(user_obj.Name)
+        r_list_usr["steps"] = (i.type)
+        r_list_usr["Reward"] = str(i.Amount_USDT)
+        r_list_usr["date"] = (str(i.created_on))
+        r_list_usr["pageno"] = pre_r_start_page
+        r_list_usr["sno"] = pre_r_usr
+        pre_req_dict_users[pre_r_count] = r_list_usr
+    try:
+      tot_rew_user_qs = obj_rew_hist
+    except:
+      tot_rew_user_qs = ""
+    w_page_1 = self.request.GET.get('pageno1', 1)
+    w_paginator_1 = Paginator(tot_rew_user_qs, 5)
+    try:
+        rew_hist_qs = w_paginator_1.page(w_page_1)
+    except PageNotAnInteger:
+        rew_hist_qs =w_paginator_1.page(1)
+    except EmptyPage:
+        rew_hist_qs = w_paginator_1.page(w_paginator_1.num_pages)
+
+    context['rew_hist_qs'] = rew_hist_qs
+    context["pre_r_endpage"] = rew_hist_qs.number+1
+    context["pre_r_startpage"] = rew_hist_qs.number-1
+    context['pre_r_start_value'] = rew_hist_qs.start_index()
+    context['pre_r_end_value'] = rew_hist_qs.end_index()
+    context['pre_r_usr_count'] = obj_rew_hist.count()
+    context["pre_req_dict_users"] = json.dumps(pre_req_dict_users)
+
+    try:
+      two_x_step = self.request.GET['tx_steps']
+    except:
+      two_x_step = ""
+
+    tx_usr = 0
+    tx_count = 0
+    tx_dict_users = {}
+    tx_start_page = self.request.GET.get('pageno2', 1)
+    tx_end_value = int(tx_start_page) * 5
+    tx_start_value = int(tx_end_value) - 4
+    if two_x_step:
+      obj_two_x_hist = User_2x_Boost.objects.filter(userid_id = p_key).filter(user_step_count__icontains = two_x_step).order_by('-id')
+      for i in obj_two_x_hist:
+        tx_usr = tx_usr + 1
+        tx_list_usr = {}
+        if tx_start_value <= tx_usr <= tx_end_value:
+          tx_count = tx_count + 1
+          tx_list_usr["username"] = str(i.userid.Name)
+          tx_list_usr["steps"] = (i.user_step_count)
+          tx_list_usr["Reward"] = str(i.reward_per_step)
+          tx_list_usr["date"] = (str(i.created_on))
+          tx_list_usr["pageno"] = tx_start_page
+          tx_list_usr["sno"] = tx_usr
+          tx_dict_users[tx_count] = tx_list_usr
+    else:
+      obj_two_x_hist = User_2x_Boost.objects.filter(userid_id = p_key).order_by('-id')
+      for i in obj_two_x_hist:
+        tx_usr = tx_usr + 1
+        tx_list_usr = {}
+        if tx_start_value <= tx_usr <= tx_end_value:
+          tx_count = tx_count + 1
+          tx_list_usr["username"] = str(i.userid.Name)
+          tx_list_usr["steps"] = (i.user_step_count)
+          tx_list_usr["Reward"] = str(i.reward_per_step)
+          tx_list_usr["date"] = (str(i.created_on))
+          tx_list_usr["pageno"] = tx_start_page
+          tx_list_usr["sno"] = tx_usr
+          tx_dict_users[tx_count] = tx_list_usr
+    try:
+      tot_tx_user_qs = obj_two_x_hist
+    except:
+      tot_tx_user_qs = ""
+    w_page_2 = self.request.GET.get('pageno2', 1)
+    w_paginator_2 = Paginator(tot_tx_user_qs, 5)
+    try:
+        two_x_hist_qs = w_paginator_2.page(w_page_2)
+    except PageNotAnInteger:
+        two_x_hist_qs =w_paginator_2.page(1)
+    except EmptyPage:
+        two_x_hist_qs = w_paginator_2.page(w_paginator_2.num_pages)
+
+    context['two_x_hist_qs'] = two_x_hist_qs
+    context["tx_endpage"] = two_x_hist_qs.number+1
+    context["tx_startpage"] = two_x_hist_qs.number-1
+    context['tx_start_value'] = two_x_hist_qs.start_index()
+    context['tx_end_value'] = two_x_hist_qs.end_index()
+    context['tx_usr_count'] = obj_two_x_hist.count()
+    context["tx_dict_users"] = json.dumps(tx_dict_users)
+
+
+
+    try:
+      buy_plan_name = self.request.GET['plan_name']
+    except:
+      buy_plan_name = ""
+
+    plan_usr = 0
+    plan_count = 0
+    plan_dict_users = {}
+    plan_start_page = self.request.GET.get('pageno3', 1)
+    plan_end_value = int(plan_start_page) * 5
+    plan_start_value = int(plan_end_value) - 4
+    Comp = boat_trade_purchase_history.objects.filter(user_id = p_key).order_by('-id')
+    if buy_plan_name:
+      obj_plan_hist = boat_trade_purchase_history.objects.filter(user_id = p_key).order_by('-id')
+      for i in obj_plan_hist:
+        plan_usr = plan_usr + 1
+        plan_list_usr = {}
+        if plan_start_value <= plan_usr <= plan_end_value:
+          plan_count = plan_count + 1
+          plan_list_usr["id"] = str(p_key)
+          plan_list_usr["username"] = str(i.user_id)
+          plan_list_usr["plan"] = "TRADE"#int(i.purchase_amount)
+          plan_list_usr["plan_amt"] = int(i.purchase_amount)
+          plan_list_usr["start_date"] = (str(user_obj.created_on))
+          # plan_list_usr["end_date"] = (str(user_obj.plan_end_date))
+          plan_list_usr["wallet_type"] = (i.user_wallet_type)
+          # plan_list_usr["health_max"] = (str(user_obj.Health_Withdraw_max_value))
+          # plan_list_usr["health_min"] = (str(user_obj.Health_Withdraw_min_value))
+          # plan_list_usr["referral_max"] = (str(user_obj.Referral_Withdraw_max_value))
+          # plan_list_usr["referral_min"] = (str(user_obj.Referral_Withdraw_min_value))
+          plan_list_usr["buy_type"] = (i.buy_type)
+          plan_list_usr["TradeBwa"] = str(user_obj.TradeBwa)
+          # plan_list_usr["hash"] = (str(i.User_plan_validation))
+          plan_list_usr["pageno"] = plan_start_page
+          plan_list_usr["sno"] = plan_usr
+          plan_dict_users[plan_count] = plan_list_usr
+    else:
+      obj_plan_hist = boat_trade_purchase_history.objects.filter(user_id = p_key).order_by('-id')
+      for i in obj_plan_hist:
+        plan_usr = plan_usr + 1
+        plan_list_usr = {}
+        if plan_start_value <= plan_usr <= plan_end_value:
+          plan_count = plan_count + 1
+          plan_list_usr["id"] = str(p_key)
+          plan_list_usr["username"] = str(i.user_id)
+          plan_list_usr["plan"] = "TRADE"#int(i.purchase_amount)
+          plan_list_usr["plan_amt"] = int(i.purchase_amount)
+          # plan_list_usr["price"] = str(user_obj.fixed_status)
+          plan_list_usr["start_date"] = (str(user_obj.created_on))
+          # plan_list_usr["end_date"] = (str(user_obj.plan_end_date))
+          plan_list_usr["wallet_type"] = (i.user_wallet_type)
+          # plan_list_usr["health_max"] = (str(user_obj.Health_Withdraw_max_value))
+          # plan_list_usr["health_min"] = (str(user_obj.Health_Withdraw_min_value))
+          # plan_list_usr["referral_max"] = (str(user_obj.Referral_Withdraw_max_value))
+          # plan_list_usr["referral_min"] = (str(user_obj.Referral_Withdraw_min_value))
+          plan_list_usr["buy_type"] = (i.buy_type)
+          plan_list_usr["TradeBwa"] = str(user_obj.TradeBwa)
+          # plan_list_usr["hash"] = (str(i.User_plan_validation))
+          plan_list_usr["pageno"] = plan_start_page
+          plan_list_usr["sno"] = plan_usr
+          plan_dict_users[plan_count] = plan_list_usr
+    try:
+      tot_plan_user_qs = obj_plan_hist
+    except:
+      tot_plan_user_qs = ""
+    w_page_3 = self.request.GET.get('pageno3', 1)
+    w_paginator_3 = Paginator(tot_plan_user_qs, 5)
+    try:
+        plan_hist_qs = w_paginator_3.page(w_page_3)
+    except PageNotAnInteger:
+        plan_hist_qs =w_paginator_3.page(1)
+    except EmptyPage:
+        plan_hist_qs = w_paginator_3.page(w_paginator_3.num_pages)\
+
+    context['plan_hist_qs'] = plan_hist_qs
+    context["plan_endpage"] = plan_hist_qs.number+1
+    context["plan_startpage"] = plan_hist_qs.number-1
+    context['plan_start_value'] = plan_hist_qs.start_index()
+    context['plan_end_value'] = plan_hist_qs.end_index()
+    context['plan_usr_count'] = obj_plan_hist.count()
+    context["plan_dict_users"] = json.dumps(plan_dict_users)
+
+
+    try:
+      usr_addrs = self.request.GET['address']
+    except:
+      usr_addrs = ""
+
+    try:
+      status = self.request.GET['status']
+     
+      if status == 'Active':
+       
+        status = 0
+      if status == 'Completed':
+        status = 1
+      if status == 'Cancelled':
+        status = 2
+    except:
+      status = ""
+
+    try:
+      date = self.request.GET['date']
+    except:
+      date = ""
+
+    withdraw_usr = 0
+    withdraw_count = 0
+    withdraw_dict_users = {}
+    withdraw_start_page = self.request.GET.get('pageno4', 1)
+    withdraw_end_value = int(withdraw_start_page) * 5
+    withdraw_start_value = int(withdraw_end_value) - 4
+    if usr_addrs and status and date:
+      obj_withdraw_hist = Withdraw.objects.filter(userid_id = p_key).filter(Q(Address__icontains = usr_addrs) and Q(status__icontains = status) and Q(created_on__date__icontains = date)).exclude(Wallet_type__in=[ 'Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    elif usr_addrs:
+      obj_withdraw_hist = Withdraw.objects.filter(userid_id = p_key).filter(Address__icontains = usr_addrs).exclude(Wallet_type__in=[ 'Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    elif date:
+      obj_withdraw_hist = Withdraw.objects.filter(userid_id = p_key).filter(created_on__date__icontains = date).exclude(Wallet_type__in=[ 'Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    elif status:
+      obj_withdraw_hist = Withdraw.objects.filter(userid_id = p_key).filter(status__icontains = status).exclude(Wallet_type__in=[ 'Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    else:
+      obj_withdraw_hist = Withdraw.objects.filter(userid_id = p_key).exclude(Wallet_type__in=[ 'Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    try:
+      tot_withdraw_user_qs = obj_withdraw_hist
+    except:
+      tot_withdraw_user_qs = ""
+    w_page_4 = self.request.GET.get('pageno4', 1)
+    w_paginator_4 = Paginator(tot_withdraw_user_qs, 5)
+    try:
+        withdraw_hist_qs = w_paginator_4.page(w_page_4)
+    except PageNotAnInteger:
+        withdraw_hist_qs =w_paginator_4.page(1)
+    except EmptyPage:
+        withdraw_hist_qs = w_paginator_4.page(w_paginator_4.num_pages)
+
+    context['withdraw_hist_qs'] = withdraw_hist_qs
+    context["withdraw_endpage"] = withdraw_hist_qs.number+1
+    context["withdraw_startpage"] = withdraw_hist_qs.number-1
+    context['withdraw_start_value'] = withdraw_hist_qs.start_index()
+    context['withdraw_end_value'] = withdraw_hist_qs.end_index()
+    context['withdraw_usr_count'] = obj_withdraw_hist.count()
+    context["withdraw_dict_users"] = json.dumps(withdraw_dict_users)
+
+     
+    try:
+      ref_user = self.request.GET['name']
+    except:
+      ref_user = ""
+
+
+    ref_usr = 0
+    ref_count = 0
+    ref_dict_users = {}
+    ref_start_page = self.request.GET.get('pageno5', 1)
+    ref_end_value = int(ref_start_page) * 5
+    ref_start_value = int(ref_end_value) - 4
+    try:
+      if ref_user:
+        obj_ref_hist = Boat_Referral_reward_History.objects.filter(user_id = p_key).filter(referral_id__icontains = ref_user).order_by('-id')
+        for i in obj_ref_hist:
+          
+          ref_usr = ref_usr + 1
+          ref_list_usr = {}
+          if ref_start_value <= ref_usr <= ref_end_value:
+            ref_count = ref_count + 1
+            # ref_list_usr["id"] = str(p_key)
+            ref_list_usr["id"] = i.id
+            ref_list_usr["username"] = str(i.user.Name)
+            ref_list_usr["ref_id"] = i.referral_id
+            ref_list_usr["reward_amt"] = i.reward
+            ref_list_usr["date"] = (str(i.created_on))
+            ref_list_usr["pageno"] = ref_start_page
+            ref_list_usr["sno"] = ref_usr
+            ref_dict_users[ref_count] = ref_list_usr
+        
+      else:
+        obj_ref_hist = Boat_Referral_reward_History.objects.filter(user_id = p_key).order_by('-id')
+        for i in obj_ref_hist:
+          ref_usr = ref_usr + 1
+          ref_list_usr = {}
+          if ref_start_value <= ref_usr <= ref_end_value:
+            ref_count = ref_count + 1
+            ref_list_usr["id"] = i.id
+            ref_list_usr["username"] = str(i.user.Name)
+            ref_list_usr["ref_id"] = i.referral_id
+            ref_list_usr["reward_amt"] = i.reward
+            ref_list_usr["date"] = (str(i.created_on))
+            ref_list_usr["pageno"] = ref_start_page
+            ref_list_usr["sno"] = ref_usr
+            ref_dict_users[ref_count] = ref_list_usr
+        
+
+      context['ref_usr_count'] = obj_ref_hist.count()
+    except:
+      obj_ref_hist = ""
+      context['ref_usr_count'] = 0
+    try:
+      tot_ref_user_qs = obj_ref_hist
+    except:
+      tot_ref_user_qs = ""
+    w_page_5 = self.request.GET.get('pageno5', 1)
+    w_paginator_5 = Paginator(tot_ref_user_qs, 5) 
+    try:
+        ref_hist_qs = w_paginator_5.page(w_page_5)
+    except PageNotAnInteger:
+        ref_hist_qs =w_paginator_5.page(1)
+    except EmptyPage:
+        ref_hist_qs = w_paginator_5.page(w_paginator_5.num_pages)
+
+    context['ref_hist_qs'] = ref_hist_qs
+    context["ref_endpage"] = ref_hist_qs.number+1
+    context["ref_startpage"] = ref_hist_qs.number-1
+    context['ref_start_value'] = ref_hist_qs.start_index()
+    context['ref_end_value'] = ref_hist_qs.end_index()
+    context["ref_dict_users"] = json.dumps(ref_dict_users)
+
+    wall_usr = 0
+    wall_count = 0
+    wall_dict_users = {}
+    wall_start_page = self.request.GET.get('pageno6', 1)
+    wall_end_value = int(wall_start_page) * 5
+    wall_start_value = int(wall_end_value) - 4
+    try:
+      obj_wall_hist = UserCashWallet.objects.filter(userid_id = p_key).order_by('-id')
+      for i in obj_wall_hist:
+        wall_usr = wall_usr + 1
+        wall_list_usr = {}
+        if wall_start_value <= wall_usr <= wall_end_value:
+          wall_count = wall_count + 1
+          wall_list_usr["username"] = str(i.userid.Name)
+          if i.roibalance == 0.00000000:
+            wall_list_usr["health_reward"] = int(i.roibalance)
+          else:
+            wall_list_usr["health_reward"] = str(i.roibalance)
+          if i.Boatreferalincome == 0.00000000:
+            wall_list_usr["ref_reward"] = int(i.Boatreferalincome)
+          else:
+            wall_list_usr["ref_reward"] = str(i.Boatreferalincome)
+          if i.boatwallet == 0.00000000:
+            wall_list_usr["pre_reward"] = int(i.boatwallet)
+          else:
+            wall_list_usr["pre_reward"] = str(i.boatwallet)
+          wall_list_usr["pageno"] = wall_start_page
+          wall_list_usr["sno"] = wall_usr
+          wall_dict_users[wall_count] = wall_list_usr
+    except:
+      obj_wall_hist = ""
+    try:
+      tot_wall_user_qs = obj_wall_hist
+    except:
+      tot_wall_user_qs = ""
+    w_page_6 = self.request.GET.get('pageno6', 1)
+    w_paginator_6 = Paginator(tot_wall_user_qs, 5)
+    try:
+        wall_hist_qs = w_paginator_6.page(w_page_6)
+    except PageNotAnInteger:
+        wall_hist_qs =w_paginator_6.page(1)
+    except EmptyPage:
+        wall_hist_qs = w_paginator_6.page(w_paginator_6.num_pages)
+
+    context['wall_hist_qs'] = wall_hist_qs
+    context["wall_endpage"] = wall_hist_qs.number+1
+    context["wall_startpage"] = wall_hist_qs.number-1
+    context['wall_start_value'] = wall_hist_qs.start_index()
+    context['wall_end_value'] = wall_hist_qs.end_index()
+    context['wall_usr_count'] = obj_wall_hist.count()
+    context["wall_dict_users"] = json.dumps(wall_dict_users)
+
+
+    login_usr = 0
+    login_count = 0
+    login_dict_users = {}
+    login_start_page = self.request.GET.get('pageno7', 1)
+    login_end_value = int(login_start_page) * 5
+    login_start_value = int(login_end_value) - 4
+    try:
+      obj_login_hist = LoginHistory.objects.filter(user_id = p_key).order_by('-created_on')
+      for i in obj_login_hist:
+        login_usr = login_usr + 1
+        login_list_usr = {}
+        if login_start_value <= login_usr <= login_end_value:
+          login_count = login_count + 1
+          login_list_usr["username"] = str(i.user.Name)
+          login_list_usr["created_on"] = str(i.created_on)
+          login_list_usr["modified_on"] = str(i.modified_on)
+          login_list_usr["pageno"] = login_start_page
+          login_list_usr["sno"] = login_usr
+          login_dict_users[login_count] = login_list_usr
+    except:
+      obj_login_hist = ""
+    try:
+      tot_login_user_qs = obj_login_hist
+    except:
+      tot_login_user_qs = ""
+    w_page_7 = self.request.GET.get('pageno7', 1)
+    w_paginator_7 = Paginator(tot_login_user_qs, 5)
+    try:
+        login_hist_qs = w_paginator_7.page(w_page_7)
+    except PageNotAnInteger:
+        login_hist_qs =w_paginator_7.page(1)
+    except EmptyPage:
+        login_hist_qs = w_paginator_7.page(w_paginator_7.num_pages)
+
+    context['login_hist_qs'] = login_hist_qs
+    context["login_endpage"] = login_hist_qs.number+1
+    context["login_startpage"] = login_hist_qs.number-1
+    context['login_start_value'] = login_hist_qs.start_index()
+    context['login_end_value'] = login_hist_qs.end_index()
+    context['login_usr_count'] = obj_login_hist.count()
+    context["login_dict_users"] = json.dumps(login_dict_users)
+
+    
+    context['Title'] = 'Trade History Table'
+    context["Btn_url"] = "trade_admin_auth:List_User_Management"
+    return context
+
+
+  @method_decorator(check_group_icon_menu("History"))
+  def dispatch(self, *args, **kwargs):
+    return super(TradeHistoryManagementTable, self).dispatch(*args, **kwargs)
+
+
+
+
+
+class StakeHistoryManagementTable(TemplateView):
+  template_name = "trade_admin_auth/stake_history_table.html"
+
+  def get_context_data(self, **kwargs):
+    context = super(StakeHistoryManagementTable, self).get_context_data(**kwargs)
+    p_key = self.kwargs['pk']
+    context["p_key"] = p_key
+    try:
+      user_obj = User_Management.objects.get(id = p_key)  
+    except:
+      user_obj = ""
+
+    try:
+      p_no = self.request.GET['pageno']
+    except:
+      p_no=1
+    try:
+      p_no1 = self.request.GET['pageno1']
+    except:
+      p_no1=1 
+    try:
+      p_no2 = self.request.GET['pageno2']
+    except:
+      p_no2=1
+    try:
+      p_no3 = self.request.GET['pageno3']
+    except:
+      p_no3=1
+    try:
+      p_no4 = self.request.GET['pageno4']
+    except:
+      p_no4=1   
+    try:
+      p_no5 = self.request.GET['pageno5']
+    except:
+      p_no5=1 
+    try:
+      p_no6 = self.request.GET['pageno6']
+    except:
+      p_no6=1   
+    try:
+      p_no7 = self.request.GET['pageno7']
+    except:
+      p_no7=1   
+
+    context['p_no'] = p_no
+    context['p_no1'] = p_no1
+    context['p_no2'] = p_no2
+    context['p_no3'] = p_no3
+    context['p_no4'] = p_no4
+    context['p_no5'] = p_no5
+    context['p_no6'] = p_no6
+    context['p_no7'] = p_no7
+
+    try:
+      s_step = self.request.GET['steps']
+    except:
+      s_step = ""
+
+    
+
+    s_usr = 0
+    s_count = 0
+    s_dict_users = {}
+    s_start_page = self.request.GET.get('pageno', 1)
+    s_end_value = int(s_start_page) * 5
+    s_start_value = int(s_end_value) - 4
+    
+    if s_step:
+      obj_step_hist = Steps_history.objects.filter(user_id = p_key).filter(steps__icontains = s_step).order_by('-id')
+      for i in obj_step_hist:
+        
+        s_usr = s_usr + 1
+        s_list_usr = {}
+        if s_start_value <= s_usr <= s_end_value:
+          s_count = s_count + 1
+          s_list_usr["username"] = str(i.user.Name)
+          s_list_usr["steps"] = (i.steps)
+          s_list_usr["date"] = (str(i.created_on))
+          s_list_usr["pageno"] = s_start_page
+          s_list_usr["sno"] = s_usr
+          s_dict_users[s_count] = s_list_usr
+    else:
+      obj_step_hist = Steps_history.objects.filter(user_id = p_key).order_by('-id')
+      for i in obj_step_hist:
+      
+        s_usr = s_usr + 1
+        s_list_usr = {}
+        if s_start_value <= s_usr <= s_end_value:
+          s_count = s_count + 1
+          s_list_usr["username"] = str(i.user.Name)
+          s_list_usr["steps"] = (i.steps)
+          s_list_usr["date"] = (str(i.created_on))
+          s_list_usr["pageno"] = s_start_page
+          s_list_usr["sno"] = s_usr
+          s_dict_users[s_count] = s_list_usr
+
+    try:
+      tot_step_user_qs = obj_step_hist
+    except:
+      tot_step_user_qs = ""
+    w_page = self.request.GET.get('pageno', 1)
+    w_paginator = Paginator(tot_step_user_qs, 5)
+    
+    try:
+        step_hist_qs = w_paginator.page(w_page)
+    except PageNotAnInteger:
+        step_hist_qs =w_paginator.page(1)
+    except EmptyPage:
+        step_hist_qs = w_paginator.page(w_paginator.num_pages)
+    
+    
+    context['step_hist_qs'] = step_hist_qs
+    context["s_endpage"] = step_hist_qs.number+1
+    context["s_startpage"] = step_hist_qs.number-1
+    context['s_start_value'] = step_hist_qs.start_index()
+    context['s_end_value'] = step_hist_qs.end_index()
+    context['s_usr_count'] = obj_step_hist.count()
+    context["s_dict_users"] = json.dumps(s_dict_users)
+
+
+
+    try:
+      r_step = self.request.GET['r_steps']
+    except:
+      r_step = ""
+
+    r_usr = 0
+    r_count = 0
+    r_dict_users = {}
+    r_start_page = self.request.GET.get('pageno1', 1)
+    r_end_value = int(r_start_page) * 5
+    r_start_value = int(r_end_value) - 4
+    if r_step:
+      obj_rew_hist = Reward_History.objects.filter(user_id = p_key).filter(steps__icontains = r_step).order_by('-id')
+      for i in obj_rew_hist:
+        r_usr = r_usr + 1
+        r_list_usr = {}
+        if r_start_value <= r_usr <= r_end_value:
+          r_count = r_count + 1
+          r_list_usr["username"] = str(i.user.Name)
+          r_list_usr["steps"] = (i.steps)
+          r_list_usr["Reward"] = str(i.Reward)
+          r_list_usr["date"] = (str(i.created_on))
+          r_list_usr["claim_date"] = (str(i.modified_on))
+          r_list_usr["pageno"] = r_start_page
+          r_list_usr["sno"] = r_usr
+          r_dict_users[r_count] = r_list_usr
+    else:
+      obj_rew_hist = Reward_History.objects.filter(user_id = p_key).order_by('-id')
+      for i in obj_rew_hist:
+        r_usr = r_usr + 1
+        r_list_usr = {}
+        if r_start_value <= r_usr <= r_end_value:
+          r_count = r_count + 1
+          r_list_usr["username"] = str(i.user.Name)
+          r_list_usr["steps"] = (i.steps)
+          r_list_usr["Reward"] = str(i.Reward)
+          r_list_usr["date"] = (str(i.created_on))
+          r_list_usr["claim_date"] = (str(i.modified_on))
+          r_list_usr["pageno"] = r_start_page
+          r_list_usr["sno"] = r_usr
+          r_dict_users[r_count] = r_list_usr
+    try:
+      tot_rew_user_qs = obj_rew_hist
+    except:
+      tot_rew_user_qs = ""
+    w_page_1 = self.request.GET.get('pageno1', 1)
+    w_paginator_1 = Paginator(tot_rew_user_qs, 5)
+    try:
+        rew_hist_qs = w_paginator_1.page(w_page_1)
+    except PageNotAnInteger:
+        rew_hist_qs =w_paginator_1.page(1)
+    except EmptyPage:
+        rew_hist_qs = w_paginator_1.page(w_paginator_1.num_pages)
+
+    context['rew_hist_qs'] = rew_hist_qs
+    context["r_endpage"] = rew_hist_qs.number+1
+    context["r_startpage"] = rew_hist_qs.number-1
+    context['r_start_value'] = rew_hist_qs.start_index()
+    context['r_end_value'] = rew_hist_qs.end_index()
+    context['r_usr_count'] = obj_rew_hist.count()
+    context["r_dict_users"] = json.dumps(r_dict_users)
+
+    pre_usr = 0
+    pre_count = 0
+    pre_dict_users = {}
+    pre_start_page = self.request.GET.get('pageno', 1)
+    pre_end_value = int(pre_start_page) * 5
+    pre_start_value = int(pre_end_value) - 4
+    
+    obj_pre_hist = new_stake_deposit_management.objects.using('second_db').filter(user = p_key,type="User Create").order_by('-id')
+    for i in obj_pre_hist: 
+      pre_usr = pre_usr + 1
+      pre_list_usr = {}
+      if pre_start_value <= pre_usr <= pre_end_value:
+        pre_count = pre_count + 1
+        pre_list_usr["username"] = str(user_obj.Name)
+        pre_list_usr["create_type"] = (i.type)
+        pre_list_usr["steps"] = (i.Amount_USDT)
+        pre_list_usr["jw"] = (i.Amount_JW)
+        pre_list_usr["Hash"] = (i.Hash)
+        pre_list_usr["date"] = (str(i.created_on))
+        pre_list_usr["pageno"] = pre_start_page
+        pre_list_usr["sno"] = pre_usr
+        pre_dict_users[pre_count] = pre_list_usr
+    try:
+      tot_step_user_qs = obj_pre_hist
+    except:
+      tot_step_user_qs = ""
+    w_page = self.request.GET.get('pageno', 1)
+    w_paginator = Paginator(tot_step_user_qs, 5)
+    
+    try:
+        step_hist_qs = w_paginator.page(w_page)
+    except PageNotAnInteger:
+        step_hist_qs =w_paginator.page(1)
+    except EmptyPage:
+        step_hist_qs = w_paginator.page(w_paginator.num_pages)
+    
+    
+    context['step_hist_qs'] = step_hist_qs
+    context["pre_endpage"] = step_hist_qs.number+1
+    context["pre_startpage"] = step_hist_qs.number-1
+    context['pre_start_value'] = step_hist_qs.start_index()
+    context['pre_end_value'] = step_hist_qs.end_index()
+    context['pre_usr_count'] = obj_pre_hist.count()
+    context["pre_dict_users"] = json.dumps(pre_dict_users)
+
+
+    pre_r_usr = 0
+    pre_r_count = 0
+    pre_req_dict_users = {}
+    pre_r_start_page = self.request.GET.get('pageno1', 1)
+    pre_r_end_value = int(pre_r_start_page) * 5
+    pre_r_start_value = int(pre_r_end_value) - 4
+    obj_rew_hist = new_stake_deposit_management.objects.using('second_db').filter(user = p_key).exclude(type="User Create").order_by('-created_on')
+    for i in obj_rew_hist:
+      pre_r_usr = pre_r_usr + 1
+      r_list_usr = {}
+      if pre_r_start_value <= pre_r_usr <= pre_r_end_value:
+        pre_r_count = pre_r_count + 1
+        r_list_usr["username"] = str(user_obj.Name)
+        r_list_usr["steps"] = (i.type)
+        r_list_usr["Reward"] = str(i.Amount_USDT)
+        r_list_usr["date"] = (str(i.created_on))
+        r_list_usr["pageno"] = pre_r_start_page
+        r_list_usr["sno"] = pre_r_usr
+        pre_req_dict_users[pre_r_count] = r_list_usr
+    try:
+      tot_rew_user_qs = obj_rew_hist
+    except:
+      tot_rew_user_qs = ""
+    w_page_1 = self.request.GET.get('pageno1', 1)
+    w_paginator_1 = Paginator(tot_rew_user_qs, 5)
+    try:
+        rew_hist_qs = w_paginator_1.page(w_page_1)
+    except PageNotAnInteger:
+        rew_hist_qs =w_paginator_1.page(1)
+    except EmptyPage:
+        rew_hist_qs = w_paginator_1.page(w_paginator_1.num_pages)
+
+    context['rew_hist_qs'] = rew_hist_qs
+    context["pre_r_endpage"] = rew_hist_qs.number+1
+    context["pre_r_startpage"] = rew_hist_qs.number-1
+    context['pre_r_start_value'] = rew_hist_qs.start_index()
+    context['pre_r_end_value'] = rew_hist_qs.end_index()
+    context['pre_r_usr_count'] = obj_rew_hist.count()
+    context["pre_req_dict_users"] = json.dumps(pre_req_dict_users)
+
+    try:
+      two_x_step = self.request.GET['tx_steps']
+    except:
+      two_x_step = ""
+
+    tx_usr = 0
+    tx_count = 0
+    tx_dict_users = {}
+    tx_start_page = self.request.GET.get('pageno2', 1)
+    tx_end_value = int(tx_start_page) * 5
+    tx_start_value = int(tx_end_value) - 4
+    if two_x_step:
+      obj_two_x_hist = User_2x_Boost.objects.filter(userid_id = p_key).filter(user_step_count__icontains = two_x_step).order_by('-id')
+      for i in obj_two_x_hist:
+        tx_usr = tx_usr + 1
+        tx_list_usr = {}
+        if tx_start_value <= tx_usr <= tx_end_value:
+          tx_count = tx_count + 1
+          tx_list_usr["username"] = str(i.userid.Name)
+          tx_list_usr["steps"] = (i.user_step_count)
+          tx_list_usr["Reward"] = str(i.reward_per_step)
+          tx_list_usr["date"] = (str(i.created_on))
+          tx_list_usr["pageno"] = tx_start_page
+          tx_list_usr["sno"] = tx_usr
+          tx_dict_users[tx_count] = tx_list_usr
+    else:
+      obj_two_x_hist = User_2x_Boost.objects.filter(userid_id = p_key).order_by('-id')
+      for i in obj_two_x_hist:
+        tx_usr = tx_usr + 1
+        tx_list_usr = {}
+        if tx_start_value <= tx_usr <= tx_end_value:
+          tx_count = tx_count + 1
+          tx_list_usr["username"] = str(i.userid.Name)
+          tx_list_usr["steps"] = (i.user_step_count)
+          tx_list_usr["Reward"] = str(i.reward_per_step)
+          tx_list_usr["date"] = (str(i.created_on))
+          tx_list_usr["pageno"] = tx_start_page
+          tx_list_usr["sno"] = tx_usr
+          tx_dict_users[tx_count] = tx_list_usr
+    try:
+      tot_tx_user_qs = obj_two_x_hist
+    except:
+      tot_tx_user_qs = ""
+    w_page_2 = self.request.GET.get('pageno2', 1)
+    w_paginator_2 = Paginator(tot_tx_user_qs, 5)
+    try:
+        two_x_hist_qs = w_paginator_2.page(w_page_2)
+    except PageNotAnInteger:
+        two_x_hist_qs =w_paginator_2.page(1)
+    except EmptyPage:
+        two_x_hist_qs = w_paginator_2.page(w_paginator_2.num_pages)
+
+    context['two_x_hist_qs'] = two_x_hist_qs
+    context["tx_endpage"] = two_x_hist_qs.number+1
+    context["tx_startpage"] = two_x_hist_qs.number-1
+    context['tx_start_value'] = two_x_hist_qs.start_index()
+    context['tx_end_value'] = two_x_hist_qs.end_index()
+    context['tx_usr_count'] = obj_two_x_hist.count()
+    context["tx_dict_users"] = json.dumps(tx_dict_users)
+
+
+
+    try:
+      buy_plan_name = self.request.GET['plan_name']
+    except:
+      buy_plan_name = ""
+
+    plan_usr = 0
+    plan_count = 0
+    plan_dict_users = {}
+    plan_start_page = self.request.GET.get('pageno3', 1)
+    plan_end_value = int(plan_start_page) * 5
+    plan_start_value = int(plan_end_value) - 4
+    if buy_plan_name:
+      obj_plan_hist = stake_purchase_history.objects.using('second_db').filter(user_id = p_key,user_wallet_type ='newstakewallet').order_by('-id')
+      for i in obj_plan_hist:
+        plan_usr = plan_usr + 1
+        plan_list_usr = {}
+        if plan_start_value <= plan_usr <= plan_end_value:
+          plan_count = plan_count + 1
+          plan_list_usr["id"] = str(p_key)
+          plan_list_usr["username"] = str(i.user_id)
+          plan_list_usr["plan"] = "STAKE"#int(i.purchase_amount)
+          plan_list_usr["plan_amt"] = int(i.purchase_amount)
+          # plan_list_usr["price"] = str(user_obj.fixed_status)
+          plan_list_usr["start_date"] = (str(user_obj.created_on))
+          # plan_list_usr["end_date"] = (str(user_obj.plan_end_date))
+          plan_list_usr["wallet_type"] = (i.user_wallet_type)
+          # plan_list_usr["health_max"] = (str(user_obj.Health_Withdraw_max_value))
+          # plan_list_usr["health_min"] = (str(user_obj.Health_Withdraw_min_value))
+          # plan_list_usr["referral_max"] = (str(user_obj.Referral_Withdraw_max_value))
+          # plan_list_usr["referral_min"] = (str(user_obj.Referral_Withdraw_min_value))
+          plan_list_usr["buy_type"] = (i.buy_type)
+          plan_list_usr["StakeBwa"] = str(user_obj.StakeBwa)
+          # plan_list_usr["hash"] = (str(i.User_plan_validation))
+          plan_list_usr["pageno"] = plan_start_page
+          plan_list_usr["sno"] = plan_usr
+          plan_dict_users[plan_count] = plan_list_usr
+    else:
+      obj_plan_hist = stake_purchase_history.objects.using('second_db').filter(user_id = p_key,user_wallet_type ='newstakewallet').order_by('-id')
+      for i in obj_plan_hist:
+        plan_usr = plan_usr + 1
+        plan_list_usr = {}
+        if plan_start_value <= plan_usr <= plan_end_value:
+          plan_count = plan_count + 1
+          plan_list_usr["id"] = str(p_key)
+          plan_list_usr["username"] = str(i.user_id)
+          plan_list_usr["plan"] = "STAKE"#int(i.purchase_amount)
+          plan_list_usr["plan_amt"] = int(i.purchase_amount)
+          # plan_list_usr["price"] = str(user_obj.fixed_status)
+          plan_list_usr["start_date"] = (str(user_obj.created_on))
+          # plan_list_usr["end_date"] = (str(user_obj.plan_end_date))
+          plan_list_usr["wallet_type"] = (i.user_wallet_type)
+          # plan_list_usr["health_max"] = (str(user_obj.Health_Withdraw_max_value))
+          # plan_list_usr["health_min"] = (str(user_obj.Health_Withdraw_min_value))
+          # plan_list_usr["referral_max"] = (str(user_obj.Referral_Withdraw_max_value))
+          # plan_list_usr["referral_min"] = (str(user_obj.Referral_Withdraw_min_value))
+          plan_list_usr["buy_type"] = (i.buy_type)
+          plan_list_usr["StakeBwa"] = str(user_obj.StakeBwa)
+          # plan_list_usr["hash"] = (str(i.User_plan_validation))
+          plan_list_usr["pageno"] = plan_start_page
+          plan_list_usr["sno"] = plan_usr
+          plan_dict_users[plan_count] = plan_list_usr
+    try:
+      tot_plan_user_qs = obj_plan_hist
+    except:
+      tot_plan_user_qs = ""
+    w_page_3 = self.request.GET.get('pageno3', 1)
+    w_paginator_3 = Paginator(tot_plan_user_qs, 5)
+    try:
+        plan_hist_qs = w_paginator_3.page(w_page_3)
+    except PageNotAnInteger:
+        plan_hist_qs =w_paginator_3.page(1)
+    except EmptyPage:
+        plan_hist_qs = w_paginator_3.page(w_paginator_3.num_pages)\
+
+    context['plan_hist_qs'] = plan_hist_qs
+    context["plan_endpage"] = plan_hist_qs.number+1
+    context["plan_startpage"] = plan_hist_qs.number-1
+    context['plan_start_value'] = plan_hist_qs.start_index()
+    context['plan_end_value'] = plan_hist_qs.end_index()
+    context['plan_usr_count'] = obj_plan_hist.count()
+    context["plan_dict_users"] = json.dumps(plan_dict_users)
+
+
+    try:
+      usr_addrs = self.request.GET['address']
+    except:
+      usr_addrs = ""
+
+    try:
+      status = self.request.GET['status']
+     
+      if status == 'Active':
+       
+        status = 0
+      if status == 'Completed':
+        status = 1
+      if status == 'Cancelled':
+        status = 2
+    except:
+      status = ""
+
+    try:
+      date = self.request.GET['date']
+    except:
+      date = ""
+
+    withdraw_usr = 0
+    withdraw_count = 0
+    withdraw_dict_users = {}
+    withdraw_start_page = self.request.GET.get('pageno4', 1)
+    withdraw_end_value = int(withdraw_start_page) * 5
+    withdraw_start_value = int(withdraw_end_value) - 4
+    if usr_addrs and status and date:
+      obj_withdraw_hist = stake_claim_table.objects.using('second_db').filter(user = p_key).filter(Q(Address__icontains = usr_addrs) and Q(status__icontains = status) and Q(created_on__date__icontains = date)).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.email)
+          withdraw_list_usr["amount"] = str(i.original_USDT)
+          withdraw_list_usr["Withdraw_fee"] = 'asperreq' #str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.claim_amount_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.claim_amount_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    elif usr_addrs:
+      obj_withdraw_hist =stake_claim_table.objects.using('second_db').filter(user = p_key).filter(Address__icontains = usr_addrs).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.email)
+          withdraw_list_usr["amount"] = str(i.original_USDT)
+          withdraw_list_usr["Withdraw_fee"] = 'asperreq' #str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.claim_amount_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.claim_amount_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    elif date:
+      obj_withdraw_hist = stake_claim_table.objects.using('second_db').filter(user = p_key).filter(created_on__date__icontains = date).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.email)
+          withdraw_list_usr["amount"] = str(i.original_USDT)
+          withdraw_list_usr["Withdraw_fee"] = 'asperreq' #str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.claim_amount_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.claim_amount_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    elif status:
+      obj_withdraw_hist = stake_claim_table.objects.using('second_db').filter(user = p_key).filter(status__icontains = status).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.email)
+          withdraw_list_usr["amount"] = str(i.original_USDT)
+          withdraw_list_usr["Withdraw_fee"] = 'asperreq' #str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.claim_amount_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.claim_amount_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    else:
+      obj_withdraw_hist = stake_claim_table.objects.using('second_db').filter(user = p_key).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.email)
+          withdraw_list_usr["amount"] = str(i.original_USDT)
+          withdraw_list_usr["Withdraw_fee"] = 'asperreq' #str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.claim_amount_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.claim_amount_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    try:
+      tot_withdraw_user_qs = obj_withdraw_hist
+    except:
+      tot_withdraw_user_qs = ""
+    w_page_4 = self.request.GET.get('pageno4', 1)
+    w_paginator_4 = Paginator(tot_withdraw_user_qs, 5)
+    try:
+        withdraw_hist_qs = w_paginator_4.page(w_page_4)
+    except PageNotAnInteger:
+        withdraw_hist_qs =w_paginator_4.page(1)
+    except EmptyPage:
+        withdraw_hist_qs = w_paginator_4.page(w_paginator_4.num_pages)
+
+    context['withdraw_hist_qs'] = withdraw_hist_qs
+    context["withdraw_endpage"] = withdraw_hist_qs.number+1
+    context["withdraw_startpage"] = withdraw_hist_qs.number-1
+    context['withdraw_start_value'] = withdraw_hist_qs.start_index()
+    context['withdraw_end_value'] = withdraw_hist_qs.end_index()
+    context['withdraw_usr_count'] = obj_withdraw_hist.count()
+    context["withdraw_dict_users"] = json.dumps(withdraw_dict_users)
+
+     
+    try:
+      ref_user = self.request.GET['name']
+    except:
+      ref_user = ""
+
+
+    ref_usr = 0
+    ref_count = 0
+    ref_dict_users = {}
+    ref_start_page = self.request.GET.get('pageno5', 1)
+    ref_end_value = int(ref_start_page) * 5
+    ref_start_value = int(ref_end_value) - 4
+    try:
+      if ref_user:
+        obj_ref_hist = newstake_Referral_reward_History.objects.using('second_db').filter(referral_id__icontains = ref_user).order_by('-id')
+        for i in obj_ref_hist:
+          
+          ref_usr = ref_usr + 1
+          ref_list_usr = {}
+          if ref_start_value <= ref_usr <= ref_end_value:
+            ref_count = ref_count + 1
+            # ref_list_usr["id"] = str(p_key)
+            ref_list_usr["id"] = i.id
+            ref_list_usr["username"] = str(i.user.Name)
+            ref_list_usr["ref_id"] = i.referral_id
+            ref_list_usr["reward_amt"] = i.reward
+            ref_list_usr["date"] = (str(i.created_on))
+            ref_list_usr["pageno"] = ref_start_page
+            ref_list_usr["sno"] = ref_usr
+            ref_dict_users[ref_count] = ref_list_usr
+        
+      else:
+        obj_ref_hist = newstake_Referral_reward_History.objects.using('second_db').filter(user_id = p_key).order_by('-id')
+        for i in obj_ref_hist:
+          ref_usr = ref_usr + 1
+          ref_list_usr = {}
+          if ref_start_value <= ref_usr <= ref_end_value:
+            ref_count = ref_count + 1
+            ref_list_usr["id"] = i.id
+            ref_list_usr["username"] = str(i.user.Name)
+            ref_list_usr["ref_id"] = i.referral_id
+            ref_list_usr["reward_amt"] = i.reward
+            ref_list_usr["date"] = (str(i.created_on))
+            ref_list_usr["pageno"] = ref_start_page
+            ref_list_usr["sno"] = ref_usr
+            ref_dict_users[ref_count] = ref_list_usr
+        
+
+      context['ref_usr_count'] = obj_ref_hist.count()
+    except:
+      obj_ref_hist = ""
+      context['ref_usr_count'] = 0
+    try:
+      tot_ref_user_qs = obj_ref_hist
+    except:
+      tot_ref_user_qs = ""
+    w_page_5 = self.request.GET.get('pageno5', 1)
+    w_paginator_5 = Paginator(tot_ref_user_qs, 5)
+    try:
+        ref_hist_qs = w_paginator_5.page(w_page_5)
+    except PageNotAnInteger:
+        ref_hist_qs =w_paginator_5.page(1)
+    except EmptyPage:
+        ref_hist_qs = w_paginator_5.page(w_paginator_5.num_pages)
+
+    context['ref_hist_qs'] = ref_hist_qs
+    context["ref_endpage"] = ref_hist_qs.number+1
+    context["ref_startpage"] = ref_hist_qs.number-1
+    context['ref_start_value'] = ref_hist_qs.start_index()
+    context['ref_end_value'] = ref_hist_qs.end_index()
+    context["ref_dict_users"] = json.dumps(ref_dict_users)
+
+    wall_usr = 0
+    wall_count = 0
+    wall_dict_users = {}
+    wall_start_page = self.request.GET.get('pageno6', 1)
+    wall_end_value = int(wall_start_page) * 5
+    wall_start_value = int(wall_end_value) - 4
+    try:
+      obj_wall_hist = stake_wallet_management.objects.using('second_db').filter(user = p_key).order_by('-id')
+      for i in obj_wall_hist:
+        wall_usr = wall_usr + 1
+        wall_list_usr = {}
+        if wall_start_value <= wall_usr <= wall_end_value:
+          wall_count = wall_count + 1
+          wall_list_usr["username"] = str(i.user.Name)
+          if i.newstakewithdraw == 0:
+            wall_list_usr["health_reward"] = int(i.newstakewithdraw)
+          else:
+            wall_list_usr["health_reward"] = str(i.newstakewithdraw)
+          if i.newstakereff == 0:
+            wall_list_usr["ref_reward"] = int(i.newstakereff)
+          else:
+            wall_list_usr["ref_reward"] = str(i.newstakereff)
+          if i.newstakewithdraw == 0:
+            wall_list_usr["pre_reward"] = int(i.newstakewithdraw)
+          else:
+            wall_list_usr["pre_reward"] = str(i.newstakewithdraw)
+          wall_list_usr["pageno"] = wall_start_page
+          wall_list_usr["sno"] = wall_usr
+          wall_dict_users[wall_count] = wall_list_usr       
+    except:
+      obj_wall_hist = ""
+    try:
+      tot_wall_user_qs = obj_wall_hist
+    except:
+      tot_wall_user_qs = ""
+    w_page_6 = self.request.GET.get('pageno6', 1)
+    w_paginator_6 = Paginator(tot_wall_user_qs, 5)
+    try:
+        wall_hist_qs = w_paginator_6.page(w_page_6)
+    except PageNotAnInteger:
+        wall_hist_qs =w_paginator_6.page(1)
+    except EmptyPage:
+        wall_hist_qs = w_paginator_6.page(w_paginator_6.num_pages)
+
+    context['wall_hist_qs'] = wall_hist_qs
+    context["wall_endpage"] = wall_hist_qs.number+1
+    context["wall_startpage"] = wall_hist_qs.number-1
+    context['wall_start_value'] = wall_hist_qs.start_index()
+    context['wall_end_value'] = wall_hist_qs.end_index()
+    context['wall_usr_count'] = obj_wall_hist.count() if obj_wall_hist else 0
+    context["wall_dict_users"] = json.dumps(wall_dict_users)
+
+    # wall_usr = 0
+    # wall_count = 0
+    # wall_dict_users = {}
+    # wall_start_page = self.request.GET.get('pageno6', 1)
+    # wall_end_value = int(wall_start_page) * 5
+    # wall_start_value = int(wall_end_value) - 4
+    # try:
+    #   obj_wall_hist = UserCashWallet.objects.filter(userid_id = p_key).order_by('-id')
+    #   for i in obj_wall_hist:
+    #     wall_usr = wall_usr + 1
+    #     wall_list_usr = {}
+    #     if wall_start_value <= wall_usr <= wall_end_value:
+    #       wall_count = wall_count + 1
+    #       wall_list_usr["username"] = str(i.userid.Name)
+    #       if i.roibalance == 0.00000000:
+    #         wall_list_usr["health_reward"] = int(i.roibalance)
+    #       else:
+    #         wall_list_usr["health_reward"] = str(i.roibalance)
+    #       if i.Boatreferalincome == 0.00000000:
+    #         wall_list_usr["ref_reward"] = int(i.Boatreferalincome)
+    #       else:
+    #         wall_list_usr["ref_reward"] = str(i.Boatreferalincome)
+    #       if i.boatwallet == 0.00000000:
+    #         wall_list_usr["pre_reward"] = int(i.boatwallet)
+    #       else:
+    #         wall_list_usr["pre_reward"] = str(i.boatwallet)
+    #       wall_list_usr["pageno"] = wall_start_page
+    #       wall_list_usr["sno"] = wall_usr
+    #       wall_dict_users[wall_count] = wall_list_usr
+    # except:
+    #   obj_wall_hist = ""
+    # try:
+    #   tot_wall_user_qs = obj_wall_hist
+    # except:
+    #   tot_wall_user_qs = ""
+    # w_page_6 = self.request.GET.get('pageno6', 1)
+    # w_paginator_6 = Paginator(tot_wall_user_qs, 5)
+    # try:
+    #     wall_hist_qs = w_paginator_6.page(w_page_6)
+    # except PageNotAnInteger:
+    #     wall_hist_qs =w_paginator_6.page(1)
+    # except EmptyPage:
+    #     wall_hist_qs = w_paginator_6.page(w_paginator_6.num_pages)
+
+    # context['wall_hist_qs'] = wall_hist_qs
+    # context["wall_endpage"] = wall_hist_qs.number+1
+    # context["wall_startpage"] = wall_hist_qs.number-1
+    # context['wall_start_value'] = wall_hist_qs.start_index()
+    # context['wall_end_value'] = wall_hist_qs.end_index()
+    # context['wall_usr_count'] = obj_wall_hist.count()
+    # context["wall_dict_users"] = json.dumps(wall_dict_users)
+
+    # wall_usr = 0
+    # wall_count = 0
+    # wall_dict_users = {}
+    # wall_start_page = int(self.request.GET.get('pageno6', 1))
+    # wall_end_value = wall_start_page * 5
+    # wall_start_value = wall_end_value - 4
+
+    # try:
+    #     # Fetch the wallet history for the given user from the secondary database
+    #     obj_wall_hist = stake_wallet_management.objects.using('second_db').filter(user=p_key).order_by('id')
+    # except stake_wallet_management.DoesNotExist:
+    #     obj_wall_hist = ""
+
+    # # Create a list of user data for the given range
+    # for index, i in enumerate(obj_wall_hist[wall_start_value - 1:wall_end_value], start=wall_start_value):
+    #     wall_list_usr = {
+    #         "username": str(i.email),
+    #         "health_reward": int(float(i.newstakewithdraw)) if i.newstakewithdraw else 0,  # Convert to float, then int
+    #         "ref_reward": int(float(i.newstakereff)) if i.newstakereff else 0,
+    #         "pre_reward": int(float(i.newstakewallet)) if i.newstakewallet else 0,
+    #         "pageno": wall_start_page,
+    #         "sno": index,
+    #     }
+    #     wall_dict_users[index] = wall_list_usr
+    
+    # # Create a list of user data for the given range
+
+    # # Paginate the queryset
+    # paginator = Paginator(obj_wall_hist, 5)
+    # try:
+    #     wall_hist_qs = paginator.page(wall_start_page)
+    # except PageNotAnInteger:
+    #     wall_hist_qs = paginator.page(1)
+    # except EmptyPage:
+    #     wall_hist_qs = paginator.page(paginator.num_pages)
+
+    # # Add data to the context
+    # context = {}
+    # context['wall_hist_qs'] = wall_hist_qs
+    # context["wall_endpage"] = wall_hist_qs.next_page_number() if wall_hist_qs.has_next() else None
+    # context["wall_startpage"] = wall_hist_qs.previous_page_number() if wall_hist_qs.has_previous() else None
+    # context['wall_start_value'] = wall_hist_qs.start_index()
+    # context['wall_end_value'] = wall_hist_qs.end_index()
+    # context['wall_usr_count'] = obj_wall_hist.count() if obj_wall_hist else 0
+    # context["wall_dict_users"] = json.dumps(wall_dict_users)
+
+
+    login_usr = 0
+    login_count = 0
+    login_dict_users = {}
+    login_start_page = self.request.GET.get('pageno7', 1)
+    login_end_value = int(login_start_page) * 5
+    login_start_value = int(login_end_value) - 4
+    try:
+      obj_login_hist = LoginHistory.objects.filter(user_id = p_key).order_by('-created_on')
+      for i in obj_login_hist:
+        login_usr = login_usr + 1
+        login_list_usr = {}
+        if login_start_value <= login_usr <= login_end_value:
+          login_count = login_count + 1
+          login_list_usr["username"] = str(i.user.Name)
+          login_list_usr["created_on"] = str(i.created_on)
+          login_list_usr["modified_on"] = str(i.modified_on)
+          login_list_usr["pageno"] = login_start_page
+          login_list_usr["sno"] = login_usr
+          login_dict_users[login_count] = login_list_usr
+    except:
+      obj_login_hist = ""
+    try:
+      tot_login_user_qs = obj_login_hist
+    except:
+      tot_login_user_qs = ""
+    w_page_7 = self.request.GET.get('pageno7', 1)
+    w_paginator_7 = Paginator(tot_login_user_qs, 5)
+    try:
+        login_hist_qs = w_paginator_7.page(w_page_7)
+    except PageNotAnInteger:
+        login_hist_qs =w_paginator_7.page(1)
+    except EmptyPage:
+        login_hist_qs = w_paginator_7.page(w_paginator_7.num_pages)
+
+    context['login_hist_qs'] = login_hist_qs
+    context["login_endpage"] = login_hist_qs.number+1
+    context["login_startpage"] = login_hist_qs.number-1
+    context['login_start_value'] = login_hist_qs.start_index()
+    context['login_end_value'] = login_hist_qs.end_index()
+    context['login_usr_count'] = obj_login_hist.count()
+    context["login_dict_users"] = json.dumps(login_dict_users)
+
+    
+    context['Title'] = 'Stake History Table'
+    context["Btn_url"] = "trade_admin_auth:List_User_Management"
+    return context
+
+
+  @method_decorator(check_group_icon_menu("History"))
+  def dispatch(self, *args, **kwargs):
+    return super(StakeHistoryManagementTable, self).dispatch(*args, **kwargs)
+
+
+
+
+
+
+
+####################################################################################################
+################################################ MP Plan ###########################################
+
+
+
+
+class MPlanHistoryManagementTable(TemplateView):
+  template_name = "trade_admin_auth/mp_history_table.html"
+
+  def get_context_data(self, **kwargs):
+    context = super(MPlanHistoryManagementTable, self).get_context_data(**kwargs)
+    p_key = self.kwargs['pk']
+    context["p_key"] = p_key
+    try:
+      user_obj = User_Management.objects.get(id = p_key)
+    except:
+      user_obj = ""
+
+    try:
+      p_no = self.request.GET['pageno']
+    except:
+      p_no=1
+    try:
+      p_no1 = self.request.GET['pageno1']
+    except:
+      p_no1=1 
+    try:
+      p_no2 = self.request.GET['pageno2']
+    except:
+      p_no2=1
+    try:
+      p_no3 = self.request.GET['pageno3']
+    except:
+      p_no3=1
+    try:
+      p_no4 = self.request.GET['pageno4']
+    except:
+      p_no4=1   
+    try:
+      p_no5 = self.request.GET['pageno5']
+    except:
+      p_no5=1 
+    try:
+      p_no6 = self.request.GET['pageno6']
+    except:
+      p_no6=1   
+    try:
+      p_no7 = self.request.GET['pageno7']
+    except:
+      p_no7=1   
+
+    context['p_no'] = p_no
+    context['p_no1'] = p_no1
+    context['p_no2'] = p_no2
+    context['p_no3'] = p_no3
+    context['p_no4'] = p_no4
+    context['p_no5'] = p_no5
+    context['p_no6'] = p_no6
+    context['p_no7'] = p_no7
+
+    try:
+      s_step = self.request.GET['steps']
+    except:
+      s_step = ""
+
+    
+
+    s_usr = 0
+    s_count = 0
+    s_dict_users = {}
+    s_start_page = self.request.GET.get('pageno', 1)
+    s_end_value = int(s_start_page) * 5
+    s_start_value = int(s_end_value) - 4
+    
+    if s_step:
+      obj_step_hist = Steps_history.objects.filter(user_id = p_key).filter(steps__icontains = s_step).order_by('-id')
+      for i in obj_step_hist:
+        
+        s_usr = s_usr + 1
+        s_list_usr = {}
+        if s_start_value <= s_usr <= s_end_value:
+          s_count = s_count + 1
+          s_list_usr["username"] = str(i.user.Name)
+          s_list_usr["steps"] = (i.steps)
+          s_list_usr["date"] = (str(i.created_on))
+          s_list_usr["pageno"] = s_start_page
+          s_list_usr["sno"] = s_usr
+          s_dict_users[s_count] = s_list_usr
+    else:
+      obj_step_hist = Steps_history.objects.filter(user_id = p_key).order_by('-id')
+      for i in obj_step_hist:
+      
+        s_usr = s_usr + 1
+        s_list_usr = {}
+        if s_start_value <= s_usr <= s_end_value:
+          s_count = s_count + 1
+          s_list_usr["username"] = str(i.user.Name)
+          s_list_usr["steps"] = (i.steps)
+          s_list_usr["date"] = (str(i.created_on))
+          s_list_usr["pageno"] = s_start_page
+          s_list_usr["sno"] = s_usr
+          s_dict_users[s_count] = s_list_usr
+
+    try:
+      tot_step_user_qs = obj_step_hist
+    except:
+      tot_step_user_qs = ""
+    w_page = self.request.GET.get('pageno', 1)
+    w_paginator = Paginator(tot_step_user_qs, 5)
+    
+    try:
+        step_hist_qs = w_paginator.page(w_page)
+    except PageNotAnInteger:
+        step_hist_qs =w_paginator.page(1)
+    except EmptyPage:
+        step_hist_qs = w_paginator.page(w_paginator.num_pages)
+    
+    
+    context['step_hist_qs'] = step_hist_qs
+    context["s_endpage"] = step_hist_qs.number+1
+    context["s_startpage"] = step_hist_qs.number-1
+    context['s_start_value'] = step_hist_qs.start_index()
+    context['s_end_value'] = step_hist_qs.end_index()
+    context['s_usr_count'] = obj_step_hist.count()
+    context["s_dict_users"] = json.dumps(s_dict_users)
+
+
+
+    try:
+      r_step = self.request.GET['r_steps']
+    except:
+      r_step = ""
+
+    r_usr = 0
+    r_count = 0
+    r_dict_users = {}
+    r_start_page = self.request.GET.get('pageno1', 1)
+    r_end_value = int(r_start_page) * 5
+    r_start_value = int(r_end_value) - 4
+    if r_step:
+      obj_rew_hist = MPRewardHistory.objects.filter(user_id = p_key).filter(steps__icontains = r_step).order_by('-id')
+      for i in obj_rew_hist:
+        r_usr = r_usr + 1
+        r_list_usr = {}
+        if r_start_value <= r_usr <= r_end_value:
+          r_count = r_count + 1
+          r_list_usr["username"] = str(i.user.Name)
+          r_list_usr["steps"] = 3000
+          r_list_usr["Reward"] = str(i.reward)
+          r_list_usr["date"] = (str(i.created_on))
+          r_list_usr["claim_date"] = (str(i.modified_on))
+          r_list_usr["pageno"] = r_start_page
+          r_list_usr["sno"] = r_usr
+          r_dict_users[r_count] = r_list_usr
+    else:
+      obj_rew_hist = MPRewardHistory.objects.filter(user_id = p_key).order_by('-id')
+      for i in obj_rew_hist:
+        r_usr = r_usr + 1
+        r_list_usr = {}
+        if r_start_value <= r_usr <= r_end_value:
+          r_count = r_count + 1
+          r_list_usr["username"] = str(i.user.Name)
+          r_list_usr["steps"] = 3000
+          r_list_usr["Reward"] = str(i.reward)
+          r_list_usr["date"] = (str(i.created_on))
+          r_list_usr["claim_date"] = (str(i.modified_on))
+          r_list_usr["pageno"] = r_start_page
+          r_list_usr["sno"] = r_usr
+          r_dict_users[r_count] = r_list_usr
+    try:
+      tot_rew_user_qs = obj_rew_hist
+    except:
+      tot_rew_user_qs = ""
+    w_page_1 = self.request.GET.get('pageno1', 1)
+    w_paginator_1 = Paginator(tot_rew_user_qs, 5)
+    try:
+        rew_hist_qs = w_paginator_1.page(w_page_1)
+    except PageNotAnInteger:
+        rew_hist_qs =w_paginator_1.page(1)
+    except EmptyPage:
+        rew_hist_qs = w_paginator_1.page(w_paginator_1.num_pages)
+
+    context['rew_hist_qs'] = rew_hist_qs
+    context["r_endpage"] = rew_hist_qs.number+1
+    context["r_startpage"] = rew_hist_qs.number-1
+    context['r_start_value'] = rew_hist_qs.start_index()
+    context['r_end_value'] = rew_hist_qs.end_index()
+    context['r_usr_count'] = obj_rew_hist.count()
+    context["r_dict_users"] = json.dumps(r_dict_users)
+
+    pre_usr = 0
+    pre_count = 0
+    pre_dict_users = {}
+    pre_start_page = self.request.GET.get('pageno', 1)
+    pre_end_value = int(pre_start_page) * 5
+    pre_start_value = int(pre_end_value) - 4
+    
+    obj_pre_hist = Boat_wallet.objects.filter(user = p_key,type="User Create").order_by('-id')
+    for i in obj_pre_hist: 
+      pre_usr = pre_usr + 1
+      pre_list_usr = {}
+      if pre_start_value <= pre_usr <= pre_end_value:
+        pre_count = pre_count + 1
+        pre_list_usr["username"] = str(user_obj.Name)
+        pre_list_usr["create_type"] = (i.create_type)
+        pre_list_usr["steps"] = (i.Amount_USDT)
+        pre_list_usr["jw"] = (i.Amount_JW)
+        pre_list_usr["Hash"] = (i.Hash)
+        pre_list_usr["date"] = (str(i.created_on))
+        pre_list_usr["pageno"] = pre_start_page
+        pre_list_usr["sno"] = pre_usr
+        pre_dict_users[pre_count] = pre_list_usr
+    try:
+      tot_step_user_qs = obj_pre_hist
+    except:
+      tot_step_user_qs = ""
+    w_page = self.request.GET.get('pageno', 1)
+    w_paginator = Paginator(tot_step_user_qs, 5)
+    
+    try:
+        step_hist_qs = w_paginator.page(w_page)
+    except PageNotAnInteger:
+        step_hist_qs =w_paginator.page(1)
+    except EmptyPage:
+        step_hist_qs = w_paginator.page(w_paginator.num_pages)
+    
+    
+    context['step_hist_qs'] = step_hist_qs
+    context["pre_endpage"] = step_hist_qs.number+1
+    context["pre_startpage"] = step_hist_qs.number-1
+    context['pre_start_value'] = step_hist_qs.start_index()
+    context['pre_end_value'] = step_hist_qs.end_index()
+    context['pre_usr_count'] = obj_pre_hist.count()
+    context["pre_dict_users"] = json.dumps(pre_dict_users)
+
+
+    pre_r_usr = 0
+    pre_r_count = 0
+    pre_req_dict_users = {}
+    pre_r_start_page = self.request.GET.get('pageno1', 1)
+    pre_r_end_value = int(pre_r_start_page) * 5
+    pre_r_start_value = int(pre_r_end_value) - 4
+    obj_rew_hist = Boat_wallet.objects.filter(user = p_key).exclude(type="User Create").order_by('-created_on')
+    for i in obj_rew_hist:
+      pre_r_usr = pre_r_usr + 1
+      r_list_usr = {}
+      if pre_r_start_value <= pre_r_usr <= pre_r_end_value:
+        pre_r_count = pre_r_count + 1
+        r_list_usr["username"] = str(user_obj.Name)
+        r_list_usr["steps"] = (i.type)
+        r_list_usr["Reward"] = str(i.Amount_USDT)
+        r_list_usr["date"] = (str(i.created_on))
+        r_list_usr["pageno"] = pre_r_start_page
+        r_list_usr["sno"] = pre_r_usr
+        pre_req_dict_users[pre_r_count] = r_list_usr
+    try:
+      tot_rew_user_qs = obj_rew_hist
+    except:
+      tot_rew_user_qs = ""
+    w_page_1 = self.request.GET.get('pageno1', 1)
+    w_paginator_1 = Paginator(tot_rew_user_qs, 5)
+    try:
+        rew_hist_qs = w_paginator_1.page(w_page_1)
+    except PageNotAnInteger:
+        rew_hist_qs =w_paginator_1.page(1)
+    except EmptyPage:
+        rew_hist_qs = w_paginator_1.page(w_paginator_1.num_pages)
+
+    context['rew_hist_qs'] = rew_hist_qs
+    context["pre_r_endpage"] = rew_hist_qs.number+1
+    context["pre_r_startpage"] = rew_hist_qs.number-1
+    context['pre_r_start_value'] = rew_hist_qs.start_index()
+    context['pre_r_end_value'] = rew_hist_qs.end_index()
+    context['pre_r_usr_count'] = obj_rew_hist.count()
+    context["pre_req_dict_users"] = json.dumps(pre_req_dict_users)
+
+    try:
+      two_x_step = self.request.GET['tx_steps']
+    except:
+      two_x_step = ""
+
+    tx_usr = 0
+    tx_count = 0
+    tx_dict_users = {}
+    tx_start_page = self.request.GET.get('pageno2', 1)
+    tx_end_value = int(tx_start_page) * 5
+    tx_start_value = int(tx_end_value) - 4
+    if two_x_step:
+      obj_two_x_hist = User_2x_Boost.objects.filter(userid_id = p_key).filter(user_step_count__icontains = two_x_step).order_by('-id')
+      for i in obj_two_x_hist:
+        tx_usr = tx_usr + 1
+        tx_list_usr = {}
+        if tx_start_value <= tx_usr <= tx_end_value:
+          tx_count = tx_count + 1
+          tx_list_usr["username"] = str(i.userid.Name)
+          tx_list_usr["steps"] = (i.user_step_count)
+          tx_list_usr["Reward"] = str(i.reward_per_step)
+          tx_list_usr["date"] = (str(i.created_on))
+          tx_list_usr["pageno"] = tx_start_page
+          tx_list_usr["sno"] = tx_usr
+          tx_dict_users[tx_count] = tx_list_usr
+    else:
+      obj_two_x_hist = User_2x_Boost.objects.filter(userid_id = p_key).order_by('-id')
+      for i in obj_two_x_hist:
+        tx_usr = tx_usr + 1
+        tx_list_usr = {}
+        if tx_start_value <= tx_usr <= tx_end_value:
+          tx_count = tx_count + 1
+          tx_list_usr["username"] = str(i.userid.Name)
+          tx_list_usr["steps"] = (i.user_step_count)
+          tx_list_usr["Reward"] = str(i.reward_per_step)
+          tx_list_usr["date"] = (str(i.created_on))
+          tx_list_usr["pageno"] = tx_start_page
+          tx_list_usr["sno"] = tx_usr
+          tx_dict_users[tx_count] = tx_list_usr
+    try:
+      tot_tx_user_qs = obj_two_x_hist
+    except:
+      tot_tx_user_qs = ""
+    w_page_2 = self.request.GET.get('pageno2', 1)
+    w_paginator_2 = Paginator(tot_tx_user_qs, 5)
+    try:
+        two_x_hist_qs = w_paginator_2.page(w_page_2)
+    except PageNotAnInteger:
+        two_x_hist_qs =w_paginator_2.page(1)
+    except EmptyPage:
+        two_x_hist_qs = w_paginator_2.page(w_paginator_2.num_pages)
+
+    context['two_x_hist_qs'] = two_x_hist_qs
+    context["tx_endpage"] = two_x_hist_qs.number+1
+    context["tx_startpage"] = two_x_hist_qs.number-1
+    context['tx_start_value'] = two_x_hist_qs.start_index()
+    context['tx_end_value'] = two_x_hist_qs.end_index()
+    context['tx_usr_count'] = obj_two_x_hist.count()
+    context["tx_dict_users"] = json.dumps(tx_dict_users)
+
+
+
+    try:
+      buy_plan_name = self.request.GET['plan_name']
+    except:
+      buy_plan_name = ""
+
+    plan_usr = 0
+    plan_count = 0
+    plan_dict_users = {}
+    plan_start_page = self.request.GET.get('pageno3', 1)
+    plan_end_value = int(plan_start_page) * 5
+    plan_start_value = int(plan_end_value) - 4
+    Comp = MPPLanHistory.objects.filter(email_id = p_key).order_by('-id')
+    if buy_plan_name:
+      obj_plan_hist = MPPLanHistory.objects.filter(email_id = p_key).order_by('-id')
+      for i in obj_plan_hist:
+        plan_usr = plan_usr + 1
+        plan_list_usr = {}
+        if plan_start_value <= plan_usr <= plan_end_value:
+          plan_count = plan_count + 1
+          plan_list_usr["id"] = str(p_key)
+          plan_list_usr["username"] = str(i.user)
+          plan_list_usr["plan"] = "MP"#int(i.purchase_amount)
+          plan_list_usr["plan_amt"] = int(i.plan_amount)
+          plan_list_usr["start_date"] = (str(i.plan_start_date))
+          # plan_list_usr["end_date"] = (str(user_obj.plan_end_date))
+          plan_list_usr["wallet_type"] = (str(i.Transaction_Hash))
+          # plan_list_usr["health_max"] = (str(user_obj.Health_Withdraw_max_value))
+          # plan_list_usr["health_min"] = (str(user_obj.Health_Withdraw_min_value))
+          # plan_list_usr["referral_max"] = (str(user_obj.Referral_Withdraw_max_value))
+          # plan_list_usr["referral_min"] = (str(user_obj.Referral_Withdraw_min_value))
+          plan_list_usr["hash"] = (str(i.Transaction_Hash))
+          plan_list_usr["buy_type"] = (i.currency)
+          plan_list_usr["TradeBwa"] = str(user_obj.MPlanBWA)
+          # plan_list_usr["hash"] = (str(i.User_plan_validation))
+          plan_list_usr["pageno"] = plan_start_page
+          plan_list_usr["sno"] = plan_usr
+          plan_dict_users[plan_count] = plan_list_usr
+    else:
+      obj_plan_hist = MPPLanHistory.objects.filter(email_id = p_key).order_by('-id')
+      for i in obj_plan_hist:
+        plan_usr = plan_usr + 1
+        plan_list_usr = {}
+        if plan_start_value <= plan_usr <= plan_end_value:
+          plan_count = plan_count + 1
+          plan_list_usr["id"] = str(p_key)
+          plan_list_usr["username"] = str(i.user)
+          plan_list_usr["plan"] = "MP"#int(i.purchase_amount)
+          plan_list_usr["plan_amt"] = int(i.plan_amount)
+          # plan_list_usr["price"] = str(user_obj.fixed_status)
+          plan_list_usr["start_date"] = (str(i.plan_start_date))
+          # plan_list_usr["end_date"] = (str(user_obj.plan_end_date))
+          plan_list_usr["wallet_type"] = (str(i.Transaction_Hash))
+          # plan_list_usr["health_max"] = (str(user_obj.Health_Withdraw_max_value))
+          # plan_list_usr["health_min"] = (str(user_obj.Health_Withdraw_min_value))
+          # plan_list_usr["referral_max"] = (str(user_obj.Referral_Withdraw_max_value))
+          # plan_list_usr["referral_min"] = (str(user_obj.Referral_Withdraw_min_value))
+          plan_list_usr["hash"] = (str(i.Transaction_Hash))
+          plan_list_usr["buy_type"] = (i.currency)
+          plan_list_usr["TradeBwa"] = str(user_obj.MPlanBWA)
+          plan_list_usr["pageno"] = plan_start_page
+          plan_list_usr["sno"] = plan_usr
+          plan_dict_users[plan_count] = plan_list_usr
+    try:
+      tot_plan_user_qs = obj_plan_hist
+    except:
+      tot_plan_user_qs = ""
+    w_page_3 = self.request.GET.get('pageno3', 1)
+    w_paginator_3 = Paginator(tot_plan_user_qs, 5)
+    try:
+        plan_hist_qs = w_paginator_3.page(w_page_3)
+    except PageNotAnInteger:
+        plan_hist_qs =w_paginator_3.page(1)
+    except EmptyPage:
+        plan_hist_qs = w_paginator_3.page(w_paginator_3.num_pages)\
+
+    context['plan_hist_qs'] = plan_hist_qs
+    context["plan_endpage"] = plan_hist_qs.number+1
+    context["plan_startpage"] = plan_hist_qs.number-1
+    context['plan_start_value'] = plan_hist_qs.start_index()
+    context['plan_end_value'] = plan_hist_qs.end_index()
+    context['plan_usr_count'] = obj_plan_hist.count()
+    context["plan_dict_users"] = json.dumps(plan_dict_users)
+
+
+    try:
+      usr_addrs = self.request.GET['address']
+    except:
+      usr_addrs = ""
+
+    try:
+      status = self.request.GET['status']
+     
+      if status == 'Active':
+       
+        status = 0
+      if status == 'Completed':
+        status = 1
+      if status == 'Cancelled':
+        status = 2
+    except:
+      status = ""
+
+    try:
+      date = self.request.GET['date']
+    except:
+      date = ""
+
+    withdraw_usr = 0
+    withdraw_count = 0
+    withdraw_dict_users = {}
+    withdraw_start_page = self.request.GET.get('pageno4', 1)
+    withdraw_end_value = int(withdraw_start_page) * 5
+    withdraw_start_value = int(withdraw_end_value) - 4
+    if usr_addrs and status and date:
+      obj_withdraw_hist = Withdraw.objects.filter(userid_id = p_key).filter(Q(Address__icontains = usr_addrs) and Q(status__icontains = status) and Q(created_on__date__icontains = date)).exclude(Wallet_type__in=[ 'Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet','Bot_Referral_wallet','trade_withdraw_wallet','Trade_Referral_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    elif usr_addrs:
+      obj_withdraw_hist = Withdraw.objects.filter(userid_id = p_key).filter(Address__icontains = usr_addrs).exclude(Wallet_type__in=['Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet','Bot_Referral_wallet','trade_withdraw_wallet','Trade_Referral_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on)) 
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    elif date:
+      obj_withdraw_hist = Withdraw.objects.filter(userid_id = p_key).filter(created_on__date__icontains = date).exclude(Wallet_type__in=['Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet','Bot_Referral_wallet','trade_withdraw_wallet','Trade_Referral_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    elif status:
+      obj_withdraw_hist = Withdraw.objects.filter(userid_id = p_key).filter(status__icontains = status).exclude(Wallet_type__in=['Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet','Bot_Referral_wallet','trade_withdraw_wallet','Trade_Referral_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    else:
+      obj_withdraw_hist = Withdraw.objects.filter(userid_id = p_key).exclude(Wallet_type__in=[ 'Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet','Bot_Referral_wallet','trade_withdraw_wallet','Trade_Referral_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    try:
+      tot_withdraw_user_qs = obj_withdraw_hist
+    except:
+      tot_withdraw_user_qs = ""
+    w_page_4 = self.request.GET.get('pageno4', 1)
+    w_paginator_4 = Paginator(tot_withdraw_user_qs, 5)
+    try:
+        withdraw_hist_qs = w_paginator_4.page(w_page_4)
+    except PageNotAnInteger:
+        withdraw_hist_qs =w_paginator_4.page(1)
+    except EmptyPage:
+        withdraw_hist_qs = w_paginator_4.page(w_paginator_4.num_pages)
+
+    context['withdraw_hist_qs'] = withdraw_hist_qs
+    context["withdraw_endpage"] = withdraw_hist_qs.number+1
+    context["withdraw_startpage"] = withdraw_hist_qs.number-1
+    context['withdraw_start_value'] = withdraw_hist_qs.start_index()
+    context['withdraw_end_value'] = withdraw_hist_qs.end_index()
+    context['withdraw_usr_count'] = obj_withdraw_hist.count()
+    context["withdraw_dict_users"] = json.dumps(withdraw_dict_users)
+
+     
+    try:
+      ref_user = self.request.GET['name']
+    except:
+      ref_user = ""
+
+
+    ref_usr = 0
+    ref_count = 0
+    ref_dict_users = {}
+    ref_start_page = self.request.GET.get('pageno5', 1)
+    ref_end_value = int(ref_start_page) * 5
+    ref_start_value = int(ref_end_value) - 4
+    try:
+      if ref_user:
+        obj_ref_hist = MPRewardHistory.objects.filter(user_id = p_key).filter(referral_id__icontains = ref_user).order_by('-id')
+        for i in obj_ref_hist:
+          
+          ref_usr = ref_usr + 1
+          ref_list_usr = {}
+          if ref_start_value <= ref_usr <= ref_end_value:
+            ref_count = ref_count + 1
+            # ref_list_usr["id"] = str(p_key)
+            ref_list_usr["id"] = i.id
+            ref_list_usr["username"] = str(i.user.Name)
+            ref_list_usr["ref_id"] = i.referral_id
+            ref_list_usr["reward_amt"] = i.reward
+            ref_list_usr["date"] = (str(i.created_on))
+            ref_list_usr["pageno"] = ref_start_page
+            ref_list_usr["sno"] = ref_usr
+            ref_dict_users[ref_count] = ref_list_usr
+        
+      else:
+        obj_ref_hist = MPRewardHistory.objects.filter(user_id = p_key).order_by('-id')
+        for i in obj_ref_hist:
+          ref_usr = ref_usr + 1
+          ref_list_usr = {}
+          if ref_start_value <= ref_usr <= ref_end_value:
+            ref_count = ref_count + 1
+            ref_list_usr["id"] = i.id
+            ref_list_usr["username"] = str(i.user.Name)
+            ref_list_usr["ref_id"] = i.referral_id
+            ref_list_usr["reward_amt"] = i.reward
+            ref_list_usr["date"] = (str(i.created_on))
+            ref_list_usr["pageno"] = ref_start_page
+            ref_list_usr["sno"] = ref_usr 
+            ref_dict_users[ref_count] = ref_list_usr
+        
+
+      context['ref_usr_count'] = obj_ref_hist.count()
+    except:
+      obj_ref_hist = ""
+      context['ref_usr_count'] = 0
+    try:
+      tot_ref_user_qs = obj_ref_hist
+    except:
+      tot_ref_user_qs = ""
+    w_page_5 = self.request.GET.get('pageno5', 1)
+    w_paginator_5 = Paginator(tot_ref_user_qs, 5) 
+    try:
+        ref_hist_qs = w_paginator_5.page(w_page_5)
+    except PageNotAnInteger:
+        ref_hist_qs =w_paginator_5.page(1)
+    except EmptyPage:
+        ref_hist_qs = w_paginator_5.page(w_paginator_5.num_pages)
+
+    context['ref_hist_qs'] = ref_hist_qs
+    context["ref_endpage"] = ref_hist_qs.number+1
+    context["ref_startpage"] = ref_hist_qs.number-1
+    context['ref_start_value'] = ref_hist_qs.start_index()
+    context['ref_end_value'] = ref_hist_qs.end_index()
+    context["ref_dict_users"] = json.dumps(ref_dict_users)
+
+    wall_usr = 0
+    wall_count = 0
+    wall_dict_users = {}
+    wall_start_page = self.request.GET.get('pageno6', 1)
+    wall_end_value = int(wall_start_page) * 5
+    wall_start_value = int(wall_end_value) - 4
+    try:
+      obj_wall_hist = UserCashWallet.objects.filter(userid_id = p_key).order_by('-id')
+      for i in obj_wall_hist:
+        wall_usr = wall_usr + 1
+        wall_list_usr = {}
+        if wall_start_value <= wall_usr <= wall_end_value:
+          wall_count = wall_count + 1
+          wall_list_usr["username"] = str(i.userid.Name)
+          if i.MPHealth == 0.00000000:
+            wall_list_usr["health_reward"] = int(i.MPHealth)
+          else:
+            wall_list_usr["health_reward"] = str(i.MPHealth)
+          if i.MPReward == 0.00000000:
+            wall_list_usr["ref_reward"] = int(i.MPReward)
+          else:
+            wall_list_usr["ref_reward"] = str(i.MPReward)
+          wall_list_usr["pageno"] = wall_start_page
+          wall_list_usr["sno"] = wall_usr
+          wall_dict_users[wall_count] = wall_list_usr
+    except:
+      obj_wall_hist = ""
+    try:
+      tot_wall_user_qs = obj_wall_hist
+    except:
+      tot_wall_user_qs = ""
+    w_page_6 = self.request.GET.get('pageno6', 1)
+    w_paginator_6 = Paginator(tot_wall_user_qs, 5)
+    try:
+        wall_hist_qs = w_paginator_6.page(w_page_6)
+    except PageNotAnInteger:
+        wall_hist_qs =w_paginator_6.page(1)
+    except EmptyPage:
+        wall_hist_qs = w_paginator_6.page(w_paginator_6.num_pages)
+
+    context['wall_hist_qs'] = wall_hist_qs
+    context["wall_endpage"] = wall_hist_qs.number+1
+    context["wall_startpage"] = wall_hist_qs.number-1
+    context['wall_start_value'] = wall_hist_qs.start_index()
+    context['wall_end_value'] = wall_hist_qs.end_index()
+    context['wall_usr_count'] = obj_wall_hist.count()
+    context["wall_dict_users"] = json.dumps(wall_dict_users)
+
+
+    login_usr = 0
+    login_count = 0
+    login_dict_users = {}
+    login_start_page = self.request.GET.get('pageno7', 1)
+    login_end_value = int(login_start_page) * 5
+    login_start_value = int(login_end_value) - 4
+    try:
+      obj_login_hist = LoginHistory.objects.filter(user_id = p_key).order_by('-created_on')
+      for i in obj_login_hist:
+        login_usr = login_usr + 1
+        login_list_usr = {}
+        if login_start_value <= login_usr <= login_end_value:
+          login_count = login_count + 1
+          login_list_usr["username"] = str(i.user.Name)
+          login_list_usr["created_on"] = str(i.created_on)
+          login_list_usr["modified_on"] = str(i.modified_on)
+          login_list_usr["pageno"] = login_start_page
+          login_list_usr["sno"] = login_usr
+          login_dict_users[login_count] = login_list_usr
+    except:
+      obj_login_hist = ""
+    try:
+      tot_login_user_qs = obj_login_hist
+    except:
+      tot_login_user_qs = ""
+    w_page_7 = self.request.GET.get('pageno7', 1)
+    w_paginator_7 = Paginator(tot_login_user_qs, 5)
+    try:
+        login_hist_qs = w_paginator_7.page(w_page_7)
+    except PageNotAnInteger:
+        login_hist_qs =w_paginator_7.page(1)
+    except EmptyPage:
+        login_hist_qs = w_paginator_7.page(w_paginator_7.num_pages)
+
+    context['login_hist_qs'] = login_hist_qs
+    context["login_endpage"] = login_hist_qs.number+1
+    context["login_startpage"] = login_hist_qs.number-1
+    context['login_start_value'] = login_hist_qs.start_index()
+    context['login_end_value'] = login_hist_qs.end_index()
+    context['login_usr_count'] = obj_login_hist.count()
+    context["login_dict_users"] = json.dumps(login_dict_users)
+
+    
+    context['Title'] = 'MPlan History Table'
+    context["Btn_url"] = "trade_admin_auth:List_User_Management"
+    return context
+
+
+  @method_decorator(check_group_icon_menu("History"))
+  def dispatch(self, *args, **kwargs):
+    return super(MPlanHistoryManagementTable, self).dispatch(*args, **kwargs)
+
+
+
+
+
+
+################################################################################################################################################
+################################################################################################################################################
+
+
+##############################################                   ##########################################
+##############################################    Burn History   ##########################################
+
+class BurnHistoryManagementTable(TemplateView):
+  template_name = "trade_admin_auth/burn_history_table.html"
+
+  def get_context_data(self, **kwargs):
+    context = super(BurnHistoryManagementTable, self).get_context_data(**kwargs)
+    p_key = self.kwargs['pk']
+    context["p_key"] = p_key
+    try:
+      user_obj = User_Management.objects.get(id = p_key)
+    except:
+      user_obj = ""
+
+    try:
+      p_no = self.request.GET['pageno']
+    except:
+      p_no=1
+    try:
+      p_no1 = self.request.GET['pageno1']
+    except:
+      p_no1=1 
+    try:
+      p_no2 = self.request.GET['pageno2']
+    except:
+      p_no2=1
+    try:
+      p_no3 = self.request.GET['pageno3']
+    except:
+      p_no3=1
+    try:
+      p_no4 = self.request.GET['pageno4']
+    except:
+      p_no4=1   
+    try:
+      p_no5 = self.request.GET['pageno5']
+    except:
+      p_no5=1 
+    try:
+      p_no6 = self.request.GET['pageno6']
+    except:
+      p_no6=1
+    try:
+      p_no7 = self.request.GET['pageno7']
+    except:
+      p_no7=1
+
+    context['p_no'] = p_no
+    context['p_no1'] = p_no1
+    context['p_no2'] = p_no2
+    context['p_no3'] = p_no3
+    context['p_no4'] = p_no4
+    context['p_no5'] = p_no5
+    context['p_no6'] = p_no6
+    context['p_no7'] = p_no7
+
+    try:
+      s_step = self.request.GET['steps']
+    except:
+      s_step = ""
+
+    
+
+    s_usr = 0
+    s_count = 0
+    s_dict_users = {}
+    s_start_page = self.request.GET.get('pageno', 1)
+    s_end_value = int(s_start_page) * 5
+    s_start_value = int(s_end_value) - 4
+    
+    if s_step:
+      obj_step_hist = Steps_history.objects.filter(user_id = p_key).filter(steps__icontains = s_step).order_by('-id')
+      for i in obj_step_hist:
+        
+        s_usr = s_usr + 1
+        s_list_usr = {}
+        if s_start_value <= s_usr <= s_end_value:
+          s_count = s_count + 1
+          s_list_usr["username"] = str(i.user.Name)
+          s_list_usr["steps"] = (i.steps)
+          s_list_usr["date"] = (str(i.created_on))
+          s_list_usr["pageno"] = s_start_page
+          s_list_usr["sno"] = s_usr
+          s_dict_users[s_count] = s_list_usr
+    else:
+      obj_step_hist = Steps_history.objects.filter(user_id = p_key).order_by('-id')
+      for i in obj_step_hist:
+      
+        s_usr = s_usr + 1
+        s_list_usr = {}
+        if s_start_value <= s_usr <= s_end_value:
+          s_count = s_count + 1
+          s_list_usr["username"] = str(i.user.Name)
+          s_list_usr["steps"] = (i.steps)
+          s_list_usr["date"] = (str(i.created_on))
+          s_list_usr["pageno"] = s_start_page
+          s_list_usr["sno"] = s_usr
+          s_dict_users[s_count] = s_list_usr
+
+    try:
+      tot_step_user_qs = obj_step_hist
+    except:
+      tot_step_user_qs = ""
+    w_page = self.request.GET.get('pageno', 1)
+    w_paginator = Paginator(tot_step_user_qs, 5)
+    
+    try:
+        step_hist_qs = w_paginator.page(w_page)
+    except PageNotAnInteger:
+        step_hist_qs =w_paginator.page(1)
+    except EmptyPage:
+        step_hist_qs = w_paginator.page(w_paginator.num_pages)
+    
+    
+    context['step_hist_qs'] = step_hist_qs
+    context["s_endpage"] = step_hist_qs.number+1
+    context["s_startpage"] = step_hist_qs.number-1
+    context['s_start_value'] = step_hist_qs.start_index()
+    context['s_end_value'] = step_hist_qs.end_index()
+    context['s_usr_count'] = obj_step_hist.count()
+    context["s_dict_users"] = json.dumps(s_dict_users)
+
+
+
+    try:
+      r_step = self.request.GET['r_steps']
+    except:
+      r_step = ""
+
+    r_usr = 0
+    r_count = 0
+    r_dict_users = {}
+    r_start_page = self.request.GET.get('pageno1', 1)
+    r_end_value = int(r_start_page) * 5
+    r_start_value = int(r_end_value) - 4
+    if r_step:
+      obj_rew_hist = BurnRewardHistory.objects.filter(user_id = p_key).filter(steps__icontains = r_step).order_by('-id')
+      for i in obj_rew_hist:
+        r_usr = r_usr + 1
+        r_list_usr = {}
+        if r_start_value <= r_usr <= r_end_value:
+          r_count = r_count + 1
+          r_list_usr["username"] = str(i.user.Name)
+          r_list_usr["steps"] = 3000
+          r_list_usr["Reward"] = str(i.reward)
+          r_list_usr["date"] = (str(i.created_on))
+          r_list_usr["claim_date"] = (str(i.modified_on))
+          r_list_usr["pageno"] = r_start_page
+          r_list_usr["sno"] = r_usr
+          r_dict_users[r_count] = r_list_usr
+    else:
+      obj_rew_hist = BurnRewardHistory.objects.filter(user_id = p_key).order_by('-id')
+      for i in obj_rew_hist:
+        r_usr = r_usr + 1
+        r_list_usr = {}
+        if r_start_value <= r_usr <= r_end_value:
+          r_count = r_count + 1
+          r_list_usr["username"] = str(i.user.Name)
+          r_list_usr["steps"] = 3000
+          r_list_usr["Reward"] = str(i.reward)
+          r_list_usr["date"] = (str(i.created_on))
+          r_list_usr["claim_date"] = (str(i.modified_on))
+          r_list_usr["pageno"] = r_start_page
+          r_list_usr["sno"] = r_usr
+          r_dict_users[r_count] = r_list_usr
+    try:
+      tot_rew_user_qs = obj_rew_hist
+    except:
+      tot_rew_user_qs = ""
+    w_page_1 = self.request.GET.get('pageno1', 1)
+    w_paginator_1 = Paginator(tot_rew_user_qs, 5)
+    try:
+        rew_hist_qs = w_paginator_1.page(w_page_1)
+    except PageNotAnInteger:
+        rew_hist_qs =w_paginator_1.page(1)
+    except EmptyPage:
+        rew_hist_qs = w_paginator_1.page(w_paginator_1.num_pages)
+
+    context['rew_hist_qs'] = rew_hist_qs
+    context["r_endpage"] = rew_hist_qs.number+1
+    context["r_startpage"] = rew_hist_qs.number-1
+    context['r_start_value'] = rew_hist_qs.start_index()
+    context['r_end_value'] = rew_hist_qs.end_index()
+    context['r_usr_count'] = obj_rew_hist.count()
+    context["r_dict_users"] = json.dumps(r_dict_users)
+
+    pre_usr = 0
+    pre_count = 0
+    pre_dict_users = {}
+    pre_start_page = self.request.GET.get('pageno', 1)
+    pre_end_value = int(pre_start_page) * 5
+    pre_start_value = int(pre_end_value) - 4
+    
+    obj_pre_hist = Boat_wallet.objects.filter(user = p_key,type="User Create").order_by('-id')
+    for i in obj_pre_hist: 
+      pre_usr = pre_usr + 1
+      pre_list_usr = {}
+      if pre_start_value <= pre_usr <= pre_end_value:
+        pre_count = pre_count + 1
+        pre_list_usr["username"] = str(user_obj.Name)
+        pre_list_usr["create_type"] = (i.create_type)
+        pre_list_usr["steps"] = (i.Amount_USDT)
+        pre_list_usr["jw"] = (i.Amount_JW)
+        pre_list_usr["Hash"] = (i.Hash)
+        pre_list_usr["date"] = (str(i.created_on))
+        pre_list_usr["pageno"] = pre_start_page
+        pre_list_usr["sno"] = pre_usr
+        pre_dict_users[pre_count] = pre_list_usr
+    try:
+      tot_step_user_qs = obj_pre_hist
+    except:
+      tot_step_user_qs = ""
+    w_page = self.request.GET.get('pageno', 1)
+    w_paginator = Paginator(tot_step_user_qs, 5)
+    
+    try:
+        step_hist_qs = w_paginator.page(w_page)
+    except PageNotAnInteger:
+        step_hist_qs =w_paginator.page(1)
+    except EmptyPage:
+        step_hist_qs = w_paginator.page(w_paginator.num_pages)
+    
+    
+    context['step_hist_qs'] = step_hist_qs
+    context["pre_endpage"] = step_hist_qs.number+1
+    context["pre_startpage"] = step_hist_qs.number-1
+    context['pre_start_value'] = step_hist_qs.start_index()
+    context['pre_end_value'] = step_hist_qs.end_index()
+    context['pre_usr_count'] = obj_pre_hist.count()
+    context["pre_dict_users"] = json.dumps(pre_dict_users)
+
+
+    pre_r_usr = 0
+    pre_r_count = 0
+    pre_req_dict_users = {}
+    pre_r_start_page = self.request.GET.get('pageno1', 1)
+    pre_r_end_value = int(pre_r_start_page) * 5
+    pre_r_start_value = int(pre_r_end_value) - 4
+    obj_rew_hist = Boat_wallet.objects.filter(user = p_key).exclude(type="User Create").order_by('-created_on')
+    for i in obj_rew_hist:
+      pre_r_usr = pre_r_usr + 1
+      r_list_usr = {}
+      if pre_r_start_value <= pre_r_usr <= pre_r_end_value:
+        pre_r_count = pre_r_count + 1
+        r_list_usr["username"] = str(user_obj.Name)
+        r_list_usr["steps"] = (i.type)
+        r_list_usr["Reward"] = str(i.Amount_USDT)
+        r_list_usr["date"] = (str(i.created_on))
+        r_list_usr["pageno"] = pre_r_start_page
+        r_list_usr["sno"] = pre_r_usr
+        pre_req_dict_users[pre_r_count] = r_list_usr
+    try:
+      tot_rew_user_qs = obj_rew_hist
+    except:
+      tot_rew_user_qs = ""
+    w_page_1 = self.request.GET.get('pageno1', 1)
+    w_paginator_1 = Paginator(tot_rew_user_qs, 5)
+    try:
+        rew_hist_qs = w_paginator_1.page(w_page_1)
+    except PageNotAnInteger:
+        rew_hist_qs =w_paginator_1.page(1)
+    except EmptyPage:
+        rew_hist_qs = w_paginator_1.page(w_paginator_1.num_pages)
+
+    context['rew_hist_qs'] = rew_hist_qs
+    context["pre_r_endpage"] = rew_hist_qs.number+1
+    context["pre_r_startpage"] = rew_hist_qs.number-1
+    context['pre_r_start_value'] = rew_hist_qs.start_index()
+    context['pre_r_end_value'] = rew_hist_qs.end_index()
+    context['pre_r_usr_count'] = obj_rew_hist.count()
+    context["pre_req_dict_users"] = json.dumps(pre_req_dict_users)
+
+    try:
+      two_x_step = self.request.GET['tx_steps']
+    except:
+      two_x_step = ""
+
+    tx_usr = 0
+    tx_count = 0
+    tx_dict_users = {}
+    tx_start_page = self.request.GET.get('pageno2', 1)
+    tx_end_value = int(tx_start_page) * 5
+    tx_start_value = int(tx_end_value) - 4
+    if two_x_step:
+      obj_two_x_hist = User_2x_Boost.objects.filter(userid_id = p_key).filter(user_step_count__icontains = two_x_step).order_by('-id')
+      for i in obj_two_x_hist:
+        tx_usr = tx_usr + 1
+        tx_list_usr = {}
+        if tx_start_value <= tx_usr <= tx_end_value:
+          tx_count = tx_count + 1
+          tx_list_usr["username"] = str(i.userid.Name)
+          tx_list_usr["steps"] = (i.user_step_count)
+          tx_list_usr["Reward"] = str(i.reward_per_step)
+          tx_list_usr["date"] = (str(i.created_on))
+          tx_list_usr["pageno"] = tx_start_page
+          tx_list_usr["sno"] = tx_usr
+          tx_dict_users[tx_count] = tx_list_usr
+    else:
+      obj_two_x_hist = User_2x_Boost.objects.filter(userid_id = p_key).order_by('-id')
+      for i in obj_two_x_hist:
+        tx_usr = tx_usr + 1
+        tx_list_usr = {}
+        if tx_start_value <= tx_usr <= tx_end_value:
+          tx_count = tx_count + 1
+          tx_list_usr["username"] = str(i.userid.Name)
+          tx_list_usr["steps"] = (i.user_step_count)
+          tx_list_usr["Reward"] = str(i.reward_per_step)
+          tx_list_usr["date"] = (str(i.created_on))
+          tx_list_usr["pageno"] = tx_start_page
+          tx_list_usr["sno"] = tx_usr
+          tx_dict_users[tx_count] = tx_list_usr
+    try:
+      tot_tx_user_qs = obj_two_x_hist
+    except:
+      tot_tx_user_qs = ""
+    w_page_2 = self.request.GET.get('pageno2', 1)
+    w_paginator_2 = Paginator(tot_tx_user_qs, 5)
+    try:
+        two_x_hist_qs = w_paginator_2.page(w_page_2)
+    except PageNotAnInteger:
+        two_x_hist_qs =w_paginator_2.page(1)
+    except EmptyPage:
+        two_x_hist_qs = w_paginator_2.page(w_paginator_2.num_pages)
+
+    context['two_x_hist_qs'] = two_x_hist_qs
+    context["tx_endpage"] = two_x_hist_qs.number+1
+    context["tx_startpage"] = two_x_hist_qs.number-1
+    context['tx_start_value'] = two_x_hist_qs.start_index()
+    context['tx_end_value'] = two_x_hist_qs.end_index()
+    context['tx_usr_count'] = obj_two_x_hist.count()
+    context["tx_dict_users"] = json.dumps(tx_dict_users)
+
+
+
+    try:
+      buy_plan_name = self.request.GET['plan_name']
+    except:
+      buy_plan_name = ""
+
+    plan_usr = 0
+    plan_count = 0
+    plan_dict_users = {}
+    plan_start_page = self.request.GET.get('pageno3', 1)
+    plan_end_value = int(plan_start_page) * 5
+    plan_start_value = int(plan_end_value) - 4
+    Comp = BurntoearnHistory.objects.filter(email_id = p_key).order_by('-id')
+    if buy_plan_name:
+      obj_plan_hist = BurntoearnHistory.objects.filter(email_id = p_key).order_by('-id')
+      for i in obj_plan_hist:
+        plan_usr = plan_usr + 1
+        plan_list_usr = {}
+        if plan_start_value <= plan_usr <= plan_end_value:
+          plan_count = plan_count + 1
+          plan_list_usr["id"] = str(p_key)
+          plan_list_usr["username"] = str(i.user)
+          plan_list_usr["plan"] = "Burn"#int(i.purchase_amount)
+          plan_list_usr["plan_amt"] = int(i.plan_amount)
+          plan_list_usr["start_date"] = (str(i.plan_start_date))
+          # plan_list_usr["end_date"] = (str(user_obj.plan_end_date))
+          plan_list_usr["wallet_type"] = (str(i.Transaction_Hash))
+          # plan_list_usr["health_max"] = (str(user_obj.Health_Withdraw_max_value))
+          # plan_list_usr["health_min"] = (str(user_obj.Health_Withdraw_min_value))
+          # plan_list_usr["referral_max"] = (str(user_obj.Referral_Withdraw_max_value))
+          # plan_list_usr["referral_min"] = (str(user_obj.Referral_Withdraw_min_value))
+          plan_list_usr["hash"] = (str(i.Transaction_Hash))
+          plan_list_usr["buy_type"] = (i.currency)
+          plan_list_usr["TradeBwa"] = str(user_obj.MPlanBWA)
+          # plan_list_usr["hash"] = (str(i.User_plan_validation))
+          plan_list_usr["pageno"] = plan_start_page
+          plan_list_usr["sno"] = plan_usr
+          plan_dict_users[plan_count] = plan_list_usr
+    else:
+      obj_plan_hist = BurntoearnHistory.objects.filter(email_id = p_key).order_by('-id')
+      for i in obj_plan_hist:
+        plan_usr = plan_usr + 1
+        plan_list_usr = {}
+        if plan_start_value <= plan_usr <= plan_end_value:
+          plan_count = plan_count + 1
+          plan_list_usr["id"] = str(p_key)
+          plan_list_usr["username"] = str(i.user)
+          plan_list_usr["plan"] = "Burn"#int(i.purchase_amount)
+          plan_list_usr["plan_amt"] = int(i.plan_amount)
+          # plan_list_usr["price"] = str(user_obj.fixed_status)
+          plan_list_usr["start_date"] = (str(i.plan_start_date))
+          # plan_list_usr["end_date"] = (str(user_obj.plan_end_date))
+          plan_list_usr["wallet_type"] = (str(i.Transaction_Hash))
+          # plan_list_usr["health_max"] = (str(user_obj.Health_Withdraw_max_value))
+          # plan_list_usr["health_min"] = (str(user_obj.Health_Withdraw_min_value))
+          # plan_list_usr["referral_max"] = (str(user_obj.Referral_Withdraw_max_value))
+          # plan_list_usr["referral_min"] = (str(user_obj.Referral_Withdraw_min_value))
+          plan_list_usr["hash"] = (str(i.Transaction_Hash))
+          plan_list_usr["buy_type"] = (i.currency)
+          plan_list_usr["TradeBwa"] = str(user_obj.MPlanBWA)
+          plan_list_usr["pageno"] = plan_start_page
+          plan_list_usr["sno"] = plan_usr
+          plan_dict_users[plan_count] = plan_list_usr
+    try:
+      tot_plan_user_qs = obj_plan_hist
+    except:
+      tot_plan_user_qs = ""
+    w_page_3 = self.request.GET.get('pageno3', 1)
+    w_paginator_3 = Paginator(tot_plan_user_qs, 5)
+    try:
+        plan_hist_qs = w_paginator_3.page(w_page_3)
+    except PageNotAnInteger:
+        plan_hist_qs =w_paginator_3.page(1)
+    except EmptyPage:
+        plan_hist_qs = w_paginator_3.page(w_paginator_3.num_pages)\
+
+    context['plan_hist_qs'] = plan_hist_qs
+    context["plan_endpage"] = plan_hist_qs.number+1
+    context["plan_startpage"] = plan_hist_qs.number-1
+    context['plan_start_value'] = plan_hist_qs.start_index()
+    context['plan_end_value'] = plan_hist_qs.end_index()
+    context['plan_usr_count'] = obj_plan_hist.count()
+    context["plan_dict_users"] = json.dumps(plan_dict_users)
+
+
+    try:
+      usr_addrs = self.request.GET['address']
+    except:
+      usr_addrs = ""
+
+    try:
+      status = self.request.GET['status']
+     
+      if status == 'Active':
+       
+        status = 0
+      if status == 'Completed':
+        status = 1
+      if status == 'Cancelled':
+        status = 2
+    except:
+      status = ""
+
+    try:
+      date = self.request.GET['date']
+    except:
+      date = ""
+
+    withdraw_usr = 0
+    withdraw_count = 0
+    withdraw_dict_users = {}
+    withdraw_start_page = self.request.GET.get('pageno4', 1)
+    withdraw_end_value = int(withdraw_start_page) * 5
+    withdraw_start_value = int(withdraw_end_value) - 4
+    if usr_addrs and status and date:
+      obj_withdraw_hist = BurnWithdraw.objects.filter(userid_id = p_key).filter(Q(Address__icontains = usr_addrs) and Q(status__icontains = status) and Q(created_on__date__icontains = date)).exclude(Wallet_type__in=[ 'Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet','Bot_Referral_wallet','trade_withdraw_wallet','Trade_Referral_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    elif usr_addrs:
+      obj_withdraw_hist = BurnWithdraw.objects.filter(userid_id = p_key).filter(Address__icontains = usr_addrs).exclude(Wallet_type__in=['Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet','Bot_Referral_wallet','trade_withdraw_wallet','Trade_Referral_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on)) 
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    elif date:
+      obj_withdraw_hist = BurnWithdraw.objects.filter(userid_id = p_key).filter(created_on__date__icontains = date).exclude(Wallet_type__in=['Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet','Bot_Referral_wallet','trade_withdraw_wallet','Trade_Referral_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    elif status:
+      obj_withdraw_hist = WiBurnWithdrawthdraw.objects.filter(userid_id = p_key).filter(status__icontains = status).exclude(Wallet_type__in=['Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet','Bot_Referral_wallet','trade_withdraw_wallet','Trade_Referral_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    else:
+      obj_withdraw_hist = BurnWithdraw.objects.filter(userid_id = p_key).exclude(Wallet_type__in=[ 'Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet','Bot_Referral_wallet','trade_withdraw_wallet','Trade_Referral_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    try:
+      tot_withdraw_user_qs = obj_withdraw_hist
+    except:
+      tot_withdraw_user_qs = ""
+    w_page_4 = self.request.GET.get('pageno4', 1)
+    w_paginator_4 = Paginator(tot_withdraw_user_qs, 5)
+    try:
+        withdraw_hist_qs = w_paginator_4.page(w_page_4)
+    except PageNotAnInteger:
+        withdraw_hist_qs =w_paginator_4.page(1)
+    except EmptyPage:
+        withdraw_hist_qs = w_paginator_4.page(w_paginator_4.num_pages)
+
+    context['withdraw_hist_qs'] = withdraw_hist_qs
+    context["withdraw_endpage"] = withdraw_hist_qs.number+1
+    context["withdraw_startpage"] = withdraw_hist_qs.number-1
+    context['withdraw_start_value'] = withdraw_hist_qs.start_index()
+    context['withdraw_end_value'] = withdraw_hist_qs.end_index()
+    context['withdraw_usr_count'] = obj_withdraw_hist.count()
+    context["withdraw_dict_users"] = json.dumps(withdraw_dict_users)
+
+     
+    try:
+      ref_user = self.request.GET['name']
+    except:
+      ref_user = ""
+
+
+    ref_usr = 0
+    ref_count = 0
+    ref_dict_users = {}
+    ref_start_page = self.request.GET.get('pageno5', 1)
+    ref_end_value = int(ref_start_page) * 5
+    ref_start_value = int(ref_end_value) - 4
+    try:
+      if ref_user:
+        obj_ref_hist = BurnRewardHistory.objects.filter(user_id = p_key).filter(referral_id__icontains = ref_user).order_by('-id')
+        for i in obj_ref_hist:
+          
+          ref_usr = ref_usr + 1
+          ref_list_usr = {}
+          if ref_start_value <= ref_usr <= ref_end_value:
+            ref_count = ref_count + 1
+            # ref_list_usr["id"] = str(p_key)
+            ref_list_usr["id"] = i.id
+            ref_list_usr["username"] = str(i.user.Name)
+            ref_list_usr["ref_id"] = i.referral_id
+            ref_list_usr["reward_amt"] = i.reward
+            ref_list_usr["date"] = (str(i.created_on))
+            ref_list_usr["pageno"] = ref_start_page
+            ref_list_usr["sno"] = ref_usr
+            ref_dict_users[ref_count] = ref_list_usr
+        
+      else:
+        obj_ref_hist = BurnRewardHistory.objects.filter(user_id = p_key).order_by('-id')
+        for i in obj_ref_hist:
+          ref_usr = ref_usr + 1
+          ref_list_usr = {}
+          if ref_start_value <= ref_usr <= ref_end_value:
+            ref_count = ref_count + 1
+            ref_list_usr["id"] = i.id
+            ref_list_usr["username"] = str(i.user.Name)
+            ref_list_usr["ref_id"] = i.referral_id
+            ref_list_usr["reward_amt"] = i.reward
+            ref_list_usr["date"] = (str(i.created_on))
+            ref_list_usr["pageno"] = ref_start_page
+            ref_list_usr["sno"] = ref_usr 
+            ref_dict_users[ref_count] = ref_list_usr
+        
+
+      context['ref_usr_count'] = obj_ref_hist.count()
+    except:
+      obj_ref_hist = ""
+      context['ref_usr_count'] = 0
+    try:
+      tot_ref_user_qs = obj_ref_hist
+    except:
+      tot_ref_user_qs = ""
+    w_page_5 = self.request.GET.get('pageno5', 1)
+    w_paginator_5 = Paginator(tot_ref_user_qs, 5) 
+    try:
+        ref_hist_qs = w_paginator_5.page(w_page_5)
+    except PageNotAnInteger:
+        ref_hist_qs =w_paginator_5.page(1)
+    except EmptyPage:
+        ref_hist_qs = w_paginator_5.page(w_paginator_5.num_pages)
+
+    context['ref_hist_qs'] = ref_hist_qs
+    context["ref_endpage"] = ref_hist_qs.number+1
+    context["ref_startpage"] = ref_hist_qs.number-1
+    context['ref_start_value'] = ref_hist_qs.start_index()
+    context['ref_end_value'] = ref_hist_qs.end_index()
+    context["ref_dict_users"] = json.dumps(ref_dict_users)
+
+    wall_usr = 0
+    wall_count = 0
+    wall_dict_users = {}
+    wall_start_page = self.request.GET.get('pageno6', 1)
+    wall_end_value = int(wall_start_page) * 5
+    wall_start_value = int(wall_end_value) - 4
+    try:
+      obj_wall_hist = UserCashWallet.objects.filter(userid_id = p_key).order_by('-id')
+      for i in obj_wall_hist:
+        wall_usr = wall_usr + 1
+        wall_list_usr = {}
+        if wall_start_value <= wall_usr <= wall_end_value:
+          wall_count = wall_count + 1
+          wall_list_usr["username"] = str(i.userid.Name)
+          if i.Burnreward == 0.00000000:
+            wall_list_usr["burn_reward"] = int(i.Burnreward)
+          else:
+            wall_list_usr["burn_reward"] = str(i.Burnreward)
+          if i.Burnreff == 0.00000000:
+            wall_list_usr["burn_reff"] = int(i.Burnreff)
+          else:
+            wall_list_usr["burn_reff"] = str(i.Burnreff)
+          wall_list_usr["pageno"] = wall_start_page
+          wall_list_usr["sno"] = wall_usr
+          wall_dict_users[wall_count] = wall_list_usr
+    except:
+      obj_wall_hist = ""
+    try:
+      tot_wall_user_qs = obj_wall_hist
+    except:
+      tot_wall_user_qs = ""
+    w_page_6 = self.request.GET.get('pageno6', 1)
+    w_paginator_6 = Paginator(tot_wall_user_qs, 5)
+    try:
+        wall_hist_qs = w_paginator_6.page(w_page_6)
+    except PageNotAnInteger:
+        wall_hist_qs =w_paginator_6.page(1)
+    except EmptyPage:
+        wall_hist_qs = w_paginator_6.page(w_paginator_6.num_pages)
+
+    context['wall_hist_qs'] = wall_hist_qs
+    context["wall_endpage"] = wall_hist_qs.number+1
+    context["wall_startpage"] = wall_hist_qs.number-1
+    context['wall_start_value'] = wall_hist_qs.start_index()
+    context['wall_end_value'] = wall_hist_qs.end_index()
+    context['wall_usr_count'] = obj_wall_hist.count()
+    context["wall_dict_users"] = json.dumps(wall_dict_users)
+
+
+    login_usr = 0
+    login_count = 0
+    login_dict_users = {}
+    login_start_page = self.request.GET.get('pageno7', 1)
+    login_end_value = int(login_start_page) * 5
+    login_start_value = int(login_end_value) - 4
+    try:
+      obj_login_hist = LoginHistory.objects.filter(user_id = p_key).order_by('-created_on')
+      for i in obj_login_hist:
+        login_usr = login_usr + 1
+        login_list_usr = {}
+        if login_start_value <= login_usr <= login_end_value:
+          login_count = login_count + 1
+          login_list_usr["username"] = str(i.user.Name)
+          login_list_usr["created_on"] = str(i.created_on)
+          login_list_usr["modified_on"] = str(i.modified_on)
+          login_list_usr["pageno"] = login_start_page
+          login_list_usr["sno"] = login_usr
+          login_dict_users[login_count] = login_list_usr
+    except:
+      obj_login_hist = ""
+    try:
+      tot_login_user_qs = obj_login_hist
+    except:
+      tot_login_user_qs = ""
+    w_page_7 = self.request.GET.get('pageno7', 1)
+    w_paginator_7 = Paginator(tot_login_user_qs, 5)
+    try:
+        login_hist_qs = w_paginator_7.page(w_page_7)
+    except PageNotAnInteger:
+        login_hist_qs =w_paginator_7.page(1)
+    except EmptyPage:
+        login_hist_qs = w_paginator_7.page(w_paginator_7.num_pages)
+
+    context['login_hist_qs'] = login_hist_qs
+    context["login_endpage"] = login_hist_qs.number+1
+    context["login_startpage"] = login_hist_qs.number-1
+    context['login_start_value'] = login_hist_qs.start_index()
+    context['login_end_value'] = login_hist_qs.end_index()
+    context['login_usr_count'] = obj_login_hist.count()
+    context["login_dict_users"] = json.dumps(login_dict_users)
+
+    
+    context['Title'] = 'Burn History Table'
+    context["Btn_url"] = "trade_admin_auth:List_User_Management"
+    return context
+
+
+  @method_decorator(check_group_icon_menu("History"))
+  def dispatch(self, *args, **kwargs):
+    return super(BurnHistoryManagementTable, self).dispatch(*args, **kwargs)
+
+
+
+############## JWC ###########
+
+
+class BurnjwcHistoryManagementTable(TemplateView):
+  template_name = "trade_admin_auth/burnjwc_history_table.html"
+
+  def get_context_data(self, **kwargs):
+    context = super(BurnjwcHistoryManagementTable, self).get_context_data(**kwargs)
+    p_key = self.kwargs['pk']
+    context["p_key"] = p_key
+    try:
+      user_obj = User_Management.objects.get(id = p_key)
+    except:
+      user_obj = ""
+
+    try:
+      p_no = self.request.GET['pageno']
+    except:
+      p_no=1
+    try:
+      p_no1 = self.request.GET['pageno1']
+    except:
+      p_no1=1 
+    try:
+      p_no2 = self.request.GET['pageno2']
+    except:
+      p_no2=1
+    try:
+      p_no3 = self.request.GET['pageno3']
+    except:
+      p_no3=1
+    try:
+      p_no4 = self.request.GET['pageno4']
+    except:
+      p_no4=1   
+    try:
+      p_no5 = self.request.GET['pageno5']
+    except:
+      p_no5=1 
+    try:
+      p_no6 = self.request.GET['pageno6']
+    except:
+      p_no6=1
+    try:
+      p_no7 = self.request.GET['pageno7']
+    except:
+      p_no7=1
+
+    context['p_no'] = p_no
+    context['p_no1'] = p_no1
+    context['p_no2'] = p_no2
+    context['p_no3'] = p_no3
+    context['p_no4'] = p_no4
+    context['p_no5'] = p_no5
+    context['p_no6'] = p_no6
+    context['p_no7'] = p_no7
+
+    try:
+      s_step = self.request.GET['steps']
+    except:
+      s_step = ""
+
+    
+
+    s_usr = 0
+    s_count = 0
+    s_dict_users = {}
+    s_start_page = self.request.GET.get('pageno', 1)
+    s_end_value = int(s_start_page) * 5
+    s_start_value = int(s_end_value) - 4
+    
+    if s_step:
+      obj_step_hist = Steps_history.objects.filter(user_id = p_key).filter(steps__icontains = s_step).order_by('-id')
+      for i in obj_step_hist:
+        
+        s_usr = s_usr + 1
+        s_list_usr = {}
+        if s_start_value <= s_usr <= s_end_value:
+          s_count = s_count + 1
+          s_list_usr["username"] = str(i.user.Name)
+          s_list_usr["steps"] = (i.steps)
+          s_list_usr["date"] = (str(i.created_on))
+          s_list_usr["pageno"] = s_start_page
+          s_list_usr["sno"] = s_usr
+          s_dict_users[s_count] = s_list_usr
+    else:
+      obj_step_hist = Steps_history.objects.filter(user_id = p_key).order_by('-id')
+      for i in obj_step_hist:
+      
+        s_usr = s_usr + 1
+        s_list_usr = {}
+        if s_start_value <= s_usr <= s_end_value:
+          s_count = s_count + 1
+          s_list_usr["username"] = str(i.user.Name)
+          s_list_usr["steps"] = (i.steps)
+          s_list_usr["date"] = (str(i.created_on))
+          s_list_usr["pageno"] = s_start_page
+          s_list_usr["sno"] = s_usr
+          s_dict_users[s_count] = s_list_usr
+
+    try:
+      tot_step_user_qs = obj_step_hist
+    except:
+      tot_step_user_qs = ""
+    w_page = self.request.GET.get('pageno', 1)
+    w_paginator = Paginator(tot_step_user_qs, 5)
+    
+    try:
+        step_hist_qs = w_paginator.page(w_page)
+    except PageNotAnInteger:
+        step_hist_qs =w_paginator.page(1)
+    except EmptyPage:
+        step_hist_qs = w_paginator.page(w_paginator.num_pages)
+    
+    
+    context['step_hist_qs'] = step_hist_qs
+    context["s_endpage"] = step_hist_qs.number+1
+    context["s_startpage"] = step_hist_qs.number-1
+    context['s_start_value'] = step_hist_qs.start_index()
+    context['s_end_value'] = step_hist_qs.end_index()
+    context['s_usr_count'] = obj_step_hist.count()
+    context["s_dict_users"] = json.dumps(s_dict_users)
+
+
+
+    try:
+      r_step = self.request.GET['r_steps']
+    except:
+      r_step = ""
+
+    r_usr = 0
+    r_count = 0
+    r_dict_users = {}
+    r_start_page = self.request.GET.get('pageno1', 1)
+    r_end_value = int(r_start_page) * 5
+    r_start_value = int(r_end_value) - 4
+    if r_step:
+      obj_rew_hist = CBurnRewardHistory.objects.filter(user_id = p_key).filter(steps__icontains = r_step).order_by('-id')
+      for i in obj_rew_hist:
+        r_usr = r_usr + 1
+        r_list_usr = {}
+        if r_start_value <= r_usr <= r_end_value:
+          r_count = r_count + 1
+          r_list_usr["username"] = str(i.user.Name)
+          r_list_usr["steps"] = 3000
+          r_list_usr["Reward"] = str(i.reward)
+          r_list_usr["date"] = (str(i.created_on))
+          r_list_usr["claim_date"] = (str(i.modified_on))
+          r_list_usr["pageno"] = r_start_page
+          r_list_usr["sno"] = r_usr
+          r_dict_users[r_count] = r_list_usr
+    else:
+      obj_rew_hist = CBurnRewardHistory.objects.filter(user_id = p_key).order_by('-id')
+      for i in obj_rew_hist:
+        r_usr = r_usr + 1
+        r_list_usr = {}
+        if r_start_value <= r_usr <= r_end_value:
+          r_count = r_count + 1
+          r_list_usr["username"] = str(i.user.Name)
+          r_list_usr["steps"] = 3000
+          r_list_usr["Reward"] = str(i.reward)
+          r_list_usr["date"] = (str(i.created_on))
+          r_list_usr["claim_date"] = (str(i.modified_on))
+          r_list_usr["pageno"] = r_start_page
+          r_list_usr["sno"] = r_usr
+          r_dict_users[r_count] = r_list_usr
+    try:
+      tot_rew_user_qs = obj_rew_hist
+    except:
+      tot_rew_user_qs = ""
+    w_page_1 = self.request.GET.get('pageno1', 1)
+    w_paginator_1 = Paginator(tot_rew_user_qs, 5)
+    try:
+        rew_hist_qs = w_paginator_1.page(w_page_1)
+    except PageNotAnInteger:
+        rew_hist_qs =w_paginator_1.page(1)
+    except EmptyPage:
+        rew_hist_qs = w_paginator_1.page(w_paginator_1.num_pages)
+
+    context['rew_hist_qs'] = rew_hist_qs
+    context["r_endpage"] = rew_hist_qs.number+1
+    context["r_startpage"] = rew_hist_qs.number-1
+    context['r_start_value'] = rew_hist_qs.start_index()
+    context['r_end_value'] = rew_hist_qs.end_index()
+    context['r_usr_count'] = obj_rew_hist.count()
+    context["r_dict_users"] = json.dumps(r_dict_users)
+
+    pre_usr = 0
+    pre_count = 0
+    pre_dict_users = {}
+    pre_start_page = self.request.GET.get('pageno', 1)
+    pre_end_value = int(pre_start_page) * 5
+    pre_start_value = int(pre_end_value) - 4
+    
+    obj_pre_hist = Boat_wallet.objects.filter(user = p_key,type="User Create").order_by('-id')
+    for i in obj_pre_hist: 
+      pre_usr = pre_usr + 1
+      pre_list_usr = {}
+      if pre_start_value <= pre_usr <= pre_end_value:
+        pre_count = pre_count + 1
+        pre_list_usr["username"] = str(user_obj.Name)
+        pre_list_usr["create_type"] = (i.create_type)
+        pre_list_usr["steps"] = (i.Amount_USDT)
+        pre_list_usr["jw"] = (i.Amount_JW)
+        pre_list_usr["Hash"] = (i.Hash)
+        pre_list_usr["date"] = (str(i.created_on))
+        pre_list_usr["pageno"] = pre_start_page
+        pre_list_usr["sno"] = pre_usr
+        pre_dict_users[pre_count] = pre_list_usr
+    try:
+      tot_step_user_qs = obj_pre_hist
+    except:
+      tot_step_user_qs = ""
+    w_page = self.request.GET.get('pageno', 1)
+    w_paginator = Paginator(tot_step_user_qs, 5)
+    
+    try:
+        step_hist_qs = w_paginator.page(w_page)
+    except PageNotAnInteger:
+        step_hist_qs =w_paginator.page(1)
+    except EmptyPage:
+        step_hist_qs = w_paginator.page(w_paginator.num_pages)
+    
+    
+    context['step_hist_qs'] = step_hist_qs
+    context["pre_endpage"] = step_hist_qs.number+1
+    context["pre_startpage"] = step_hist_qs.number-1
+    context['pre_start_value'] = step_hist_qs.start_index()
+    context['pre_end_value'] = step_hist_qs.end_index()
+    context['pre_usr_count'] = obj_pre_hist.count()
+    context["pre_dict_users"] = json.dumps(pre_dict_users)
+
+
+    pre_r_usr = 0
+    pre_r_count = 0
+    pre_req_dict_users = {}
+    pre_r_start_page = self.request.GET.get('pageno1', 1)
+    pre_r_end_value = int(pre_r_start_page) * 5
+    pre_r_start_value = int(pre_r_end_value) - 4
+    obj_rew_hist = Boat_wallet.objects.filter(user = p_key).exclude(type="User Create").order_by('-created_on')
+    for i in obj_rew_hist:
+      pre_r_usr = pre_r_usr + 1
+      r_list_usr = {}
+      if pre_r_start_value <= pre_r_usr <= pre_r_end_value:
+        pre_r_count = pre_r_count + 1
+        r_list_usr["username"] = str(user_obj.Name)
+        r_list_usr["steps"] = (i.type)
+        r_list_usr["Reward"] = str(i.Amount_USDT)
+        r_list_usr["date"] = (str(i.created_on))
+        r_list_usr["pageno"] = pre_r_start_page
+        r_list_usr["sno"] = pre_r_usr
+        pre_req_dict_users[pre_r_count] = r_list_usr
+    try:
+      tot_rew_user_qs = obj_rew_hist
+    except:
+      tot_rew_user_qs = ""
+    w_page_1 = self.request.GET.get('pageno1', 1)
+    w_paginator_1 = Paginator(tot_rew_user_qs, 5)
+    try:
+        rew_hist_qs = w_paginator_1.page(w_page_1)
+    except PageNotAnInteger:
+        rew_hist_qs =w_paginator_1.page(1)
+    except EmptyPage:
+        rew_hist_qs = w_paginator_1.page(w_paginator_1.num_pages)
+
+    context['rew_hist_qs'] = rew_hist_qs
+    context["pre_r_endpage"] = rew_hist_qs.number+1
+    context["pre_r_startpage"] = rew_hist_qs.number-1
+    context['pre_r_start_value'] = rew_hist_qs.start_index()
+    context['pre_r_end_value'] = rew_hist_qs.end_index()
+    context['pre_r_usr_count'] = obj_rew_hist.count()
+    context["pre_req_dict_users"] = json.dumps(pre_req_dict_users)
+
+    try:
+      two_x_step = self.request.GET['tx_steps']
+    except:
+      two_x_step = ""
+
+    tx_usr = 0
+    tx_count = 0
+    tx_dict_users = {}
+    tx_start_page = self.request.GET.get('pageno2', 1)
+    tx_end_value = int(tx_start_page) * 5
+    tx_start_value = int(tx_end_value) - 4
+    if two_x_step:
+      obj_two_x_hist = User_2x_Boost.objects.filter(userid_id = p_key).filter(user_step_count__icontains = two_x_step).order_by('-id')
+      for i in obj_two_x_hist:
+        tx_usr = tx_usr + 1
+        tx_list_usr = {}
+        if tx_start_value <= tx_usr <= tx_end_value:
+          tx_count = tx_count + 1
+          tx_list_usr["username"] = str(i.userid.Name)
+          tx_list_usr["steps"] = (i.user_step_count)
+          tx_list_usr["Reward"] = str(i.reward_per_step)
+          tx_list_usr["date"] = (str(i.created_on))
+          tx_list_usr["pageno"] = tx_start_page
+          tx_list_usr["sno"] = tx_usr
+          tx_dict_users[tx_count] = tx_list_usr
+    else:
+      obj_two_x_hist = User_2x_Boost.objects.filter(userid_id = p_key).order_by('-id')
+      for i in obj_two_x_hist:
+        tx_usr = tx_usr + 1
+        tx_list_usr = {}
+        if tx_start_value <= tx_usr <= tx_end_value:
+          tx_count = tx_count + 1
+          tx_list_usr["username"] = str(i.userid.Name)
+          tx_list_usr["steps"] = (i.user_step_count)
+          tx_list_usr["Reward"] = str(i.reward_per_step)
+          tx_list_usr["date"] = (str(i.created_on))
+          tx_list_usr["pageno"] = tx_start_page
+          tx_list_usr["sno"] = tx_usr
+          tx_dict_users[tx_count] = tx_list_usr
+    try:
+      tot_tx_user_qs = obj_two_x_hist
+    except:
+      tot_tx_user_qs = ""
+    w_page_2 = self.request.GET.get('pageno2', 1)
+    w_paginator_2 = Paginator(tot_tx_user_qs, 5)
+    try:
+        two_x_hist_qs = w_paginator_2.page(w_page_2)
+    except PageNotAnInteger:
+        two_x_hist_qs =w_paginator_2.page(1)
+    except EmptyPage:
+        two_x_hist_qs = w_paginator_2.page(w_paginator_2.num_pages)
+
+    context['two_x_hist_qs'] = two_x_hist_qs
+    context["tx_endpage"] = two_x_hist_qs.number+1
+    context["tx_startpage"] = two_x_hist_qs.number-1
+    context['tx_start_value'] = two_x_hist_qs.start_index()
+    context['tx_end_value'] = two_x_hist_qs.end_index()
+    context['tx_usr_count'] = obj_two_x_hist.count()
+    context["tx_dict_users"] = json.dumps(tx_dict_users)
+
+
+
+    try:
+      buy_plan_name = self.request.GET['plan_name']
+    except:
+      buy_plan_name = ""
+
+    plan_usr = 0
+    plan_count = 0
+    plan_dict_users = {}
+    plan_start_page = self.request.GET.get('pageno3', 1)
+    plan_end_value = int(plan_start_page) * 5
+    plan_start_value = int(plan_end_value) - 4
+    Comp = CBurntoearnHistory.objects.filter(email_id = p_key).order_by('-id')
+    if buy_plan_name:
+      obj_plan_hist = CBurntoearnHistory.objects.filter(email_id = p_key).order_by('-id')
+      for i in obj_plan_hist:
+        plan_usr = plan_usr + 1
+        plan_list_usr = {}
+        if plan_start_value <= plan_usr <= plan_end_value:
+          plan_count = plan_count + 1
+          plan_list_usr["id"] = str(p_key)
+          plan_list_usr["username"] = str(i.user)
+          plan_list_usr["plan"] = "Burn"#int(i.purchase_amount)
+          plan_list_usr["plan_amt"] = int(i.plan_amount)
+          plan_list_usr["start_date"] = (str(i.plan_start_date))
+          # plan_list_usr["end_date"] = (str(user_obj.plan_end_date))
+          plan_list_usr["wallet_type"] = (str(i.Transaction_Hash))
+          # plan_list_usr["health_max"] = (str(user_obj.Health_Withdraw_max_value))
+          # plan_list_usr["health_min"] = (str(user_obj.Health_Withdraw_min_value))
+          # plan_list_usr["referral_max"] = (str(user_obj.Referral_Withdraw_max_value))
+          # plan_list_usr["referral_min"] = (str(user_obj.Referral_Withdraw_min_value))
+          plan_list_usr["hash"] = (str(i.Transaction_Hash))
+          plan_list_usr["buy_type"] = (i.currency)
+          plan_list_usr["TradeBwa"] = str(user_obj.MPlanBWA)
+          # plan_list_usr["hash"] = (str(i.User_plan_validation))
+          plan_list_usr["pageno"] = plan_start_page
+          plan_list_usr["sno"] = plan_usr
+          plan_dict_users[plan_count] = plan_list_usr
+    else:
+      obj_plan_hist = CBurntoearnHistory.objects.filter(email_id = p_key).order_by('-id')
+      for i in obj_plan_hist:
+        plan_usr = plan_usr + 1
+        plan_list_usr = {}
+        if plan_start_value <= plan_usr <= plan_end_value:
+          plan_count = plan_count + 1
+          plan_list_usr["id"] = str(p_key)
+          plan_list_usr["username"] = str(i.user)
+          plan_list_usr["plan"] = "Burn"#int(i.purchase_amount)
+          plan_list_usr["plan_amt"] = int(i.plan_amount)
+          # plan_list_usr["price"] = str(user_obj.fixed_status)
+          plan_list_usr["start_date"] = (str(i.plan_start_date))
+          # plan_list_usr["end_date"] = (str(user_obj.plan_end_date))
+          plan_list_usr["wallet_type"] = (str(i.Transaction_Hash))
+          # plan_list_usr["health_max"] = (str(user_obj.Health_Withdraw_max_value))
+          # plan_list_usr["health_min"] = (str(user_obj.Health_Withdraw_min_value))
+          # plan_list_usr["referral_max"] = (str(user_obj.Referral_Withdraw_max_value))
+          # plan_list_usr["referral_min"] = (str(user_obj.Referral_Withdraw_min_value))
+          plan_list_usr["hash"] = (str(i.Transaction_Hash))
+          plan_list_usr["buy_type"] = (i.currency)
+          plan_list_usr["TradeBwa"] = str(user_obj.MPlanBWA)
+          plan_list_usr["pageno"] = plan_start_page
+          plan_list_usr["sno"] = plan_usr
+          plan_dict_users[plan_count] = plan_list_usr
+    try:
+      tot_plan_user_qs = obj_plan_hist
+    except:
+      tot_plan_user_qs = ""
+    w_page_3 = self.request.GET.get('pageno3', 1)
+    w_paginator_3 = Paginator(tot_plan_user_qs, 5)
+    try:
+        plan_hist_qs = w_paginator_3.page(w_page_3)
+    except PageNotAnInteger:
+        plan_hist_qs =w_paginator_3.page(1)
+    except EmptyPage:
+        plan_hist_qs = w_paginator_3.page(w_paginator_3.num_pages)\
+
+    context['plan_hist_qs'] = plan_hist_qs
+    context["plan_endpage"] = plan_hist_qs.number+1
+    context["plan_startpage"] = plan_hist_qs.number-1
+    context['plan_start_value'] = plan_hist_qs.start_index()
+    context['plan_end_value'] = plan_hist_qs.end_index()
+    context['plan_usr_count'] = obj_plan_hist.count()
+    context["plan_dict_users"] = json.dumps(plan_dict_users)
+
+
+    try:
+      usr_addrs = self.request.GET['address']
+    except:
+      usr_addrs = ""
+
+    try:
+      status = self.request.GET['status']
+     
+      if status == 'Active':
+       
+        status = 0
+      if status == 'Completed':
+        status = 1
+      if status == 'Cancelled':
+        status = 2
+    except:
+      status = ""
+
+    try:
+      date = self.request.GET['date']
+    except:
+      date = ""
+
+    withdraw_usr = 0
+    withdraw_count = 0
+    withdraw_dict_users = {}
+    withdraw_start_page = self.request.GET.get('pageno4', 1)
+    withdraw_end_value = int(withdraw_start_page) * 5
+    withdraw_start_value = int(withdraw_end_value) - 4
+    if usr_addrs and status and date:
+      obj_withdraw_hist = BurnWithdraw.objects.filter(userid_id = p_key).filter(Q(Address__icontains = usr_addrs) and Q(status__icontains = status) and Q(created_on__date__icontains = date)).exclude(Wallet_type__in=[ 'Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet','Bot_Referral_wallet','trade_withdraw_wallet','Trade_Referral_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    elif usr_addrs:
+      obj_withdraw_hist = BurnWithdraw.objects.filter(userid_id = p_key).filter(Address__icontains = usr_addrs).exclude(Wallet_type__in=['Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet','Bot_Referral_wallet','trade_withdraw_wallet','Trade_Referral_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on)) 
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    elif date:
+      obj_withdraw_hist = BurnWithdraw.objects.filter(userid_id = p_key).filter(created_on__date__icontains = date).exclude(Wallet_type__in=['Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet','Bot_Referral_wallet','trade_withdraw_wallet','Trade_Referral_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    elif status:
+      obj_withdraw_hist = WiBurnWithdrawthdraw.objects.filter(userid_id = p_key).filter(status__icontains = status).exclude(Wallet_type__in=['Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet','Bot_Referral_wallet','trade_withdraw_wallet','Trade_Referral_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    else:
+      obj_withdraw_hist = BurnWithdraw.objects.filter(userid_id = p_key).exclude(Wallet_type__in=[ 'Referral_wallet', 'Reward_wallet','ROR_wallet','LB_wallet','Bot_Referral_wallet','trade_withdraw_wallet','Trade_Referral_wallet']).order_by('-id')
+      for i in obj_withdraw_hist:
+        withdraw_usr = withdraw_usr + 1
+        withdraw_list_usr = {}
+        if withdraw_start_value <= withdraw_usr <= withdraw_end_value:
+          withdraw_count = withdraw_count + 1
+          withdraw_list_usr["username"] = str(i.userid.Name)
+          withdraw_list_usr["amount"] = str(i.Amount)
+          withdraw_list_usr["Withdraw_fee"] = str(i.Withdraw_fee)
+          withdraw_list_usr["Withdraw_USDT"] = str(i.Withdraw_USDT)
+          withdraw_list_usr["Withdraw_JW"] = str(i.Withdraw_JW)
+          withdraw_list_usr["Address"] = str(i.Address)
+          withdraw_list_usr["wallet"] = str(i.Wallet_type)
+          withdraw_list_usr["Transaction_Hash"] = str(i.Transaction_Hash)
+          withdraw_list_usr["id"] = str(i.id)
+          withdraw_list_usr["status"] = str(i.status)
+          withdraw_list_usr["date"] = (str(i.created_on))
+          withdraw_list_usr["pageno"] = withdraw_start_page
+          withdraw_list_usr["sno"] = withdraw_usr
+          withdraw_dict_users[withdraw_count] = withdraw_list_usr
+    try:
+      tot_withdraw_user_qs = obj_withdraw_hist
+    except:
+      tot_withdraw_user_qs = ""
+    w_page_4 = self.request.GET.get('pageno4', 1)
+    w_paginator_4 = Paginator(tot_withdraw_user_qs, 5)
+    try:
+        withdraw_hist_qs = w_paginator_4.page(w_page_4)
+    except PageNotAnInteger:
+        withdraw_hist_qs =w_paginator_4.page(1)
+    except EmptyPage:
+        withdraw_hist_qs = w_paginator_4.page(w_paginator_4.num_pages)
+
+    context['withdraw_hist_qs'] = withdraw_hist_qs
+    context["withdraw_endpage"] = withdraw_hist_qs.number+1
+    context["withdraw_startpage"] = withdraw_hist_qs.number-1
+    context['withdraw_start_value'] = withdraw_hist_qs.start_index()
+    context['withdraw_end_value'] = withdraw_hist_qs.end_index()
+    context['withdraw_usr_count'] = obj_withdraw_hist.count()
+    context["withdraw_dict_users"] = json.dumps(withdraw_dict_users)
+
+     
+    try:
+      ref_user = self.request.GET['name']
+    except:
+      ref_user = ""
+
+
+    ref_usr = 0
+    ref_count = 0
+    ref_dict_users = {}
+    ref_start_page = self.request.GET.get('pageno5', 1)
+    ref_end_value = int(ref_start_page) * 5
+    ref_start_value = int(ref_end_value) - 4
+    try:
+      if ref_user:
+        obj_ref_hist = BurnRewardHistory.objects.filter(user_id = p_key).filter(referral_id__icontains = ref_user).order_by('-id')
+        for i in obj_ref_hist:
+          
+          ref_usr = ref_usr + 1
+          ref_list_usr = {}
+          if ref_start_value <= ref_usr <= ref_end_value:
+            ref_count = ref_count + 1
+            # ref_list_usr["id"] = str(p_key)
+            ref_list_usr["id"] = i.id
+            ref_list_usr["username"] = str(i.user.Name)
+            ref_list_usr["ref_id"] = i.referral_id
+            ref_list_usr["reward_amt"] = i.reward
+            ref_list_usr["date"] = (str(i.created_on))
+            ref_list_usr["pageno"] = ref_start_page
+            ref_list_usr["sno"] = ref_usr
+            ref_dict_users[ref_count] = ref_list_usr
+        
+      else:
+        obj_ref_hist = BurnRewardHistory.objects.filter(user_id = p_key).order_by('-id')
+        for i in obj_ref_hist:
+          ref_usr = ref_usr + 1
+          ref_list_usr = {}
+          if ref_start_value <= ref_usr <= ref_end_value:
+            ref_count = ref_count + 1
+            ref_list_usr["id"] = i.id
+            ref_list_usr["username"] = str(i.user.Name)
+            ref_list_usr["ref_id"] = i.referral_id
+            ref_list_usr["reward_amt"] = i.reward
+            ref_list_usr["date"] = (str(i.created_on))
+            ref_list_usr["pageno"] = ref_start_page
+            ref_list_usr["sno"] = ref_usr 
+            ref_dict_users[ref_count] = ref_list_usr
+        
+
+      context['ref_usr_count'] = obj_ref_hist.count()
+    except:
+      obj_ref_hist = ""
+      context['ref_usr_count'] = 0
+    try:
+      tot_ref_user_qs = obj_ref_hist
+    except:
+      tot_ref_user_qs = ""
+    w_page_5 = self.request.GET.get('pageno5', 1)
+    w_paginator_5 = Paginator(tot_ref_user_qs, 5) 
+    try:
+        ref_hist_qs = w_paginator_5.page(w_page_5)
+    except PageNotAnInteger:
+        ref_hist_qs =w_paginator_5.page(1)
+    except EmptyPage:
+        ref_hist_qs = w_paginator_5.page(w_paginator_5.num_pages)
+
+    context['ref_hist_qs'] = ref_hist_qs
+    context["ref_endpage"] = ref_hist_qs.number+1
+    context["ref_startpage"] = ref_hist_qs.number-1
+    context['ref_start_value'] = ref_hist_qs.start_index()
+    context['ref_end_value'] = ref_hist_qs.end_index()
+    context["ref_dict_users"] = json.dumps(ref_dict_users)
+
+    wall_usr = 0
+    wall_count = 0
+    wall_dict_users = {}
+    wall_start_page = self.request.GET.get('pageno6', 1)
+    wall_end_value = int(wall_start_page) * 5
+    wall_start_value = int(wall_end_value) - 4
+    try:
+      obj_wall_hist = UserCashWallet.objects.filter(userid_id = p_key).order_by('-id')
+      for i in obj_wall_hist:
+        wall_usr = wall_usr + 1
+        wall_list_usr = {}
+        if wall_start_value <= wall_usr <= wall_end_value:
+          wall_count = wall_count + 1
+          wall_list_usr["username"] = str(i.userid.Name)
+          if i.Burnrewardjwc == 0.00000000:
+            wall_list_usr["burn_reward"] = int(i.Burnrewardjwc)
+          else:
+            wall_list_usr["burn_reward"] = str(i.Burnrewardjwc)
+          if i.Burnreffjwc == 0.00000000:
+            wall_list_usr["burn_reff"] = int(i.Burnreffjwc)
+          else:
+            wall_list_usr["burn_reff"] = str(i.Burnreffjwc)  
+          wall_list_usr["pageno"] = wall_start_page
+          wall_list_usr["sno"] = wall_usr
+          wall_dict_users[wall_count] = wall_list_usr
+    except:
+      obj_wall_hist = ""
+    try:
+      tot_wall_user_qs = obj_wall_hist
+    except:
+      tot_wall_user_qs = ""
+    w_page_6 = self.request.GET.get('pageno6', 1)
+    w_paginator_6 = Paginator(tot_wall_user_qs, 5)
+    try:
+        wall_hist_qs = w_paginator_6.page(w_page_6)
+    except PageNotAnInteger:
+        wall_hist_qs =w_paginator_6.page(1)
+    except EmptyPage:
+        wall_hist_qs = w_paginator_6.page(w_paginator_6.num_pages)
+
+    context['wall_hist_qs'] = wall_hist_qs
+    context["wall_endpage"] = wall_hist_qs.number+1
+    context["wall_startpage"] = wall_hist_qs.number-1
+    context['wall_start_value'] = wall_hist_qs.start_index()
+    context['wall_end_value'] = wall_hist_qs.end_index()
+    context['wall_usr_count'] = obj_wall_hist.count()
+    context["wall_dict_users"] = json.dumps(wall_dict_users)
+
+
+    login_usr = 0
+    login_count = 0
+    login_dict_users = {}
+    login_start_page = self.request.GET.get('pageno7', 1)
+    login_end_value = int(login_start_page) * 5
+    login_start_value = int(login_end_value) - 4
+    try:
+      obj_login_hist = LoginHistory.objects.filter(user_id = p_key).order_by('-created_on')
+      for i in obj_login_hist:
+        login_usr = login_usr + 1
+        login_list_usr = {}
+        if login_start_value <= login_usr <= login_end_value:
+          login_count = login_count + 1
+          login_list_usr["username"] = str(i.user.Name)
+          login_list_usr["created_on"] = str(i.created_on)
+          login_list_usr["modified_on"] = str(i.modified_on)
+          login_list_usr["pageno"] = login_start_page
+          login_list_usr["sno"] = login_usr
+          login_dict_users[login_count] = login_list_usr
+    except:
+      obj_login_hist = ""
+    try:
+      tot_login_user_qs = obj_login_hist
+    except:
+      tot_login_user_qs = ""
+    w_page_7 = self.request.GET.get('pageno7', 1)
+    w_paginator_7 = Paginator(tot_login_user_qs, 5)
+    try:
+        login_hist_qs = w_paginator_7.page(w_page_7)
+    except PageNotAnInteger:
+        login_hist_qs =w_paginator_7.page(1)
+    except EmptyPage:
+        login_hist_qs = w_paginator_7.page(w_paginator_7.num_pages)
+
+    context['login_hist_qs'] = login_hist_qs
+    context["login_endpage"] = login_hist_qs.number+1
+    context["login_startpage"] = login_hist_qs.number-1
+    context['login_start_value'] = login_hist_qs.start_index()
+    context['login_end_value'] = login_hist_qs.end_index()
+    context['login_usr_count'] = obj_login_hist.count()
+    context["login_dict_users"] = json.dumps(login_dict_users)
+
+    
+    context['Title'] = 'Burn JWC History Table'
+    context["Btn_url"] = "trade_admin_auth:List_User_Management"
+    return context
+
+
+  @method_decorator(check_group_icon_menu("History"))
+  def dispatch(self, *args, **kwargs):
+    return super(BurnjwcHistoryManagementTable, self).dispatch(*args, **kwargs)
+
+
+
+################################################################################################################################################
+################################################################################################################################################
+
+
+
+
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from datetime import timedelta
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
+from decimal import Decimal
+from django.db.models import Sum
+
+@csrf_exempt
+def get_user_pwdetails(request):
+    start = int(request.POST.get('start', 0))
+    length = int(request.POST.get('length', 10))
+    draw = int(request.POST.get('draw', 1))
+
+    # Retrieve filter values
+    email_filter = request.POST.get('email', '')
+    plan_filter = request.POST.get('plan', '')
+    lock_date_filter = request.POST.get('lock_date', '')
+    premium_wallet_filter = request.POST.get('premium_wallet', '')
+    transferpw_filter = request.POST.get('transferpw', '')
+
+    # Queryset base filter
+    # queryset = User_Management.objects.all()
+    queryset = User_Management.objects.filter(transferpw__gte=1)
+
+    # Apply filters
+    if email_filter:
+        queryset = queryset.filter(Email__icontains=email_filter)
+    # if plan_filter:
+    #     queryset = queryset.filter(plan__icontains=plan_filter)
+    # Apply plan filter (handle >= case)
+    if plan_filter:
+        try:
+            # Check if the plan filter is a number for the `>=` comparison
+            plan_value = Decimal(plan_filter)
+            queryset = queryset.filter(plan__gte=plan_value)
+        except (ValueError, Decimal.InvalidOperation):
+            # If it's not a number, apply the regular `icontains` filter
+            queryset = queryset.filter(plan__icontains=plan_filter)
+    if lock_date_filter:
+        queryset = queryset.filter(plan_start_date__date=lock_date_filter)
+    if premium_wallet_filter:
+        try:
+            premium_wallet_value = Decimal(premium_wallet_filter)
+            queryset = queryset.filter(user_cashwallet__Premiumwallet__gte=premium_wallet_value)
+        except (ValueError, Decimal.InvalidOperation):
+            pass
+    if transferpw_filter:
+        try:
+            transferpw_value = Decimal(transferpw_filter)
+            queryset = queryset.filter(transferpw__gte=transferpw_value)
+        except (ValueError, Decimal.InvalidOperation):
+            pass
+
+    # Calculate totals
+    total_premium_wallet = queryset.aggregate(Sum('user_cashwallet__Premiumwallet'))['user_cashwallet__Premiumwallet__sum'] or 0
+    total_transferpw = queryset.aggregate(Sum('transferpw'))['transferpw__sum'] or 0
+
+    # Paginate results
+    filtered_queryset = queryset[start:start + length]
+
+    # Build the response data
+    data = []
+    for user in filtered_queryset:
+        # Calculate lock_date as plan_start_date + 365 days
+        lock_date = user.plan_start_date + timedelta(days=365) if user.plan_start_date else None
+
+        # Fetch Premiumwallet from UserCashWallet
+        user_cash_wallet = user.user_cashwallet.first()  # Related name should match the ForeignKey's related_name
+        premium_wallet_value = user_cash_wallet.Premiumwallet if user_cash_wallet else 0.0
+
+        # Append formatted row
+        data.append({
+            "email": user.Email,
+            "plan": user.plan,
+            "lock_date": lock_date,
+            "premium_wallet": float(premium_wallet_value),
+            "transferpw": float(user.transferpw),
+        })
+
+    # Total records count
+    # total_records = User_Management.objects.all().count()
+    total_records = User_Management.objects.filter(transferpw__gte=1).count()
+
+    return JsonResponse({
+        "draw": draw,
+        "recordsTotal": total_records,
+        "recordsFiltered": queryset.count(),
+        "data": data,
+        "total_premium_wallet": float(total_premium_wallet),
+        "total_transferpw": float(total_transferpw),
+    })
+
+
+
+
+
+def USERPW(request):
+    context = {}
+    context['Title'] = 'USER Detail Premium Wallet'
+    return render(request, 'trade_admin_auth/USERPW.html', context)
+
+
+
+
+
+
+
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q, Sum
+from decimal import Decimal, InvalidOperation
+
+@csrf_exempt
+def get_promobonus_details(request):
+    start = int(request.POST.get('start', 0))
+    length = int(request.POST.get('length', 10))
+    draw = int(request.POST.get('draw', 1))
+
+    # Retrieve filters
+    email_filter = request.POST.get('email', '')
+    claim_amount_filter = request.POST.get('claim_amount', '')
+    created_on_filter = request.POST.get('created_on', '')
+    status_filter = request.POST.get('status', '')
+
+    # Queryset
+    queryset = promobonus_history.objects.all()
+
+    if email_filter:
+        queryset = queryset.filter(email__icontains=email_filter)
+
+    if status_filter != '':  # ✅ Fix for 0 status issue
+        try:
+            status_value = int(status_filter)
+            queryset = queryset.filter(status=status_value)
+        except ValueError:
+            pass
+    
+    if created_on_filter:  # ✅ Apply date filter
+      queryset = queryset.filter(created_on__date=created_on_filter)
+
+    # Pagination
+    filtered_queryset = queryset[start:start + length]
+
+    # Data response
+    data = [
+        {
+            "id": record.id,
+            "user_id": record.user_id,
+            "email": record.email,
+            "claim_amount": float(record.claim_amount),
+            "link": record.link,
+            "content": record.content,
+            "created_on": record.created_on.strftime("%Y-%m-%d %H:%M:%S"),
+            "status": record.status,
+        }
+        for record in filtered_queryset
+    ]
+
+    return JsonResponse({
+        "draw": draw,
+        "recordsTotal": promobonus_history.objects.count(),
+        "recordsFiltered": queryset.count(),
+        "data": data,
+        "total_claim_amount": float(queryset.aggregate(Sum('claim_amount'))['claim_amount__sum'] or 0),
+    })
+
+
+def PROMOBONUS(request):
+    context = {'Title': 'Promo Bonus History'}
+    return render(request, 'trade_admin_auth/PROMOBONUS.html', context)
+
+
+
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Sum
+from decimal import Decimal
+
+@csrf_exempt
+def update_promobonus_status(request):
+    if request.method == "POST":
+        promo_id = request.POST.get("id")
+        new_status = request.POST.get("status")
+
+        try:
+            new_status = int(new_status)
+            promo = get_object_or_404(promobonus_history, id=promo_id)
+            user_Deatail = get_object_or_404(User_Management, id=promo.user_id)
+
+            if new_status == 1:  # Approve
+                # promo.status = 1
+                # promo.save()
+
+                # ✅ Create BurnRewardHistory
+                MPRewardHistory.objects.create(
+                    user=user_Deatail,
+                    referral_id="PROMOBONUS",
+                    reward=promo.claim_amount
+                )
+                promo.status = 1
+                promo.save()
+                message = "Promo Bonus Approved!"
+
+            elif new_status == 2:  # Reject
+                promo.status = 2
+                promo.save()
+                message = "Promo Bonus Rejected!"
+
+            else:
+                return JsonResponse({"error": "Invalid status"}, status=400)
+
+            return JsonResponse({"success": True, "message": message})
+
+        except ValueError:
+            return JsonResponse({"error": "Invalid data"}, status=400)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+  
+  
+
+
+
+
+##############################################################################################
+#######################      Swap     ########################################################
+##############################################################################################
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q, Sum
+from decimal import Decimal, InvalidOperation
+
+
+@csrf_exempt
+def get_Swap_details(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid request method."}, status=405)
+
+    try:
+        # Pagination
+        start = int(request.POST.get('start', 0))
+        length = int(request.POST.get('length', 10))
+        draw = int(request.POST.get('draw', 1))
+    except ValueError:
+        return JsonResponse({"error": "Invalid pagination values."}, status=400)
+
+    # Filters
+    email_filter = request.POST.get('email', '').strip()
+    claim_amount_filter = request.POST.get('claim_amount', '').strip()
+    created_on_filter = request.POST.get('created_on', '').strip()
+    status_filter = request.POST.get('status', '').strip()
+
+    # Base queryset
+    queryset = swap_sendhistory.objects.select_related('userid').all()
+
+    # Apply filters
+    if email_filter:
+        queryset = queryset.filter(userid__Email__icontains=email_filter)
+
+    if status_filter:
+        try:
+            queryset = queryset.filter(status=int(status_filter))
+        except ValueError:
+            pass  # ignore invalid status
+
+    if created_on_filter:
+        queryset = queryset.filter(created_on__date=created_on_filter)
+
+    # Total amount from filtered results
+    total_claim = queryset.aggregate(Sum('Amount'))['Amount__sum'] or 0
+
+    # Count before and after filtering
+    records_total = swap_sendhistory.objects.count()
+    records_filtered = queryset.count()
+
+    # Pagination
+    paginated_queryset = queryset.order_by('-id')[start:start + length]
+
+    # Prepare response data
+    data = [
+        {
+            "id": record.id,
+            "user_id": record.userid.id if record.userid else None,
+            "email": record.userid.Email if record.userid else "",
+            "amount": float(record.Amount),
+            "claim_amountusdt": float(record.Withdraw_USDT),
+            "claim_amountjwc": float(record.Withdraw_JWC),
+            "Transaction_Hash": record.Transaction_Hash or "",
+            "Transaction_Hash_recieved": record.Transaction_Hash_recieved or "",
+            "Address": record.Address or "",
+            "created_on": record.created_on.strftime("%Y-%m-%d %H:%M:%S"),
+            "status": record.status,
+        }
+        for record in paginated_queryset
+    ]
+
+    # Final response
+    return JsonResponse({
+        "draw": draw,
+        "recordsTotal": records_total,
+        "recordsFiltered": records_filtered,
+        "data": data,
+        "total_claim_amount": float(total_claim),
+    })
+
+# @csrf_exempt
+# def get_Swap_details(request):
+#     start = int(request.POST.get('start', 0))
+#     length = int(request.POST.get('length', 10))
+#     draw = int(request.POST.get('draw', 1))
+
+#     # Retrieve filters
+#     email_filter = request.POST.get('email', '')
+#     claim_amount_filter = request.POST.get('claim_amount', '')
+#     created_on_filter = request.POST.get('created_on', '')
+#     status_filter = request.POST.get('status', '')
+
+#     # Queryset
+#     queryset = swap_sendhistory.objects.select_related('userid') 
+#     if email_filter:
+#         queryset = queryset.filter(userid__email__icontains=email_filter) 
+
+#     if status_filter != '':  
+#         try:
+#             status_value = int(status_filter)
+#             queryset = queryset.filter(status=status_value)
+#         except ValueError:
+#             pass
+    
+#     if created_on_filter: 
+#         queryset = queryset.filter(created_on__date=created_on_filter)
+
+#     # Pagination
+#     filtered_queryset = queryset[start:start + length]
+
+#     # Data response
+#     data = [
+#         {
+#             "id": record.id,
+#             "user_id": record.userid_id,
+#             "email": record.userid.Email, 
+#             "amount": float(record.Amount),
+#             "claim_amountusdt": float(record.Withdraw_USDT),
+#             "claim_amountjwc": float(record.Withdraw_JWC),
+#             "Transaction_Hash": record.Transaction_Hash,
+#             "Transaction_Hash_recieved": record.Transaction_Hash_recieved,
+#             "Address": record.Address,
+#             "created_on": record.created_on.strftime("%Y-%m-%d %H:%M:%S"),
+#             "status": record.status,
+#         }
+#         for record in filtered_queryset
+#     ]
+
+#     return JsonResponse({
+#         "draw": draw,
+#         "recordsTotal": swap_sendhistory.objects.count(),
+#         "recordsFiltered": queryset.count(),
+#         "data": data,
+#         "total_claim_amount": float(queryset.aggregate(Sum('Amount'))['Amount__sum'] or 0),
+#     })
+
+
+
+def SWAP(request):
+    context = {'Title': 'SWAP History'}
+    return render(request, 'trade_admin_auth/swap.html', context)
+
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Sum
+
+@csrf_exempt
+def Approve_swap(request):
+    if request.method == "POST":
+        promo_id = request.POST.get("id")
+        new_status = request.POST.get("status")
+
+        try:
+            new_status = int(new_status)
+            promo = get_object_or_404(swap_sendhistory, id=promo_id)
+            user_detail = get_object_or_404(User_Management, id=promo.userid_id)
+
+            if new_status == 1:  # Approve
+                if float(promo.Withdraw_USDT) > 0:
+                    return swapusdtapprove(request, promo.id)  # ✅ Call function properly
+                else:
+                    return swapjwcapprove(request, promo.id)  # ✅ Call function properly
+
+            elif new_status == 2:  # Reject
+                promo.status = 2
+                promo.save()
+                return JsonResponse({"success": True, "message": "SWAP Rejected!"})
+
+            elif new_status == 4:  # Hold
+                promo.status = 4
+                promo.save()
+                return JsonResponse({"success": True, "message": "SWAP Put on Hold!"})
+
+            else:
+                return JsonResponse({"error": "Invalid status"}, status=400)
+
+        except ValueError:
+            return JsonResponse({"error": "Invalid data"}, status=400)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
+
+def swapusdtapprove(request, id):
+    try:
+        withdraw = swap_sendhistory.objects.get(id=id)
+        user_detail = User_Management.objects.get(id=withdraw.userid_id)
+        amount = float(withdraw.Withdraw_USDT)
+        max_amount = int(Decimal(amount) * 10 ** 18)
+
+        from_address = Web3.toChecksumAddress(Company.objects.get(id=1).withaddress)
+        to_address = Web3.toChecksumAddress(str(withdraw.Address))
+
+        gas_price = w3.eth.gas_price
+        gas_limit = 500000
+
+        txn = {
+            'from': from_address,
+            'to': usdt_tkn_address,
+            'data': usd_token_contract.encodeABI(fn_name='transfer', args=[to_address, max_amount]),
+            'gasPrice': gas_price,
+            'gas': gas_limit,
+            'nonce': w3.eth.get_transaction_count(from_address)
+        }
+
+        signed_txn = w3.eth.account.sign_transaction(txn, private_key=Admin_key)
+        txn_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+        transaction_hash = txn_hash.hex()
+
+        receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=120, poll_latency=2)
+
+        if receipt['status'] == 1:
+            withdraw.status = 1
+            withdraw.Transaction_Hash = transaction_hash
+            withdraw.save()
+            return JsonResponse({"success": True, "message": "SWAP Successful!"})
+        else:
+            return JsonResponse({"error": "Transaction failed on the blockchain."}, status=400)
+
+    except Exception as e:
+        return JsonResponse({"error": f"Failed with error: {str(e)}"}, status=400)
+
+
+def swapjwcapprove(request, id):
+    try:
+        withdraw = swap_sendhistory.objects.get(id=id)
+        user_detail = User_Management.objects.get(id=withdraw.userid_id)
+        amount = float(withdraw.Withdraw_JWC)
+        max_amount = int(Decimal(amount) * 10 ** 8)
+
+        from_address = Web3.toChecksumAddress(Company.objects.get(id=1).withaddress)
+        to_address = Web3.toChecksumAddress(str(withdraw.Address))
+
+        gas_price = w3.eth.gas_price
+        gas_limit = 500000
+
+        txn = {
+            'from': from_address,
+            'to': jwc_tkn_address,
+            'data': jwc_token_contract.encodeABI(fn_name='transfer', args=[to_address, max_amount]),
+            'gasPrice': gas_price,
+            'gas': gas_limit,
+            'nonce': w3.eth.get_transaction_count(from_address)
+        }
+
+        signed_txn = w3.eth.account.sign_transaction(txn, private_key=Admin_key)
+        txn_hash = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+        transaction_hash = txn_hash.hex()
+
+        receipt = w3.eth.wait_for_transaction_receipt(txn_hash, timeout=120, poll_latency=2)
+
+        if receipt['status'] == 1:
+            withdraw.status = 1
+            withdraw.Transaction_Hash = transaction_hash
+            withdraw.save()
+            return JsonResponse({"success": True, "message": "SWAP Successful!"})
+        else:
+            return JsonResponse({"error": "Transaction failed on the blockchain."}, status=400)
+
+    except Exception as e:
+        return JsonResponse({"error": f"Failed with error: {str(e)}"}, status=400)
+
+
+
+
+
+#################################
+################### burn withdraw detail  
+
+
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q, Sum
+from decimal import Decimal, InvalidOperation
+
+@csrf_exempt
+def get_Burn_details(request):
+    start = int(request.POST.get('start', 0))
+    length = int(request.POST.get('length', 10))
+    draw = int(request.POST.get('draw', 1))
+
+    email_filter = request.POST.get('email', '')
+    claim_amount_filter = request.POST.get('claim_amount', '')
+    created_on_filter = request.POST.get('created_on', '')
+    status_filter = request.POST.get('status', '')
+
+    # Base queryset
+    queryset = BurnWithdraw.objects.select_related('userid')
+
+    # Apply filters
+    if email_filter:
+        queryset = queryset.filter(userid__Email__icontains=email_filter)
+
+    if status_filter != '':
+        try:
+            status_value = int(status_filter)
+            queryset = queryset.filter(status=status_value)
+        except ValueError:
+            pass
+
+    if created_on_filter:
+        queryset = queryset.filter(created_on__date=created_on_filter)
+
+    if claim_amount_filter:
+        try:
+            claim_value = Decimal(claim_amount_filter)
+            queryset = queryset.filter(Amount__gte=claim_value)
+        except InvalidOperation:
+            pass
+
+    total_filtered = queryset.count()
+    total_claim_amount = queryset.aggregate(Sum('Amount'))['Amount__sum'] or 0
+
+    paginated_queryset = queryset[start:start + length]
+
+    data = [
+        {
+            "id": record.id,
+            "user_id": record.userid_id,
+            "email": record.userid.Email,  
+            "amount": float(record.Amount),
+            "Claim_JW": float(record.Withdraw_JW),
+            "Claim_JWC": float(record.Withdraw_USDT),
+            "Transaction_Hash": record.Transaction_Hash,
+            "Address": record.Address,
+            "created_on": record.created_on.strftime("%Y-%m-%d %H:%M:%S"),
+            "status": record.status,
+        }
+        for record in paginated_queryset
+    ]
+
+    return JsonResponse({
+        "draw": draw,
+        "recordsTotal": BurnWithdraw.objects.count(),
+        "recordsFiltered": total_filtered,
+        "data": data,
+        "total_claim_amount": float(total_claim_amount),
+    })
+
+
+def BURNWITHDRAW(request):
+    context = {'Title': 'Burn Withdraw History'}
+    return render(request, 'trade_admin_auth/burnwithdraw_request.html', context)

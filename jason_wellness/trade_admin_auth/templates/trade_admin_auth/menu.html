@@ -95,9 +95,14 @@
             <!-- <li><a href=""><i class="fa fa-circle-o"></i>Deposit History</a></li> -->
             <li><a href="{% url 'trade_admin_auth:List_Withdraw_Request' %}"><i class="fa fa-circle-o"></i>Withdraw History</a></li>
             <li><a href="{% url 'trade_admin_auth:manual_Withdraw' %}"><i class="fa fa-circle-o"></i>Pending Withdraw History</a></li>
+            <li><a href="{% url 'trade_admin_auth:manual_withdraw_USDT' %}"><i class="fa fa-circle-o"></i>Pending USDT Withdraw History</a></li>
+            <li><a href="{% url 'trade_admin_auth:manual_withdraw_INR' %}"><i class="fa fa-circle-o"></i>Pending INR Withdraw History</a></li>
+            <li><a href="{% url 'trade_admin_auth:BURNWITHDRAW' %}"><i class="fa fa-circle-o"></i> Burn Withdraw History</a></li> 
+            <li><a href="{% url 'trade_admin_auth:manual_withdrawburntoearn' %}"><i class="fa fa-circle-o"></i>Pending Burn Withdraw History</a></li>
             <li><a href="{% url 'trade_admin_auth:hold_manual_withdraw' %}"><i class="fa fa-circle-o"></i>Hold Payout Withdraw History</a></li>
             <li><a href="{% url 'trade_admin_auth:stake_manual_withdraw' %}"><i class="fa fa-circle-o"></i>Pending Stake Withdraw </a></li>
             <li><a href="{% url 'trade_admin_auth:hold_stake_manual_withdraw' %}"><i class="fa fa-circle-o"></i>Hold Payout Stake Withdraw </a></li>
+            
           </ul>
         </li>
 {% endif %}
@@ -178,7 +183,9 @@
           <ul class="treeview-menu">
             <li><a href="{% url 'trade_admin_auth:List_wallet' %}"><i class="fa fa-circle-o"></i>Wallet Management</a></li>
             <li><a href="{% url 'trade_admin_auth:wallet_address_block' %}"><i class="fa fa-circle-o"></i>Wallet Address Block</a></li>       
-            <li><a href="{% url 'trade_admin_auth:wallet_address_block_list' %}"><i class="fa fa-circle-o"></i>Wallet Address Block List</a></li>         
+            <li><a href="{% url 'trade_admin_auth:wallet_address_block_list' %}"><i class="fa fa-circle-o"></i>Wallet Address Block List</a></li>    
+            <li><a href="{% url 'trade_admin_auth:USERPW' %}"><i class="fa fa-circle-o"></i>USER Detail Premium Wallet</a></li>   
+            <li><a href="{% url 'trade_admin_auth:SWAP' %}"><i class="fa fa-circle-o"></i> USER SWAP</a></li>    
           </ul>
         </li>
 {% endif %}
@@ -193,7 +200,8 @@
               </span>
             </a>
             <ul class="treeview-menu">
-              <li><a href="{% url 'trade_admin_auth:List_admin_notification_message' %}"><i class="fa fa-circle-o"></i>Notification Management</a></li>         
+              <li><a href="{% url 'trade_admin_auth:List_admin_notification_message' %}"><i class="fa fa-circle-o"></i>Notification Management</a></li> 
+              <li><a href="{% url 'trade_admin_auth:PROMOBONUS' %}"><i class="fa fa-circle-o"></i>USER Detail PROMOBONUS</a></li>          
             </ul>
           </li>
 {% endif %}

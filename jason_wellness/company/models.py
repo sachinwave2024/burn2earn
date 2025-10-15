@@ -61,6 +61,17 @@ class Company(models.Model):
     
     Android_version = models.CharField(max_length=200,verbose_name='Android Version',blank=True,null=True)
     IOS_version = models.CharField(max_length=200,verbose_name='IOS Version',blank=True,null=True)
+    
+    privatekey = models.CharField(max_length=200,verbose_name='privatekey Version',blank=True,null=True)
+    securitykey = models.CharField(max_length=200,verbose_name='securitykey Version',blank=True,null=True)
+    withaddress = models.CharField(max_length=200,verbose_name='withaddress Version',blank=True,null=True)
+    
+    facebookpromo = models.IntegerField(verbose_name="facebookpromo to be Used",blank=True,null=True)
+    instapromo = models.IntegerField(verbose_name="instapromo to be Used",blank=True,null=True)
+    twitterpromo = models.IntegerField(verbose_name="twitterpromo to be Used",blank=True,null=True)
+    cmcpromo = models.IntegerField(verbose_name="cmcpromo to be Used",blank=True,null=True)
+    
+    
     created_on = models.DateTimeField(auto_now_add = True)
     modified_on = models.DateTimeField(auto_now=True)
 

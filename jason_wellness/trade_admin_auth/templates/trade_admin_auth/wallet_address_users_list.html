@@ -1,5 +1,5 @@
 {% extends 'default_theme/base/__base.html' %}
-{% load staticfiles %} 
+{% load static %} 
 
 {% load form_custom %}
 
@@ -143,7 +143,7 @@
                   <th>Address</th>
                   <th>Wallet type</th>
                   <th>Created on</th>
-                  
+                  <th>Auction</th>
                 </tr>
                 </thead>
                
@@ -222,7 +222,7 @@
        $("#user_wallet_table").empty();
      k = 1
      for (var i = 0; i < len; i++) {
-       table = ("<td>"+obj[i+1].sno+"</td><td>"+obj[i+1].email+"</td><td>"+obj[i+1].address+"</td><td>"+obj[i+1].wallet_type+"</td><td>"+obj[i+1].date+"</td>");  
+       table = ("<td>"+obj[i+1].sno+"</td><td>"+obj[i+1].email+"</td><td>"+obj[i+1].address+"</td><td>"+obj[i+1].wallet_type+"</td><td>"+obj[i+1].date+"</td><td><a href='/tradeadmin/delete_wallet_address/"+obj[i+1].id+"/'><i class='fa fa-edit'></i></a></td>");  
        $("#user_wallet_table").append("<tr>"+table+"</tr>")
      }
      } else {

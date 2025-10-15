@@ -127,6 +127,19 @@ class UserCashWallet(models.Model):
 	referalincome = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='Referal Income Balance',default=0.00)
 	Premiumwallet = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='Premium Wallet',default=0.00)
 	LB = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='L B',default=0.00)
+	ROR_Wallet = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='ROR Wallet ',default=0.00)
+	boatwallet = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='Boat Wallet',default=0.00)
+	roibalance = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='Roi Wallet',default=0.00)
+	Boatreferalincome = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='referalincome Wallet',default=0.00)
+	BoatreferalincomeJW = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='referalincome JW Wallet',default=0.00)
+	roiwithdrawbalance = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='Roi withdraw Wallet',default=0.00)
+	MPHealth = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='MPHealth',default=0.00)
+	MPReward = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='MPReward',default=0.00)
+	trading = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='trading',default=0.00)
+	Burnreff = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='Burnreff',default=0.00)
+	Burnreward = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='Burnreward',default=0.00)
+	Burnreffjwc = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='Burnreffjwc',default=0.00)
+	Burnrewardjwc = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='Burnrewardjwc',default=0.00)
 	address = models.CharField(max_length=50,verbose_name='Address',blank=True,null=True)
 	status =models.IntegerField(choices=General_Status,default=0,verbose_name='Status')
 	def __int__self(self):
@@ -290,6 +303,20 @@ class Referral_reward_History(models.Model):
 			models.Index(fields=['user'])
 		]
 
+class RollOn_reward_History(models.Model):
+	user = models.ForeignKey(User_Management,related_name ='RollOn_reward_History',on_delete=models.CASCADE,verbose_name='User',default="")
+	referral_id = models.CharField(max_length=50,verbose_name="Referral ID",blank=True,null=True)
+	reward = models.CharField(max_length=50,verbose_name="Reward",blank=True,null=True)
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = "RollOn Reward History"
+		db_table = 'RORReward'
+		indexes = [
+			models.Index(fields=['user'])
+		]
+
 class Delete_Account_Management(models.Model):
 	user = models.ForeignKey(User_Management,related_name ='Delete_Account_Management',on_delete=models.CASCADE,verbose_name='User',default="")
 	Delete_Account = models.CharField(max_length=50,verbose_name="Delete Account",blank=True,null=True)
@@ -412,6 +439,12 @@ class referral_level(models.Model):
 	name = models.CharField(max_length = 50,verbose_name="name")
 	commission_amount = models.DecimalField(max_digits=16,decimal_places=8,verbose_name='Referral Commission (%)')
 	second_level_commission_amount = models.DecimalField(max_digits=16,decimal_places=8,default=0.0000,verbose_name='Second Referral Commission (%)')
+	third_level_commission_amount = models.DecimalField(max_digits=16,decimal_places=8,default=0.0000,verbose_name='Third Referral Commission (%)')
+	claim_commission_amount = models.DecimalField(max_digits=16,decimal_places=8,default=0.0000,verbose_name='Claim Commission (%)')
+	mp_reward = models.DecimalField(max_digits=16,decimal_places=8,default=0.0000,verbose_name='mp_reward (%)')
+	burn_reward = models.DecimalField(max_digits=16,decimal_places=8,default=0.0000,verbose_name='burn_reward (%)')
+	mp_reward_second = models.DecimalField(max_digits=16,decimal_places=8,default=0.0000,verbose_name='mp_reward_second (%)')
+	mp_reward_third = models.DecimalField(max_digits=16,decimal_places=8,default=0.0000,verbose_name='mp_reward_third (%)')
 	status=models.IntegerField(choices=General_Status,default=1,verbose_name='Status')
 	created_on = models.DateTimeField(auto_now_add = True)
 	modified_on = models.DateTimeField(auto_now=True)
@@ -712,3 +745,325 @@ class LB_deposit(models.Model):
     class Meta:
         verbose_name = 'LB Deposit'
         db_table = 'LB_Rewards'
+        
+        
+
+class Boat_wallet(models.Model):
+    user = models.CharField(max_length=50,verbose_name="User",blank=True,null=True)
+    email = models.CharField(max_length=50,verbose_name="Email",blank=True,null=True)
+    Amount_USDT = models.CharField(max_length=50,verbose_name="Amount USDT",blank=True,null=True)
+    type = models.CharField(max_length=50,verbose_name="Type",blank=True,null=True)
+    create_type = models.CharField(max_length=50,verbose_name="Create Type",blank=True,null=True)
+    Amount_JW = models.CharField(max_length=50,verbose_name="Amount JW",blank=True,null=True)
+    Hash = models.CharField(max_length=500,verbose_name="Hash",blank=True,null=True)
+    General_Status = (
+        (0,'Pending'),
+        (1,'Success'),		
+	)
+    status=models.IntegerField(choices=General_Status,default=0,verbose_name='Status')
+    created_on = models.DateTimeField(verbose_name="Created On",default=timezone.now)
+    modified_on = models.DateTimeField(verbose_name="Modified On",default=timezone.now)
+    paytype = models.CharField(verbose_name="Pay Type",default="",max_length=45)
+
+    class Meta:
+        verbose_name = 'Boat Wallet Deposit'
+        db_table = 'boatwallet'
+        
+        
+class boat_purchase_history(models.Model):
+	user_id = models.IntegerField(default=0, verbose_name="user_id")
+	purchase_amount = models.DecimalField(default = 0,max_digits=16,decimal_places=8,verbose_name='plan_purchase_amount')
+	user_wallet_type = models.CharField(verbose_name="user_wallet_type",default="",max_length = 200)
+	buy_type = models.CharField(verbose_name="Buy Type",default="",max_length=200)
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+	status=models.IntegerField(default=0,verbose_name='status')
+
+	class Meta:
+		verbose_name = "Boat Purchase History"
+		db_table = "Boatpurchage"
+  
+class boat_trade_purchase_history(models.Model):
+	user_id = models.IntegerField(default=0, verbose_name="user_id")
+	purchase_amount = models.DecimalField(default = 0,max_digits=16,decimal_places=8,verbose_name='plan_purchase_amount')
+	user_wallet_type = models.CharField(verbose_name="user_wallet_type",default="",max_length = 200)
+	buy_type = models.CharField(verbose_name="Buy Type",default="",max_length=200)
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+	status=models.IntegerField(default=0,verbose_name='status')
+
+	class Meta:
+		verbose_name = "Boat Purchase trade History"
+		db_table = "Boattradepurchage"
+
+
+class Roi_Reward_History(models.Model):
+	user = models.ForeignKey(User_Management,on_delete=models.CASCADE,verbose_name='User')
+	steps = models.IntegerField(verbose_name="steps",blank=True,null=True)
+	Reward = models.DecimalField(max_digits=16,decimal_places=8,verbose_name="Reward Token",blank=True,null=True)
+	reward_status = models.CharField(max_length=50,verbose_name="Reward Token",blank=True,null=True,default="step_reward")
+	created_on = models.DateTimeField(default=timezone.now)
+	modified_on = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = "Roi Reward history"
+		db_table = 'boatroihistory'
+		indexes = [
+			models.Index(fields=['user'])
+		]
+  
+  
+class Boat_Referral_reward_History(models.Model):
+	user = models.ForeignKey(User_Management,on_delete=models.CASCADE,verbose_name='User',default="")
+	referral_id = models.CharField(max_length=50,verbose_name="Referral ID",blank=True,null=True)
+	reward = models.CharField(max_length=50,verbose_name="Reward",blank=True,null=True)
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = "Boat Referral Reward History"
+		db_table = 'Boat_referral_reward'
+		indexes = [
+			models.Index(fields=['user'])
+		]
+
+class boatroi_percentage(models.Model):
+	date = models.CharField(max_length=6)  # Storing '01/Jan', etc.
+	reward_percentage = models.DecimalField(max_digits=16,decimal_places=8,verbose_name="Reward Token",blank=True,null=True)
+
+	class Meta:
+		verbose_name = "boatroi percentage"
+		db_table = "boatroi_percentage"
+
+
+class claim_trade_history(models.Model):
+	user_id = models.IntegerField(default=0, verbose_name="user_id")
+	amount = models.DecimalField(default = 0,max_digits=16,decimal_places=8,verbose_name='amount')
+	user_wallet_type = models.CharField(verbose_name="user_wallet_type",default="",max_length = 200)
+	buy_type = models.CharField(verbose_name="Buy Type",default="",max_length=200)
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+	status=models.IntegerField(default=0,verbose_name='status')
+
+	class Meta:
+		verbose_name = "claim trade History"
+		db_table = "claim_trade"
+
+
+
+class Boat_Referral_income_History(models.Model):
+	user = models.ForeignKey(User_Management,on_delete=models.CASCADE,verbose_name='User',default="")
+	referral_id = models.CharField(max_length=50,verbose_name="Referral ID",blank=True,null=True)
+	reward = models.CharField(max_length=50,verbose_name="Reward",blank=True,null=True)
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = "Boat Referral income History"
+		db_table = 'Boat_referral_income'
+		indexes = [
+			models.Index(fields=['user'])
+		]
+
+
+
+
+##### mp plan ####
+
+
+
+class MPRewardHistory(models.Model):
+	user = models.ForeignKey(User_Management,on_delete=models.CASCADE,verbose_name='User',default="")
+	referral_id = models.CharField(max_length=50,verbose_name="Referral ID",blank=True,null=True)
+	reward = models.CharField(max_length=50,verbose_name="Reward",blank=True,null=True)
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = "MPReward History"
+		db_table = 'MPReward'
+		indexes = [
+			models.Index(fields=['user'])
+		]
+  
+  
+  
+class MPDailyRewardHistory(models.Model):
+	user = models.ForeignKey(User_Management,on_delete=models.CASCADE,verbose_name='User')
+	steps = models.IntegerField(verbose_name="steps",blank=True,null=True)
+	Reward = models.DecimalField(max_digits=16,decimal_places=8,verbose_name="Reward Token",blank=True,null=True)
+	reward_status = models.CharField(max_length=50,verbose_name="Reward Token",blank=True,null=True,default="step_reward")
+	created_on = models.DateTimeField(default=timezone.now)
+	modified_on = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = "MPDailyRewardHistory"
+		db_table = 'MPDailyReward'
+		indexes = [
+			models.Index(fields=['user'])
+		]
+  
+
+
+class MPPlanlist(models.Model):
+    plan_name = models.CharField(max_length=50, db_column='PlanName')
+    plan = models.IntegerField(db_column='Plan')
+    fee_usdt = models.DecimalField(max_digits=10, decimal_places=2, db_column='Fee_usdt')
+    fee_jw = models.DecimalField(max_digits=10, decimal_places=2, db_column='Fee_jw')
+    time_period = models.CharField(max_length=20, db_column='Time_period')
+    daily_reward = models.DecimalField(max_digits=10, decimal_places=2, db_column='Dailyreward')
+    eligibility_level = models.IntegerField(db_column='Elegibility_level')
+    direct_user = models.IntegerField(db_column='Direct_user')
+    step = models.IntegerField(db_column='step')
+    reward_percentage = models.DecimalField(max_digits=10, decimal_places=6, db_column='reward_percentage')
+
+    class Meta:
+        verbose_name = "MPPlanlist"
+        db_table = 'MPlanList'  # Match the table name
+        
+        
+
+## promo bonus
+
+        
+class promobonus_history(models.Model):
+	user_id = models.IntegerField(default=0, verbose_name="user_id")
+	claim_amount = models.DecimalField(default = 0,max_digits=16,decimal_places=8,verbose_name='claim_amount')
+	link = models.CharField(verbose_name="link",default="",max_length = 200)
+	email = models.CharField(verbose_name="email",default="",max_length=200)
+	content = models.CharField(verbose_name="content",default="",max_length = 200)
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+	status=models.IntegerField(default=0,verbose_name='status')
+
+	class Meta:
+		verbose_name = "promobonus History"
+		db_table = "Earnrefferbounce"
+  
+  
+class BurnRewardHistory(models.Model):
+	user = models.ForeignKey(User_Management,on_delete=models.CASCADE,verbose_name='User',default="")
+	referral_id = models.CharField(max_length=50,verbose_name="Referral ID",blank=True,null=True)
+	reward = models.CharField(max_length=50,verbose_name="Reward",blank=True,null=True)
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = "BurnReward History"
+		db_table = 'BurnReward'
+		indexes = [
+			models.Index(fields=['user'])
+		]
+  
+  
+class BurnMonthRewardHistory(models.Model):
+	user = models.ForeignKey(User_Management,on_delete=models.CASCADE,verbose_name='User')
+	steps = models.IntegerField(verbose_name="steps",blank=True,null=True)
+	Reward = models.DecimalField(max_digits=16,decimal_places=8,verbose_name="Reward Token",blank=True,null=True)
+	reward_status = models.CharField(max_length=50,verbose_name="Reward Token",blank=True,null=True,default="step_reward")
+	created_on = models.DateTimeField(default=timezone.now)
+	modified_on = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = "BurnMonthRewardHistory"
+		db_table = 'BurnMonthReward'
+		indexes = [
+			models.Index(fields=['user'])
+		]
+  
+  
+class BurnWithdraw(models.Model):
+	userid = models.ForeignKey(User_Management,related_name ='BurnWithdraw',on_delete=models.CASCADE,verbose_name='User')
+	Amount = models.CharField(max_length=50,verbose_name='USDT Amount',blank=True,null=True)
+	Withdraw_fee = models.CharField(max_length=50,verbose_name='Withdraw Fee',blank=True,null=True)
+	Month_stake = models.CharField(max_length=50,verbose_name='Month Stake',blank=True,null=True)
+	user_request_amt = models.CharField(max_length=500,verbose_name='User Request Amount',blank=True,null=True)
+	back_up_phrase = models.CharField(max_length=500,verbose_name='Month Stake',blank=True,null=True)
+	Withdraw_USDT = models.CharField(max_length=50,verbose_name='Withdraw USDT Amount',blank=True,null=True)
+	Withdraw_JW = models.CharField(max_length=50,verbose_name='Withdraw JW Amount',blank=True,null=True)
+	Address = models.CharField(max_length=50,verbose_name='Address',blank=True,null=True)
+	Two_Fa = models.IntegerField(verbose_name="Two FA OTP",blank=True,null=True)
+	Transaction_Hash = models.CharField(max_length=200,verbose_name='Transaction Hash',blank=True,null=True,default="")
+	Wallet_type = models.CharField(max_length=200,verbose_name='Wallet type',blank=True,null=True,default="")
+	status =models.IntegerField(choices=Withdraw_Status,default=0,verbose_name='Status')
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = "burn Withdraw Request"
+		db_table = 'burnwithdraw'
+		indexes = [
+			models.Index(fields=['userid'])
+		]
+  
+  
+class swap_receivehistory(models.Model):
+	userid = models.ForeignKey(User_Management,related_name ='swap_receive',on_delete=models.CASCADE,verbose_name='User')
+	Amount = models.CharField(max_length=50,verbose_name='USDT Amount',blank=True,null=True)
+	Withdraw_fee = models.CharField(max_length=50,verbose_name='Withdraw Fee',blank=True,null=True)
+	Withdraw_USDT = models.CharField(max_length=50,verbose_name='Withdraw USDT Amount',blank=True,null=True)
+	Withdraw_JWC = models.CharField(max_length=50,verbose_name='Withdraw JWC Amount',blank=True,null=True)
+	Address = models.CharField(max_length=50,verbose_name='Address',blank=True,null=True)
+	Transaction_Hash = models.CharField(max_length=200,verbose_name='Transaction Hash',blank=True,null=True,default="")
+	status =models.IntegerField(choices=Withdraw_Status,default=0,verbose_name='Status')
+	type = models.CharField(max_length=200,verbose_name='type',blank=True,null=True,default="")
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = "swap_receivehistory"
+		db_table = 'swap_receive'
+		indexes = [
+			models.Index(fields=['userid'])
+		]
+  
+class swap_sendhistory(models.Model):
+	userid = models.ForeignKey(User_Management,related_name ='swap_send',on_delete=models.CASCADE,verbose_name='User')
+	Amount = models.CharField(max_length=50,verbose_name='USDT Amount',blank=True,null=True)
+	Withdraw_fee = models.CharField(max_length=50,verbose_name='Withdraw Fee',blank=True,null=True)
+	Withdraw_USDT = models.CharField(max_length=50,verbose_name='Withdraw USDT Amount',blank=True,null=True)
+	Withdraw_JWC = models.CharField(max_length=50,verbose_name='Withdraw JWC Amount',blank=True,null=True)
+	Address = models.CharField(max_length=50,verbose_name='Address',blank=True,null=True)
+	Transaction_Hash = models.CharField(max_length=200,verbose_name='Transaction Hash',blank=True,null=True,default="")
+	Transaction_Hash_recieved = models.CharField(max_length=200,verbose_name='Transaction recieve Hash',blank=True,null=True,default="")
+	status =models.IntegerField(choices=Withdraw_Status,default=0,verbose_name='Status')
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = "swap_sendhistory"
+		db_table = 'swap_send'
+		indexes = [
+			models.Index(fields=['userid'])
+		]
+
+
+
+class CBurnRewardHistory(models.Model):
+	user = models.ForeignKey(User_Management,on_delete=models.CASCADE,verbose_name='User',default="")
+	referral_id = models.CharField(max_length=50,verbose_name="Referral ID",blank=True,null=True)
+	reward = models.CharField(max_length=50,verbose_name="Reward",blank=True,null=True)
+	created_on = models.DateTimeField(auto_now_add = True)
+	modified_on = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = "CBurnReward History"
+		db_table = 'CBurnReward'
+		indexes = [
+			models.Index(fields=['user'])
+		]
+  
+class CBurnMonthRewardHistory(models.Model):
+	user = models.ForeignKey(User_Management,on_delete=models.CASCADE,verbose_name='User')
+	steps = models.IntegerField(verbose_name="steps",blank=True,null=True)
+	Reward = models.DecimalField(max_digits=16,decimal_places=8,verbose_name="Reward Token",blank=True,null=True)
+	reward_status = models.CharField(max_length=50,verbose_name="Reward Token",blank=True,null=True,default="step_reward")
+	created_on = models.DateTimeField(default=timezone.now)
+	modified_on = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = "CBurnMonthRewardHistory"
+		db_table = 'CBurnMonthReward'
+		indexes = [
+			models.Index(fields=['user'])
+		]

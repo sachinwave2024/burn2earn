@@ -79,7 +79,7 @@ class EditCompanyForm(forms.ModelForm):
     class Meta:
         model= Company
         
-        fields=['name','email','phone1','company_logo','company_fav','copy_right','telegram','fb','twitter','instagram','linkedin','session_timeout','Device_id_status','support_address','withdraw_type','Android_version']
+        fields=['name','email','phone1','company_logo','company_fav','copy_right','telegram','fb','twitter','instagram','linkedin','session_timeout','Device_id_status','support_address','withdraw_type','Android_version','IOS_version','privatekey','securitykey','withaddress','facebookpromo','instapromo','twitterpromo','cmcpromo']
 
         exclude=['created_on','modified_on','state','admin_redirect','address1','city','country','postcode']
 
@@ -249,7 +249,7 @@ class User_Management_Form(forms.ModelForm):
     
     class Meta:
         model = User_Management
-        fields = ['user_name','Email','Name','user_profile_pic','user_phone_number','status','device_unique_id','notes']
+        fields = ['user_name','Email','Name','user_profile_pic','user_phone_number','status','device_unique_id','notes','USER_INRID']
         exclude = ['created_on','modified_on']
 
 class Referral_Reward_Form(forms.ModelForm):

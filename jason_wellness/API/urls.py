@@ -20,6 +20,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.decorators.csrf import csrf_exempt
+from .views import DownloadImageView
 
 
 
@@ -40,7 +41,8 @@ urlpatterns = [
     path('step_history_update/', views.step_history, name='step_history_update'),
     path('user_step_history/', views.user_step_history, name='user_step_history'),
     path('user_details_two/', views.reward_footsteps_two, name='user_details_two'),
-    path('withdraw_request/', views.withdraw_request, name='withdraw_request'),
+    
+    path('webwithdraw_request/', views.withdraw_request, name='withdraw_request'),
     path('two_fa_details/', views.two_fa_details, name='two_fa_details'),
     path('Boost_status/', views.Boost_status, name='Boost_status'),
     path('Maximum_target/', views.Maximum_target, name='Maximum_target'),
@@ -148,6 +150,7 @@ urlpatterns = [
     path("user_address_trust_live/",views.user_address_trust,name = 'user_address_trust_live'),
     path("user_address_trust_live_edit/",views.user_address_trust_edit,name = 'user_address_trust_live_edit'),
     path('plan_usdt_send_api/', views.plan_usdt_send_api, name='plan_usdt_send_api'),
+    path('plan_JW_send_api/', views.plan_JW_send_api, name='plan_JW_send_api'),
 
 
 
@@ -176,11 +179,142 @@ urlpatterns = [
     path("add_leg_business/",views.add_leg_business,name = 'add_leg_business'),
     path('resend_otp_org/', views.resend_otp_org, name='resend_otp_org'),
     path("process_rewards/",views.process_rewards,name = 'process_rewards'),
-    path('withdraw_LB/', views.withdraw_LB, name='withdraw_LB'),
+    
+    path('webwithdraw_LB/', views.withdraw_LB, name='withdraw_LB'),
     path('LB_transaction_history/', views.LB_transaction_history, name='LB_transaction_history'),
     path("auto_update_missing_rewards/",views.auto_update_missing_rewards,name = 'auto_update_missing_rewards'),
-    path('withdrawUSDT_request/', views.withdrawUSDT_request, name='withdrawUSDT_request'),
+    
+    path('webwithdrawUSDT_request/', views.withdrawUSDT_request, name='withdrawUSDT_request'),
     path("roll_process_rewards/",views.roll_process_rewards,name = 'roll_process_rewards'),
+    path("update_market_price/",views.update_market_price,name = 'update_market_price'),
+    path('Health_ROI/', views.Health_ROI, name='Health_ROI'),
+    path("plan_expire/",views.plan_expire,name = 'plan_expire'),
+    path('delete_account/', views.delete_account, name='delete_account'),
+    path('Trade_expire/', views.Trade_expire, name='Trade_expire'),
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    ##for trading boat
+    # path('user_details_three/', views.user_details_three, name='user_details_three'),
+    path('Boat_JW_send_api/', views.Boat_JW_send_api, name='Boat_JW_send_api'),
+    path('Boat_USDT_send_api/', views.Boat_USDT_send_api, name='Boat_USDT_send_api'),
+    path('Support_JW_TradeBot/', views.Support_JW_TradeBot, name='Support_JW_TradeBot'),
+    path('buy_boat_plan/', views.buy_boat_plan, name='buy_boat_plan'),
+    path('buy_boat_trade/', views.buy_boat_trade, name='buy_boat_trade'),
+    path('auto_roi_reward/', views.auto_roi_reward, name='auto_roi_reward'),
+    path('Boat_plan_detail/', views.Boat_plan_detail, name='Boat_plan_detail'),
+    path('Boat_plan_purchase_API/', views.Boat_plan_purchase_API, name='Boat_plan_purchase_API'),
+    path('Boat_purchase_API/', views.Boat_purchase_API, name='Boat_purchase_API'),
+    path('Boat_Transfer_History_List/', views.Boat_Transfer_History_List, name='Boat_Transfer_History_List'),
+    path('roi_reward_data/', views.roi_reward_data, name='roi_reward_data'),
+    path('Trade_earning_summary/', views.Trade_earning_summary, name='Trade_earning_summary'),
+    path('Trade_Referral_history/', views.Trade_Referral_history, name='Trade_Referral_history'),
+    path('Bot_Referral_history/', views.Bot_Referral_history, name='Bot_Referral_history'),
+    path('Bot_Direct_referral_list/',views.Bot_Direct_referral_list,name = "Bot_Direct_referral_list"),
+    path('Trade_Claim/',views.Trade_Claim,name = "Trade_Claim"),
+    path('ClaiAamount/',views.ClaiAamount,name = "ClaiAamount"),
+    path('Monthly_matching_bonus/',views.Monthly_matching_bonus,name = "Monthly_matching_bonus"),
+    path('transfer_stake_amount/', views.transfer_stake_amount, name='transfer_stake_amount'),
+    
+    
+    
+    
+    ### for mp plan
+    
+    path('MPPlanlist_API/', views.MPPlanlistGroupedAPIView, name='MPPlanlist_API'),
+    path('MP_USDT_send_api/', views.MP_USDT_send_api, name='MP_USDT_send_api'),
+    path('Support_JW_MP/', views.Support_JW_MP, name='Support_JW_MP'),
+    path('Support_JWC_MP/', views.Support_JWC_MP, name='Support_JWC_MP'),
+    path('JWMPPlan/', views.JWMPPlan, name='JWMPPlan'),
+    path('release_upline_referral/', views.release_upline_referral, name='release_upline_referral'),
+    path('MP_plan_detail/', views.MP_plan_detail, name='MP_plan_detail'),
+    path('JWMPPlan_classic/', views.JWMPPlan_classic, name='JWMPPlan_classic'),
+    path('Performance_bonus/', views.Performance_bonus, name='Performance_bonus'),
+    path('MPHealthReward/', views.MPHealthReward, name='MPHealthReward'),
+    path('MP_Fee_History_List/', views.MP_Fee_History_List, name='MP_Fee_History_List'),
+    path('MP_Plan_History_List/', views.MP_Plan_History_List, name='MP_Plan_History_List'),
+    
+    path('MP_earning_summary/', views.MP_earning_summary, name='MP_earning_summary'),
+    path('MP_Referral_history/', views.MP_Referral_history, name='MP_Referral_history'),
+    path('User_Login_api/', views.User_Login_api, name='User_Login_api'),
+    path('add_User_new/', views.add_User_new, name='add_User_new'),
+    path('BNBStaus_update/', views.BNBStaus_update, name='BNBStaus_update'),
+    path('MPlan_auto_expire/', views.MPlan_auto_expire, name='MPlan_auto_expire'),
+    path('MPlan_userexpire/', views.MPlan_userexpire, name='MPlan_userexpire'),
+    path('update_market_priceall/', views.update_market_priceall, name='update_market_priceall'),
+    path('user_wallet_balance/', views.user_wallet_balance, name='user_wallet_balance'),
+    
+    
+    
+    ## promo bonus
+    path('promobonus/', views.promobonus, name='promobonus'),
+    path('promobonussecond/', views.promobonussecond, name='promobonussecond'),
+    path('promobonus_detail/', views.promobonus_detail, name='promobonus_detail'),
+    path('PROMOHISTORY_List/', views.PROMOHISTORY_List, name='PROMOHISTORY_List'),
+    
+    
+    
+    ### for mp plan  
+    path('BurntoEarn/', views.BurntoEarn, name='BurntoEarn'),
+    path('BurntoEarn_detail/', views.BurntoEarn_detail, name='BurntoEarn_detail'),
+    path('burn_upline_referral/', views.burn_upline_referral, name='burn_upline_referral'),
+    path('burn_process_rewards/', views.burn_process_rewards, name='burn_process_rewards'),
+    path('burnjw_history/', views.burnjw_history, name='burnjw_history'),
+    
+    path('burn_earning_history/', views.burn_earning_history, name='burn_earning_history'),
+    path('burn_Referral_history/', views.burn_Referral_history, name='burn_Referral_history'),
+    path('burnwithdraw_request/', views.burnwithdraw_request, name='burnwithdraw_request'),
+    path('burntransaction_history/', views.burntransaction_history, name='burntransaction_history'),
+    
+    path('JWMPPlan_classic_hash/', views.JWMPPlan_classic_hash, name='JWMPPlan_classic_hash'),
+    path('JWMPPlan_hash/', views.JWMPPlan_hash, name='JWMPPlan_hash'),
+    path('EarntoBurn_hash/', views.EarntoBurn_hash, name='EarntoBurn_hash'),
+    
+    path('burnperformance/', views.burnperformance, name='burnperformance'),
+    
+    
+    path('classicBurntoEarn/', views.classicBurntoEarn, name='classicBurntoEarn'),
+    path('classicBurntoEarn_detail/', views.classicBurntoEarn_detail, name='classicBurntoEarn_detail'),
+    path('classicburn_upline_referral/', views.classicburn_upline_referral, name='classicburn_upline_referral'),
+    path('classicburn_process_rewards/', views.classicburn_process_rewards, name='classicburn_process_rewards'),
+    path('classicburnjw_history/', views.classicburnjw_history, name='classicburnjw_history'),
+    
+    path('classicburn_earning_history/', views.classicburn_earning_history, name='classicburn_earning_history'),
+    path('classicburn_Referral_history/', views.classicburn_Referral_history, name='classicburn_Referral_history'),
+    path('classicburnperformance/', views.classicburnperformance, name='classicburnperformance'),
+    
+    
+    path('download-image/', DownloadImageView.as_view(), name='download_image'),
+    
+    
+    #################swap################
+    path('swap_tokens/', views.swap_tokens, name='swap_tokens'),
+    path('Swapusdt_jwc/', views.Swapusdt_jwc, name='Swapusdt_jwc'),
+    path('Swapjwc_usdt/', views.Swapjwc_usdt, name='Swapjwc_usdt'),
+    path('swapsend_history/', views.swapsend_history, name='swapsend_history'),
+    path('swaprecieve_history/', views.swaprecieve_history, name='swaprecieve_history'),
+    
+    path('burnperformanceaftermay20/', views.burnperformanceaftermay20, name='burnperformanceaftermay20'),
+    
+    path('create-wallet/', views.create_wallet, name='create_wallet'),
+    path('check-usdt-balances/', views.check_usdt_balances, name='check_usdt_balances'),
+    path("create_child_wallet/", views.create_child_wallet, name="create_child_wallet"),
+    path("generate_wallets_range/", views.generate_wallets_range, name="generate_wallets_range"),
+    path("check_usdt_balances_range/", views.check_usdt_balances_range, name="check_usdt_balances_range"),
+    path('send_fund/', views.send_fund, name='send_fund'),
+    
+    
+
 
 
 
