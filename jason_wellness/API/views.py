@@ -75,6 +75,9 @@ def get_common_cipher():
 #     decrypted_message_with_padding = common_cipher.decrypt(raw_ciphertext)
 #     return decrypted_message_with_padding.decode('utf-8').strip()
 
+
+
+
 def encrypt_with_common_cipher(cleartext):
     common_cipher = get_common_cipher() 
     cleartext_length = len(cleartext)
